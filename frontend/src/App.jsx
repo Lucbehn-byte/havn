@@ -9,11 +9,18 @@ import CrisisStressTest from './components/CrisisStressTest';
 import FanChart from './components/FanChart';
 import FundamentalCards from './components/FundamentalCards';
 import BrokerGuide from './components/BrokerGuide';
-import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight } from 'lucide-react';
+import RollUpPicker from './components/RollUpPicker';
+import CrisisSimulator from './components/CrisisSimulator';
+import GoalPlanner from './components/GoalPlanner';
+import AssetBattle from './components/AssetBattle';
+import Academy from './components/Academy';
+import MobileNav from './components/MobileNav';
+import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck } from 'lucide-react';
 
 const API_BASE = '';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('terminal');
   const [ticker, setTicker] = useState('EUNL.DE');
   const [timeframe, setTimeframe] = useState('1 Jahr (Jahres-Trend)');
   const [invType, setInvType] = useState('Einmalanlage');
@@ -91,10 +98,21 @@ export default function App() {
     : ["3 Tage (Kurzfrist-Impuls)", "10 Tage (Kurzfrist-Trend)", "8 Wochen (Mittelfrist-Swing)", "1 Jahr (Jahres-Trend)", "3 Jahre (Makro-Zyklus)", "5 Jahre (Vermögensaufbau)"];
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white">
-      <Navbar onReset={() => runAnalysis('EUNL.DE')} />
+    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0">
+      <Navbar 
+        activeTab={activeTab} 
+        onSelectTab={setActiveTab} 
+        onReset={() => runAnalysis('EUNL.DE')} 
+      />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {activeTab === 'crisis' && <CrisisSimulator />}
+        {activeTab === 'goals' && <GoalPlanner />}
+        {activeTab === 'battle' && <AssetBattle />}
+        {activeTab === 'academy' && <Academy />}
+
+        {activeTab === 'terminal' && (
+          <div className="space-y-8 animate-fadeIn">
         
         {/* HERO & SUCHE */}
         <section className="space-y-4">
@@ -172,31 +190,25 @@ export default function App() {
               </div>
             </div>
 
-            {/* Kapital / Sparrate */}
+            {/* Kapital / Sparrate mit Roll-Up Picker */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                {invType === 'Einmalanlage' ? 'Geldeinsatz (€):' : `Sparrate (${sparplanFreq}) in €:`}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min="10"
-                  step="50"
-                  value={kapital}
-                  onChange={(e) => setKapital(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-                {invType === 'Sparplan' && (
+              <RollUpPicker
+                label={invType === 'Einmalanlage' ? 'Geldeinsatz' : `Sparrate (${sparplanFreq})`}
+                value={kapital}
+                onChange={setKapital}
+              />
+              {invType === 'Sparplan' && (
+                <div className="flex justify-end mt-1">
                   <select
                     value={sparplanFreq}
                     onChange={(e) => setSparplanFreq(e.target.value)}
-                    className="bg-slate-950 border border-slate-700/80 rounded-xl px-2 py-2.5 text-xs text-slate-300 focus:outline-none"
+                    className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none"
                   >
-                    <option value="monatlich">mtl.</option>
-                    <option value="wöchentlich">wtl.</option>
+                    <option value="monatlich">monatlich</option>
+                    <option value="wöchentlich">wöchentlich</option>
                   </select>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Start Button */}
@@ -305,10 +317,15 @@ export default function App() {
             />
           </div>
         )}
+          </div>
+        )}
       </main>
 
+      {/* Floating Mobile Navigation Bar */}
+      <MobileNav activeTab={activeTab} onSelectTab={setActiveTab} />
+
       {/* FOOTER & RECHTLICHER HINWEIS */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500 space-y-2 mt-12">
+      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500 space-y-2 mt-12 mb-16 lg:mb-0">
         <div className="max-w-4xl mx-auto px-4">
           <p>
             <strong className="text-slate-300">HAVN</strong> — Dein sicherer Hafen für fundierte Investment-Entscheidungen. Entwickelt mit modernem Tailwind CSS & stochastischer Finanzmathematik.
