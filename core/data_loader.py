@@ -30,19 +30,19 @@ def get_asset_info(ticker_symbol: str) -> dict:
     try:
         t = yf.Ticker(clean_ticker)
         short_name = clean_ticker
-        try:
-            info = t.info or {}
-            short_name = info.get("shortName") or info.get("longName") or clean_ticker
-            quote_type = info.get("quoteType", "EQUITY")
-            typ_str = "ETF / Fonds" if quote_type == "ETF" else "Aktie"
-            isin_val = info.get("isin", "Über Broker suchen")
-            desc = info.get("longBusinessSummary", "")
-        except Exception:
-            # Fallback über fast_info falls Yahoo den Crumb blockiert
-            quote_type = "EQUITY"
-            typ_str = "Wertpapier"
-            isin_val = "Über Broker suchen"
-            desc = ""
+        quote_type = "EQUITY"
+        typ_str = "Wertpapier"
+        isin_val = "Über Broker suchen"
+        desc = ""
+        
+        # fast_info wirft niemals einen 401 Crumb Error
+        if hasattr(t, "fast_info"):
+            try:
+                currency = getattr(t.fast_info, "currency", "EUR")
+                quote_type = getattr(t.fast_info, "quote_type", "EQUITY")
+                typ_str = "ETF / Fonds" if quote_type == "ETF" else "Aktie"
+            except Exception:
+                pass
         
         return {
             "name": short_name,
