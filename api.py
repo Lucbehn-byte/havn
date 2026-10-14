@@ -102,6 +102,25 @@ def analyze_stock(req: AnalysisRequest):
     return res
 
 
+from fastapi.responses import FileResponse
+
+# Direkte Routen für Apple Touch Icon und Favicons (für iOS Safari & PWA)
+@app.get("/apple-touch-icon.png")
+@app.get("/apple-touch-icon-precomposed.png")
+def get_apple_touch_icon():
+    icon_path = os.path.join(os.path.dirname(__file__), "frontend", "public", "apple-touch-icon.png")
+    if os.path.exists(icon_path):
+        return FileResponse(icon_path, media_type="image/png")
+    raise HTTPException(status_code=404, detail="Icon not found")
+
+@app.get("/favicon.png")
+@app.get("/favicon.ico")
+def get_favicon():
+    icon_path = os.path.join(os.path.dirname(__file__), "frontend", "public", "favicon.png")
+    if os.path.exists(icon_path):
+        return FileResponse(icon_path, media_type="image/png")
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
 # Statische Frontend-Dateien einbinden, falls dist gebaut wurde
 frontend_dist_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 if os.path.exists(frontend_dist_path):
