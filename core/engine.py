@@ -53,11 +53,14 @@ def run_full_analysis(
     asset_info = get_asset_info(clean_ticker)
     log_returns = np.log(close_series / close_series.shift(1)).dropna()
 
-    # 3. Markt-Beta ermitteln (entweder aus yfinance oder vola-basiert schätzen)
+    # 3. Markt-Beta ermitteln (entweder aus fast_info oder vola-basiert schätzen)
     beta = 1.0
     try:
-        t_info = yf.Ticker(clean_ticker).info or {}
-        raw_beta = t_info.get("beta")
+        t_obj = yf.Ticker(clean_ticker)
+        raw_beta = None
+        if hasattr(t_obj, "fast_info") and hasattr(t_obj.fast_info, "beta"):
+            raw_beta = t_obj.fast_info.beta
+        
         if raw_beta is not None and float(raw_beta) > 0.1:
             beta = float(raw_beta)
         else:
