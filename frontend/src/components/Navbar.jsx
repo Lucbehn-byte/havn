@@ -10,8 +10,8 @@ export default function Navbar({ onReset }) {
           onClick={onReset}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
-            <Anchor className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-700/80 shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform bg-slate-900">
+            <img src="/apple-touch-icon.png" alt="HAVN Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-2">
