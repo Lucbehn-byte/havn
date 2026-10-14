@@ -29,19 +29,28 @@ def get_asset_info(ticker_symbol: str) -> dict:
     # 2. Falls nicht, über yfinance abfragen
     try:
         t = yf.Ticker(clean_ticker)
-        info = t.info or {}
-        short_name = info.get("shortName") or info.get("longName") or clean_ticker
-        currency = info.get("currency", "EUR")
-        quote_type = info.get("quoteType", "EQUITY")
-        typ_str = "ETF / Fonds" if quote_type == "ETF" else "Aktie"
+        short_name = clean_ticker
+        try:
+            info = t.info or {}
+            short_name = info.get("shortName") or info.get("longName") or clean_ticker
+            quote_type = info.get("quoteType", "EQUITY")
+            typ_str = "ETF / Fonds" if quote_type == "ETF" else "Aktie"
+            isin_val = info.get("isin", "Über Broker suchen")
+            desc = info.get("longBusinessSummary", "")
+        except Exception:
+            # Fallback über fast_info falls Yahoo den Crumb blockiert
+            quote_type = "EQUITY"
+            typ_str = "Wertpapier"
+            isin_val = "Über Broker suchen"
+            desc = ""
         
         return {
             "name": short_name,
             "ticker": clean_ticker,
             "wkn": "Über Broker suchen",
-            "isin": info.get("isin", "Nicht direkt hinterlegt"),
+            "isin": isin_val,
             "typ": typ_str,
-            "beschreibung": info.get("longBusinessSummary", "Keine Beschreibung verfügbar.")[:200] + "..."
+            "beschreibung": (desc[:200] + "...") if desc else "Automatisch analysiertes Wertpapier."
         }
     except Exception:
         return {

@@ -20,9 +20,15 @@ def analyze_fundamental_valuation(ticker_symbol: str) -> dict:
             - 'drift_adjustment': float (annualisierter Anpassungsfaktor, z.B. -0.015 = -1.5% p.a.)
     """
     clean_ticker = ticker_symbol.upper().strip()
+    info = {}
     try:
         t = yf.Ticker(clean_ticker)
-        info = t.info or {}
+        # fast_info ist viel stabiler und benötigt keinen Crumb
+        fast = getattr(t, "fast_info", None)
+        try:
+            info = t.info or {}
+        except Exception:
+            info = {}
     except Exception:
         info = {}
 
