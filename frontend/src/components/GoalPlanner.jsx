@@ -64,11 +64,11 @@ export default function GoalPlanner() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-            <Target className="w-5 h-5" />
+            <Compass className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Persönlicher Zielhafen-Planer</h2>
-            <p className="text-xs text-slate-400">Mathematische Rückrechnung: Wie viel musst du sparen, um dein Traumziel sicher zu erreichen?</p>
+            <h2 className="text-xl font-black text-white tracking-tight">Kompass (Ziel- & Rentenplaner)</h2>
+            <p className="text-xs text-slate-400">Setze deinen Kurs auf deinen Zielhafen (Rente, Vermögen, Meilensteine) und berechne deine Sparrate.</p>
           </div>
         </div>
 

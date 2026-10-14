@@ -1,13 +1,13 @@
 import React from 'react';
-import { Activity, Flame, Target, Swords, BookOpen } from 'lucide-react';
+import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react';
 
 export default function MobileNav({ activeTab, onSelectTab }) {
   const tabs = [
-    { id: 'terminal', label: 'Terminal', icon: Activity },
-    { id: 'crisis', label: 'Krisen', icon: Flame },
-    { id: 'goals', label: 'Ziele', icon: Target },
-    { id: 'battle', label: 'Battle', icon: Swords },
-    { id: 'academy', label: 'Kompass', icon: BookOpen },
+    { id: 'terminal', label: 'Hafen', icon: Anchor },
+    { id: 'crisis', label: 'Sturm', icon: CloudLightning },
+    { id: 'goals', label: 'Kompass', icon: Compass },
+    { id: 'battle', label: 'Duell', icon: Swords },
+    { id: 'academy', label: 'Logbuch', icon: BookOpen },
   ];
 
   return (

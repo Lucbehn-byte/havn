@@ -39,8 +39,8 @@ export default function Academy() {
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Der Kompass (Investment-Wissen)</h2>
-            <p className="text-xs text-slate-400">Verstehe in 3 Minuten, wie Wohlstand entsteht und wie du dich vor Fehlern schützt.</p>
+            <h2 className="text-xl font-black text-white tracking-tight">Logbuch (Wissen & Navigation)</h2>
+            <p className="text-xs text-slate-400">Kurz und anschaulich: Warum anlegen wichtig ist, wie man anlegt und worauf man achten sollte.</p>
           </div>
         </div>
       </div>

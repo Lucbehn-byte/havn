@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap } from 'lucide-react';
+import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap, CloudLightning } from 'lucide-react';
 import RollUpPicker from './RollUpPicker';
 
 const SCENARIOS = [
@@ -70,11 +70,11 @@ export default function CrisisSimulator() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-            <Flame className="w-5 h-5" />
+            <CloudLightning className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Krisen- & Stress-Simulator</h2>
-            <p className="text-xs text-slate-400">Simulation der 3 größten Ängste junger Investoren mit stochastischer Schadensberechnung.</p>
+            <h2 className="text-xl font-black text-white tracking-tight">Sturmmodus (Krisen- & Stress-Simulator)</h2>
+            <p className="text-xs text-slate-400">Simulation schwerer Markt-Unwetter und stochastische Schadensberechnung für dein Depot.</p>
           </div>
         </div>
 
