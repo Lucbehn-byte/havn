@@ -108,17 +108,19 @@ from fastapi.responses import FileResponse
 @app.get("/apple-touch-icon.png")
 @app.get("/apple-touch-icon-precomposed.png")
 def get_apple_touch_icon():
-    icon_path = os.path.join(os.path.dirname(__file__), "frontend", "public", "apple-touch-icon.png")
-    if os.path.exists(icon_path):
-        return FileResponse(icon_path, media_type="image/png")
+    for folder in [os.path.join("frontend", "dist"), os.path.join("frontend", "public")]:
+        icon_path = os.path.join(os.path.dirname(__file__), folder, "apple-touch-icon.png")
+        if os.path.exists(icon_path):
+            return FileResponse(icon_path, media_type="image/png")
     raise HTTPException(status_code=404, detail="Icon not found")
 
 @app.get("/favicon.png")
 @app.get("/favicon.ico")
 def get_favicon():
-    icon_path = os.path.join(os.path.dirname(__file__), "frontend", "public", "favicon.png")
-    if os.path.exists(icon_path):
-        return FileResponse(icon_path, media_type="image/png")
+    for folder in [os.path.join("frontend", "dist"), os.path.join("frontend", "public")]:
+        icon_path = os.path.join(os.path.dirname(__file__), folder, "favicon.png")
+        if os.path.exists(icon_path):
+            return FileResponse(icon_path, media_type="image/png")
     raise HTTPException(status_code=404, detail="Favicon not found")
 
 # Statische Frontend-Dateien einbinden, falls dist gebaut wurde
