@@ -295,7 +295,7 @@ export default function CrisisSimulator() {
           <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
             <span className="text-xs text-slate-400">Gesamteinzahlung (36 Monate)</span>
             <div className="text-2xl font-black font-mono text-white mt-1">
-              {totalCashIn.toLocaleString('de-DE')} €
+              {currentCashIn.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-slate-400">Startkapital ({kapital.toLocaleString('de-DE')} €) + 36 × {sparrate} € Sparrate</span>
           </div>
