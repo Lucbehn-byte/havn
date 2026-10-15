@@ -15,6 +15,7 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
         setIsOpen(false);
       }
     }
+    // Mousedown & pointerdown außerhalb
     document.addEventListener('pointerdown', handleClickOutside);
     return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, []);
@@ -64,7 +65,7 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => { if (results.length > 0) setIsOpen(true); }}
-            placeholder="Aktie, ETF oder Ticker suchen (z. B. Tesla, BMW, MSCI World, NVDA, Apple)..."
+            placeholder={currentTicker ? `Aktuell gewählt: ${currentTicker} – Neue Aktie/ETF suchen...` : "Aktie, ETF oder Ticker suchen (z. B. Tesla, BMW, MSCI World, NVDA, Apple)..."}
             className="w-full pl-12 pr-12 py-3.5 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-white placeholder-slate-400 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-xl transition-all"
           />
           {loading && (
@@ -76,13 +77,18 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
         {isOpen && results.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden divide-y divide-slate-800 backdrop-blur-xl">
             {results.map((item, idx) => (
-              <div
+              <button
                 key={idx}
-                onPointerDown={(e) => {
+                type="button"
+                onMouseDown={(e) => {
                   e.preventDefault();
                   handleSelect(item.symbol, item.name);
                 }}
-                className="px-4 py-3 hover:bg-slate-800/80 active:bg-sky-600/30 cursor-pointer flex items-center justify-between transition-colors group"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSelect(item.symbol, item.name);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-slate-800/80 active:bg-sky-600/30 cursor-pointer flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-sky-400 group-hover:bg-sky-500/20">
@@ -100,7 +106,7 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
                 <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 group-hover:bg-sky-500 group-hover:text-white transition-colors">
                   Auswählen →
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -120,7 +126,11 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
             <button
               key={item.symbol}
               type="button"
-              onPointerDown={(e) => {
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelectAsset(item.symbol, item.label);
+              }}
+              onClick={(e) => {
                 e.preventDefault();
                 onSelectAsset(item.symbol, item.label);
               }}
