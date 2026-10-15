@@ -51,10 +51,26 @@ def analyze_fundamental_valuation(ticker_symbol: str) -> dict:
 
     # Aktien-Bewertung
     pe = None
+    forward_pe = None
     peg = None
     rev_growth = None
     profit_margin = None
     div_yield = None
+
+    # Sichere Abfrage fundamentaler Kennzahlen (mit Fallback, falls yfinance-Netzwerk blockiert oder Crumb ungültig)
+    try:
+        t = yf.Ticker(clean_ticker)
+        # Schnelle Metadaten versuchen abzugreifen
+        info = getattr(t, "info", None)
+        if isinstance(info, dict) and info:
+            pe = info.get("trailingPE")
+            forward_pe = info.get("forwardPE")
+            peg = info.get("pegRatio")
+            rev_growth = info.get("revenueGrowth")
+            profit_margin = info.get("profitMargins")
+            div_yield = info.get("dividendYield")
+    except Exception:
+        pass
 
     if pe is not None:
         metrics["KGV (Aktuell)"] = f"{pe:.1f}"
