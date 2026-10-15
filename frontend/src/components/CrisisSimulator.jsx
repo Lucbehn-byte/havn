@@ -15,47 +15,43 @@ const ASSET_OPTIONS = [
   { id: 'BTC-EUR', name: 'Bitcoin (EUR)', type: 'Kryptowährung', beta: 2.60, color: 'text-orange-400' },
 ];
 
-// Historische & makroökonomische Krisenereignisse
+// Historische & makroökonomische Krisenereignisse mit authentischer Crash- & Erholungs-Dynamik
 const CRISIS_EVENTS = [
   {
     id: 'corona_shock',
-    title: 'Blitzcrash (wie Corona 2020)',
-    baseDrop: 33,
-    recoverySpeedMonths: 12,
-    monthlyRecoveryPct: 1.2,
-    desc: 'Extremer panikartiger Kurseinbruch in kürzester Zeit, gefolgt von einer dynamischen V-Erholung.'
+    title: 'Corona-Crash (2020)',
+    baseDrop: 34,
+    crashMonths: 2,         // Schock dauerte nur wenige Wochen (Februar-März 2020)
+    recoveryMonths: 7,      // Bis Herbst 2020 war der Weltmarkt bereits wieder auf Allzeithoch (V-Shape)
+    postCrashBoomRate: 2.8, // Extrem steile V-Erholung durch weltweite Zentralbank-Liquidität
+    desc: 'Rasanter 34%-Schock in nur 33 Tagen, gefolgt von einer historischen V-förmigen Rallye auf neue Rekorde.'
   },
   {
     id: 'bear_market',
-    title: 'Zinsschock & Bärenmarkt (wie 2022)',
-    baseDrop: 25,
-    recoverySpeedMonths: 24,
-    monthlyRecoveryPct: 0.8,
-    desc: 'Langsamer, zermürbender Abwärtstrend durch steigende Leitzinsen und Inflationsdruck.'
+    title: 'Zinsschock & Bärenmarkt (2022)',
+    baseDrop: 26,
+    crashMonths: 9,         // Zäher Abwärtstrend über fast das gesamte Jahr 2022
+    recoveryMonths: 14,     // Zähe Bodenbildung
+    postCrashBoomRate: 1.1,
+    desc: 'Zermürbender, monatelanger Abwärtstrend getrieben von Rekordinflation und rasanten Zinsanhebungen.'
   },
   {
     id: 'financial_crisis',
-    title: 'Struktur- & Bankenkrise (wie 2008)',
-    baseDrop: 52,
-    recoverySpeedMonths: 36,
-    monthlyRecoveryPct: 0.7,
-    desc: 'Tiefe weltweite Rezession mit schweren Kreditausfällen und langwieriger Marktregeneration.'
-  },
-  {
-    id: 'stagflation',
-    title: 'Stagflation & Energiekrise',
-    baseDrop: 20,
-    recoverySpeedMonths: 30,
-    monthlyRecoveryPct: 0.5,
-    desc: 'Nullwachstum bei hoher Inflation – Kurse treten auf der Stelle mit zwischenzeitlichen Schwächephasen.'
+    title: 'Globale Finanzkrise (2008)',
+    baseDrop: 54,
+    crashMonths: 14,        // Lehman-Kollaps mit langwieriger Talfahrt
+    recoveryMonths: 28,     // Langwierige U-förmige Erholung der Weltwirtschaft
+    postCrashBoomRate: 1.4,
+    desc: 'Schwerste Banken- und Vertrauenskrise der Moderne mit dramatischem Einbruch und U-Erholung.'
   },
   {
     id: 'tech_bubble',
-    title: 'Tech-Korrektur / Bewertungscrash',
-    baseDrop: 40,
-    recoverySpeedMonths: 28,
-    monthlyRecoveryPct: 0.9,
-    desc: 'Plötzliche Entzauberung überbewerteter Hype-Sektoren. Breitere Märkte halten sich stabiler.'
+    title: 'Dotcom- / Tech-Korrektur',
+    baseDrop: 44,
+    crashMonths: 10,
+    recoveryMonths: 20,
+    postCrashBoomRate: 1.3,
+    desc: 'Plötzliche Entzauberung überhitzter Wachstumswerte bei robusterem Gesamtmarkt.'
   }
 ];
 
@@ -84,13 +80,14 @@ export default function CrisisSimulator() {
   
   const investedInitial = kapital;
 
-  // 3-PHASEN SIMULATION:
-  // Phase 1: Einstieg & regulärer Vorlauf (Monat 0 bis 3) – Normaler Vermögensaufbau
-  // Phase 2: Der Krise-Einbruch (Monat 3 bis 5) – Plötzlicher Schock
-  // Phase 3: Die Erholungsphase (Monat 5 bis 36) – Cost-Average-Effekt & Marktwachstum
+  // DYNAMISCHE KALIBRIERUNG JE NACH KRISEN-EREIGNIS:
+  // Corona-Crash: Extrem rasanter Einbruch in ~1-2 Monaten (Feb-März 2020), extrem steile V-förmige Erholung
+  // Bärenmarkt 2022: Zäher monatelanger Zinsanstiegs-Trend (ca. 8-9 Monate)
+  // Finanzkrise 2008: Langwieriger Einbruch über 14 Monate mit tiefer U-Erholung
   const totalMonths = 36;
-  const crashStartMonth = 3;
-  const crashTroughMonth = 5;
+  const crashStartMonth = 1; // Unmittelbar nach der Einzahlung trifft die Krise ein
+  const crashDuration = Math.min(event.crashMonths, 12);
+  const crashTroughMonth = crashStartMonth + crashDuration; // Für Corona z.B. Monat 1+2 = Monat 3
 
   let currentPortfolio = investedInitial;
   let currentCashIn = investedInitial;
@@ -106,16 +103,15 @@ export default function CrisisSimulator() {
     info: `Einzahlung Startkapital: ${investedInitial.toLocaleString('de-DE')} €`
   });
 
-  // Monatliche Wachstumsrate im Normal- / Erholungsmarkt
-  const normalMonthlyGain = 0.0075 * (0.8 + 0.2 * asset.beta); // ca. 9% p.a.
-  const recoveryMonthlyGain = (event.monthlyRecoveryPct / 100) * (0.8 + 0.2 * asset.beta);
+  // Dynamische Wachstumsrate für Erholung
+  // Bei Corona war die Erholungsrallye durch weltweite Zentralbank-Stimuli historisch steil
+  const baseMonthlyRecoveryRate = (0.012 * event.postCrashBoomRate) * (0.8 + 0.2 * asset.beta);
 
   for (let m = 1; m <= totalMonths; m++) {
     currentCashIn += sparrate;
 
     if (m < crashStartMonth) {
-      // Phase 1: Solider Vorlauf vor der Krise
-      currentPortfolio = (currentPortfolio + sparrate) * (1 + normalMonthlyGain);
+      currentPortfolio = (currentPortfolio + sparrate) * 1.008;
       fullTimeline.push({
         month: m,
         label: `M${m}`,
@@ -124,25 +120,45 @@ export default function CrisisSimulator() {
         cash: currentCashIn,
       });
     } else if (m <= crashTroughMonth) {
-      // Phase 2: Der Krisen-Schock trifft den Markt
-      // In Monat 3 & 4 bricht das Depot auf das Tief ein
-      const crashStep = m === crashStartMonth ? 0.6 : 1.0;
-      const targetTrough = (investedInitial + m * sparrate) * (1 - effectiveDropPct / 100);
-      currentPortfolio = m === crashStartMonth 
-        ? currentPortfolio * (1 - (effectiveDropPct * 0.6) / 100) + sparrate
-        : targetTrough;
+      // Phase 2: Der Crash vollzieht sich über event.crashMonths
+      // Fortschritt des Einbruchs von 0% bis 100% des maximalen Schocks
+      const progress = (m - crashStartMonth + 1) / crashDuration;
+      // Bei Corona schlug der Crash exponentiell schnell durch
+      const curveFactor = event.id === 'corona_shock' ? Math.pow(progress, 0.7) : Math.pow(progress, 1.1);
+      const currentDrop = (effectiveDropPct * curveFactor) / 100;
       
+      const baselineDepot = investedInitial + (m * sparrate);
+      currentPortfolio = Math.max(10, baselineDepot * (1 - currentDrop));
+
       fullTimeline.push({
         month: m,
-        label: m === crashTroughMonth ? 'Crash-Tief' : `Krise M${m}`,
+        label: m === crashTroughMonth ? 'Crash-Tief' : `M${m}`,
         phase: 'crash',
         value: Math.round(currentPortfolio),
         cash: currentCashIn,
-        info: m === crashTroughMonth ? `Tiefpunkt: -${effectiveDropPct}%` : 'Markteinbruch'
+        info: m === crashTroughMonth ? `Tiefststand: -${effectiveDropPct}%` : `Crash-Verlauf: -${Math.round(currentDrop * 100)}%`
       });
     } else {
-      // Phase 3: Erholungsphase mit Sparplan-Nachkauf (Cost-Average-Effekt)
-      currentPortfolio = currentPortfolio + sparrate + (currentPortfolio * recoveryMonthlyGain);
+      // Phase 3: Erholungsphase (V-Shape bei Corona vs. U-Shape bei Finanzkrise)
+      const monthsSinceTrough = m - crashTroughMonth;
+      
+      // Bei Corona verdoppelt sich das Momentum in den ersten 6 Monaten nach dem Tief
+      let monthlyBoost = baseMonthlyRecoveryRate;
+      if (event.id === 'corona_shock') {
+        if (monthsSinceTrough <= event.recoveryMonths) {
+          // Extrem steile V-Rallye in den ersten Monaten nach dem März-Tief 2020
+          monthlyBoost = 0.045 * (0.8 + 0.2 * asset.beta); 
+        } else {
+          // Nach Übertreffen der Vorkrisen-Hochs solides technologisches Bullenmarkt-Wachstum (2020/2021)
+          monthlyBoost = 0.016 * (0.8 + 0.2 * asset.beta);
+        }
+      } else {
+        // Standard / U-Erholung
+        monthlyBoost = baseMonthlyRecoveryRate * (1 + Math.min(1.0, monthsSinceTrough / 15));
+      }
+
+      currentPortfolio = (currentPortfolio + sparrate) * (1 + monthlyBoost);
+
       fullTimeline.push({
         month: m,
         label: `M${m}`,
@@ -342,19 +358,20 @@ export default function CrisisSimulator() {
             </div>
           </div>
 
-          {/* Großformatiges SVG Diagramm (Mindesthöhe 320px für perfekte Lesbarkeit) */}
-          <div className="w-full h-80 sm:h-96 pt-4">
+          {/* Responsive SVG Diagramm (Mobil-optimiert mit dynamischen Proportionen & großer Typografie) */}
+          <div className="w-full h-[360px] sm:h-[420px] pt-2">
             {(() => {
-              const svgW = 900;
-              const svgH = 340;
-              const padLeft = 85;
-              const padRight = 60;
-              const padTop = 40;
-              const padBottom = 50;
+              // Mobil-freundliches Koordinatensystem: 640px Breite sorgt für scharfe, große Texte auf Handys
+              const svgW = 640;
+              const svgH = 360;
+              const padLeft = 70;
+              const padRight = 35;
+              const padTop = 45;
+              const padBottom = 45;
 
               const allValues = fullTimeline.flatMap(p => [p.value, p.cash]);
-              const minV = Math.min(...allValues) * 0.85;
-              const maxV = Math.max(...allValues) * 1.12;
+              const minV = Math.min(...allValues) * 0.88;
+              const maxV = Math.max(...allValues) * 1.15;
               const rangeV = maxV - minV || 1;
 
               const getSvgX = (m) => padLeft + (m / totalMonths) * (svgW - padLeft - padRight);
@@ -384,42 +401,50 @@ export default function CrisisSimulator() {
                 maxV
               ];
 
+              // Dynamische Begrenzung der Krisenzone
+              const zoneStart = Math.max(0.5, crashStartMonth - 0.5);
+              const zoneEnd = crashTroughMonth + 1;
+
               return (
-                <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-full overflow-visible select-none">
+                <svg 
+                  viewBox={`0 0 ${svgW} ${svgH}`} 
+                  preserveAspectRatio="xMidYMid meet"
+                  className="w-full h-full overflow-visible select-none"
+                >
                   <defs>
                     <linearGradient id="depotLargeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.35" />
-                      <stop offset="60%" stopColor="#38bdf8" stopOpacity="0.08" />
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.38" />
+                      <stop offset="70%" stopColor="#38bdf8" stopOpacity="0.08" />
                       <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
                     </linearGradient>
 
                     {/* Krisen-Zone Schattierung */}
                     <linearGradient id="crisisZoneGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="rgba(244, 63, 94, 0.05)" />
-                      <stop offset="50%" stopColor="rgba(244, 63, 94, 0.18)" />
-                      <stop offset="100%" stopColor="rgba(244, 63, 94, 0.05)" />
+                      <stop offset="0%" stopColor="rgba(244, 63, 94, 0.04)" />
+                      <stop offset="50%" stopColor="rgba(244, 63, 94, 0.22)" />
+                      <stop offset="100%" stopColor="rgba(244, 63, 94, 0.04)" />
                     </linearGradient>
                   </defs>
 
-                  {/* Vertikaler Schattierungs-Balken für die Krisenphase (Monat 3 bis 5) */}
+                  {/* Vertikaler Schattierungs-Balken für die Krisenphase */}
                   <rect
-                    x={getSvgX(2.5)}
-                    y={padTop}
-                    width={getSvgX(6) - getSvgX(2.5)}
-                    height={svgH - padTop - padBottom}
+                    x={getSvgX(zoneStart)}
+                    y={padTop - 10}
+                    width={Math.max(30, getSvgX(zoneEnd) - getSvgX(zoneStart))}
+                    height={svgH - padTop - padBottom + 10}
                     fill="url(#crisisZoneGradient)"
                     rx="8"
                   />
                   <text 
-                    x={(getSvgX(2.5) + getSvgX(6)) / 2} 
-                    y={padTop + 16} 
+                    x={(getSvgX(zoneStart) + getSvgX(zoneEnd)) / 2} 
+                    y={padTop + 10} 
                     fill="#f43f5e" 
                     fontSize="11" 
-                    fontWeight="800" 
+                    fontWeight="900" 
                     textAnchor="middle" 
-                    letterSpacing="1"
+                    letterSpacing="0.8"
                   >
-                    KRISEN-SCHOCK
+                    CRASH ({event.title.split(' ')[0]})
                   </text>
 
                   {/* Horizontale Gitterlinien mit großen, lesbaren Euro-Beträgen */}
@@ -437,10 +462,10 @@ export default function CrisisSimulator() {
                           strokeDasharray="4 4" 
                         />
                         <text 
-                          x={padLeft - 12} 
+                          x={padLeft - 10} 
                           y={yPos + 4} 
                           fill="#94a3b8" 
-                          fontSize="13" 
+                          fontSize="12" 
                           fontWeight="700" 
                           fontFamily="monospace"
                           textAnchor="end"
@@ -463,7 +488,7 @@ export default function CrisisSimulator() {
                     fill="none"
                     stroke="#64748b"
                     strokeWidth="2.5"
-                    strokeDasharray="6 6"
+                    strokeDasharray="5 5"
                   />
 
                   {/* Depotwert Linie (Sky Blue leuchtend) */}
@@ -471,44 +496,49 @@ export default function CrisisSimulator() {
                     d={pathPoints}
                     fill="none"
                     stroke="#38bdf8"
-                    strokeWidth="4"
+                    strokeWidth="3.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
 
                   {/* 1. STARTPUNKT MARKER */}
-                  <circle cx={startX} cy={startY} r="6" fill="#38bdf8" stroke="#070B14" strokeWidth="2" />
-                  <rect x={startX - 10} y={startY - 38} width="110" height="26" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
-                  <text x={startX + 45} y={startY - 21} fill="#ffffff" fontSize="12" fontWeight="800" textAnchor="middle" fontFamily="monospace">
+                  <circle cx={startX} cy={startY} r="5.5" fill="#38bdf8" stroke="#070B14" strokeWidth="2" />
+                  <rect x={startX} y={startY - 34} width="105" height="24" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.2" />
+                  <text x={startX + 52} y={startY - 18} fill="#ffffff" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">
                     Start: {investedInitial.toLocaleString('de-DE')} €
                   </text>
 
                   {/* 2. CRASH-TIEFPUNKT MARKER */}
-                  <circle cx={troughX} cy={troughY} r="7" fill="#f43f5e" stroke="#070B14" strokeWidth="2" className="animate-pulse" />
-                  <rect x={troughX - 55} y={troughY + 16} width="125" height="42" rx="8" fill="#1e1014" stroke="#f43f5e" strokeWidth="1.5" />
-                  <text x={troughX + 7} y={troughY + 34} fill="#f43f5e" fontSize="12" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                    Tief: {troughValue.toLocaleString('de-DE')} €
-                  </text>
-                  <text x={troughX + 7} y={troughY + 49} fill="#f87171" fontSize="11" fontWeight="700" textAnchor="middle">
-                    Schock: -{effectiveDropPct}%
-                  </text>
+                  <circle cx={troughX} cy={troughY} r="6.5" fill="#f43f5e" stroke="#070B14" strokeWidth="2" className="animate-pulse" />
+                  {/* Positionierung des Tief-Badges leicht oberhalb oder unterhalb je nach Platz */}
+                  <g transform={`translate(${troughX > 150 ? troughX - 55 : troughX - 10}, ${troughY < svgH - 100 ? troughY + 14 : troughY - 50})`}>
+                    <rect x="0" y="0" width="118" height="38" rx="8" fill="#1e1014" stroke="#f43f5e" strokeWidth="1.5" />
+                    <text x="59" y="16" fill="#f43f5e" fontSize="11" fontWeight="900" textAnchor="middle" fontFamily="monospace">
+                      Tief: {troughValue.toLocaleString('de-DE')} €
+                    </text>
+                    <text x="59" y="30" fill="#f87171" fontSize="10" fontWeight="700" textAnchor="middle">
+                      Schock: -{effectiveDropPct}%
+                    </text>
+                  </g>
 
                   {/* 3. ENDWERT MARKER */}
-                  <circle cx={endX} cy={endY} r="7" fill="#10b981" stroke="#070B14" strokeWidth="2" />
-                  <rect x={endX - 145} y={endY - 42} width="145" height="36" rx="8" fill="#062d1f" stroke="#10b981" strokeWidth="1.5" />
-                  <text x={endX - 72} y={endY - 26} fill="#ffffff" fontSize="13" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                    Ende: {endValue.toLocaleString('de-DE')} €
-                  </text>
-                  <text x={endX - 72} y={endY - 11} fill="#34d399" fontSize="11" fontWeight="800" textAnchor="middle">
-                    +{netGain.toLocaleString('de-DE')} € ({gainPct}%)
-                  </text>
+                  <circle cx={endX} cy={endY} r="6.5" fill="#10b981" stroke="#070B14" strokeWidth="2" />
+                  <g transform={`translate(${endX - 130}, ${endY - 38})`}>
+                    <rect x="0" y="0" width="130" height="34" rx="8" fill="#062d1f" stroke="#10b981" strokeWidth="1.5" />
+                    <text x="65" y="14" fill="#ffffff" fontSize="11.5" fontWeight="900" textAnchor="middle" fontFamily="monospace">
+                      Ende: {endValue.toLocaleString('de-DE')} €
+                    </text>
+                    <text x="65" y="27" fill="#34d399" fontSize="10" fontWeight="800" textAnchor="middle">
+                      +{netGain.toLocaleString('de-DE')} € ({gainPct}%)
+                    </text>
+                  </g>
 
                   {/* X-Achsen Beschriftungen (Monate & Phasen) */}
-                  <g transform={`translate(0, ${svgH - 15})`}>
-                    <text x={getSvgX(0)} y="0" fill="#cbd5e1" fontSize="12" fontWeight="700" textAnchor="middle">Monat 0 (Einstieg)</text>
-                    <text x={getSvgX(crashTroughMonth)} y="0" fill="#f87171" fontSize="12" fontWeight="800" textAnchor="middle">Monat 5 (Crash)</text>
-                    <text x={getSvgX(18)} y="0" fill="#94a3b8" fontSize="12" fontWeight="600" textAnchor="middle">1,5 Jahre</text>
-                    <text x={getSvgX(totalMonths)} y="0" fill="#34d399" fontSize="12" fontWeight="800" textAnchor="middle">3 Jahre (Ziel)</text>
+                  <g transform={`translate(0, ${svgH - 12})`}>
+                    <text x={getSvgX(0)} y="0" fill="#cbd5e1" fontSize="11" fontWeight="700" textAnchor="middle">Monat 0</text>
+                    <text x={getSvgX(crashTroughMonth)} y="0" fill="#f87171" fontSize="11" fontWeight="800" textAnchor="middle">M{crashTroughMonth} (Tief)</text>
+                    <text x={getSvgX(18)} y="0" fill="#94a3b8" fontSize="11" fontWeight="600" textAnchor="middle">1,5 Jahre</text>
+                    <text x={getSvgX(totalMonths)} y="0" fill="#34d399" fontSize="11" fontWeight="800" textAnchor="middle">3 Jahre (Ziel)</text>
                   </g>
                 </svg>
               );
