@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, Star, TrendingUp } from 'lucide-react';
+import { Search, Loader2, TrendingUp } from 'lucide-react';
 
 export default function SearchBar({ onSelectAsset, presets = {}, currentTicker = '' }) {
   const [query, setQuery] = useState('');
@@ -106,25 +106,32 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
         )}
       </div>
 
-      {/* Beliebte Schnellauswahl-Chips */}
+      {/* Schnellauswahl-Chips: 3 wichtigste ETFs, 1 Aktie, 1 Krypto */}
       <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <span className="text-xs text-slate-400 font-medium flex items-center gap-1 shrink-0">
-          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> Beliebt:
-        </span>
-        {presetList.slice(0, 5).map(([title, p]) => {
-          const isActive = currentTicker === p.ticker;
+        {[
+          { label: 'MSCI World', symbol: 'EUNL.DE' },
+          { label: 'S&P 500', symbol: 'VUSA.DE' },
+          { label: 'All-World', symbol: 'VWCE.DE' },
+          { label: 'Apple', symbol: 'AAPL' },
+          { label: 'Bitcoin', symbol: 'BTC-EUR' },
+        ].map((item) => {
+          const isActive = currentTicker === item.symbol;
           return (
             <button
-              key={p.ticker}
-              onClick={() => onSelectAsset(p.ticker, title)}
-              className={`shrink-0 text-xs px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5 ${
+              key={item.symbol}
+              type="button"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                onSelectAsset(item.symbol, item.label);
+              }}
+              className={`shrink-0 text-xs px-3.5 py-1.5 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
                 isActive
                   ? 'bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/20 font-bold'
                   : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
               }`}
             >
-              <span>{title.split(' ')[0]}</span>
-              <span>{p.ticker}</span>
+              <span className="font-medium">{item.label}</span>
+              <span className="text-[10px] opacity-75 font-mono">{item.symbol}</span>
             </button>
           );
         })}

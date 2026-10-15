@@ -21,7 +21,8 @@ def run_full_analysis(
     timeframe_label: str,
     investment_type: str = "Einmalanlage",
     sparplan_frequenz: str = "monatlich",
-    kapital: float = 1000.0
+    kapital: float = 1000.0,
+    startkapital: float = 0.0
 ) -> dict:
     """
     Führt die ganzheitliche Analyse über alle Teilmodelle aus.
@@ -91,6 +92,7 @@ def run_full_analysis(
         investment_type=investment_type,
         sparplan_frequenz=sparplan_frequenz,
         kapital=kapital,
+        startkapital=startkapital,
         anzahl_monate=tf_config["months"],
         num_simulations=SIMULATION_PATHS,
         sample_size_viz=VIZ_SAMPLE_PATHS,
@@ -121,6 +123,7 @@ def run_full_analysis(
         "investment_type": investment_type,
         "sparplan_frequenz": sparplan_frequenz,
         "kapital_input": kapital,
+        "startkapital_input": startkapital,
         "chart_model": chart_res,
         "crisis_model": crisis_res,
         "monte_carlo": mc_res,

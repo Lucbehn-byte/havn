@@ -72,6 +72,7 @@ def run_monte_carlo_simulation(
     investment_type: str = "Einmalanlage",
     sparplan_frequenz: str = "monatlich",
     kapital: float = 1000.0,
+    startkapital: float = 0.0,
     anzahl_monate: float = 12.0,
     num_simulations: int = 5000,
     sample_size_viz: int = 40,
@@ -138,7 +139,7 @@ def run_monte_carlo_simulation(
         returns_pct = ((simulated_portfolio_values - eingezahltes_kapital) / eingezahltes_kapital) * 100.0
 
     else:
-        # ECHTE SPARPLAN-SIMULATION (Cost-Average-Effekt)
+        # ECHTE SPARPLAN-SIMULATION (Cost-Average-Effekt + optionaler Geldeinsatz/Startkapital)
         if sparplan_frequenz == "wöchentlich":
             interval_days = 5
             anzahl_einzahlungen = max(1, int(holding_days / interval_days))
@@ -146,8 +147,12 @@ def run_monte_carlo_simulation(
             interval_days = 21
             anzahl_einzahlungen = max(1, int(holding_days / interval_days))
 
-        eingezahltes_kapital = float(anzahl_einzahlungen * kapital)
-        accumulated_shares = np.zeros(num_simulations)
+        initial_deposit = max(0.0, float(startkapital))
+        total_regular = float(anzahl_einzahlungen * kapital)
+        eingezahltes_kapital = initial_deposit + total_regular
+
+        # Initialer Anteilsbestand aus Startkapital (Geldeinsatz an Tag 0)
+        accumulated_shares = np.full(num_simulations, initial_deposit / current_price) if initial_deposit > 0 else np.zeros(num_simulations)
         
         for k in range(anzahl_einzahlungen):
             day_idx = min(holding_days, k * interval_days)
@@ -155,7 +160,10 @@ def run_monte_carlo_simulation(
             accumulated_shares += kapital / purchase_prices
 
         simulated_portfolio_values = accumulated_shares * price_paths[-1]
-        returns_pct = ((simulated_portfolio_values - eingezahltes_kapital) / eingezahltes_kapital) * 100.0
+        if eingezahltes_kapital > 0:
+            returns_pct = ((simulated_portfolio_values - eingezahltes_kapital) / eingezahltes_kapital) * 100.0
+        else:
+            returns_pct = np.zeros(num_simulations)
 
     # 6. Wahrscheinlichkeiten & Perzentile
     prob_up = float(np.mean(returns_pct > 1.0) * 100.0)

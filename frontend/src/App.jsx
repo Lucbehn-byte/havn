@@ -26,6 +26,7 @@ export default function App() {
   const [invType, setInvType] = useState('Einmalanlage');
   const [sparplanFreq, setSparplanFreq] = useState('monatlich');
   const [kapital, setKapital] = useState(1000);
+  const [startkapital, setStartkapital] = useState(0);
 
   const [presets, setPresets] = useState({});
   const [timeframes, setTimeframes] = useState({});
@@ -64,7 +65,8 @@ export default function App() {
           timeframe,
           investment_type: invType,
           sparplan_frequenz: sparplanFreq,
-          kapital: Number(kapital) || 1000,
+          kapital: Number(kapital) || 100,
+          startkapital: Number(startkapital) || 0,
         }),
       });
 
@@ -190,29 +192,48 @@ export default function App() {
               </div>
             </div>
 
-            {/* Kapital / Sparrate mit Roll-Up Picker */}
-            <div>
-              <RollUpPicker
-                label={invType === 'Einmalanlage' ? 'Geldeinsatz' : `Sparrate (${sparplanFreq})`}
-                value={kapital}
-                onChange={setKapital}
-              />
-              {invType === 'Sparplan' && (
-                <div className="flex justify-end mt-1">
-                  <select
-                    value={sparplanFreq}
-                    onChange={(e) => setSparplanFreq(e.target.value)}
-                    className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none"
-                  >
-                    <option value="monatlich">monatlich</option>
-                    <option value="wöchentlich">wöchentlich</option>
-                  </select>
+            {/* Kapital / Sparrate & Geldeinsatz mit Roll-Up Picker */}
+            {invType === 'Einmalanlage' ? (
+              <div>
+                <RollUpPicker
+                  label="Geldeinsatz"
+                  value={kapital}
+                  onChange={setKapital}
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <RollUpPicker
+                    label="Geldeinsatz (Startkapital)"
+                    value={startkapital}
+                    onChange={setStartkapital}
+                    presets={[0, 100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
+                  />
                 </div>
-              )}
-            </div>
+                <div>
+                  <RollUpPicker
+                    label={`Sparrate (${sparplanFreq})`}
+                    value={kapital}
+                    onChange={setKapital}
+                    presets={[25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000]}
+                  />
+                  <div className="flex justify-end mt-1">
+                    <select
+                      value={sparplanFreq}
+                      onChange={(e) => setSparplanFreq(e.target.value)}
+                      className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none"
+                    >
+                      <option value="monatlich">monatlich</option>
+                      <option value="wöchentlich">wöchentlich</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Start Button */}
-            <div>
+            <div className={invType === 'Sparplan' ? 'sm:col-span-2 lg:col-span-4 mt-2' : ''}>
               <button
                 type="button"
                 onClick={() => runAnalysis()}

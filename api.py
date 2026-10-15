@@ -32,6 +32,7 @@ class AnalysisRequest(BaseModel):
     investment_type: str = "Einmalanlage"  # oder "Sparplan"
     sparplan_frequenz: str = "monatlich"
     kapital: float = 1000.0
+    startkapital: float = 0.0
 
 
 @app.get("/api/presets")
@@ -62,7 +63,8 @@ def analyze_stock(req: AnalysisRequest):
             timeframe_label=req.timeframe,
             investment_type=req.investment_type,
             sparplan_frequenz=req.sparplan_frequenz,
-            kapital=req.kapital
+            kapital=req.kapital,
+            startkapital=req.startkapital
         )
 
         if "error" in res and res["error"]:

@@ -1,21 +1,21 @@
 import React, { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 
-const REALISTIC_PRESETS = [
+const DEFAULT_PRESETS = [
   25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 
   750, 1000, 1500, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 50000
 ];
 
-export default function RollUpPicker({ value, onChange, label = 'Betrag (€)' }) {
+export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', presets = DEFAULT_PRESETS }) {
   const [touchStartX, setTouchStartX] = useState(null);
 
   // Finde den passenden Index
-  const currentIndex = REALISTIC_PRESETS.findIndex((v) => v >= value);
-  const activeIdx = currentIndex === -1 ? REALISTIC_PRESETS.length - 1 : currentIndex;
+  const currentIndex = presets.findIndex((v) => v >= value);
+  const activeIdx = currentIndex === -1 ? presets.length - 1 : currentIndex;
 
   const handleIndexChange = (newIdx) => {
-    const clamped = Math.max(0, Math.min(REALISTIC_PRESETS.length - 1, newIdx));
-    onChange(REALISTIC_PRESETS[clamped]);
+    const clamped = Math.max(0, Math.min(presets.length - 1, newIdx));
+    onChange(presets[clamped]);
   };
 
   // Touch-Gesten (Wischen nach links/rechts für Touchscreen & Daumen)
@@ -66,13 +66,13 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)' }
         {/* Zentraler rollender Zähler */}
         <div className="flex-1 flex flex-col items-center justify-center px-2 text-center">
           <div className="text-[11px] font-mono text-slate-500 h-4">
-            {activeIdx > 0 ? `${REALISTIC_PRESETS[activeIdx - 1].toLocaleString('de-DE')} €` : ''}
+            {activeIdx > 0 ? `${presets[activeIdx - 1].toLocaleString('de-DE')} €` : ''}
           </div>
           <div className="text-2xl font-black font-mono text-sky-400 tracking-tight my-0.5 transform scale-105 transition-transform duration-100">
             {Number(value).toLocaleString('de-DE')} €
           </div>
           <div className="text-[11px] font-mono text-slate-500 h-4">
-            {activeIdx < REALISTIC_PRESETS.length - 1 ? `${REALISTIC_PRESETS[activeIdx + 1].toLocaleString('de-DE')} €` : ''}
+            {activeIdx < presets.length - 1 ? `${presets[activeIdx + 1].toLocaleString('de-DE')} €` : ''}
           </div>
         </div>
 
@@ -80,7 +80,7 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)' }
         <button
           type="button"
           onClick={() => handleIndexChange(activeIdx + 1)}
-          disabled={activeIdx === REALISTIC_PRESETS.length - 1}
+          disabled={activeIdx === presets.length - 1}
           className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all disabled:opacity-20 active:scale-90 cursor-pointer shrink-0"
           title="Erhöhen"
         >
@@ -93,17 +93,17 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)' }
         <input
           type="range"
           min="0"
-          max={REALISTIC_PRESETS.length - 1}
+          max={presets.length - 1}
           step="1"
           value={activeIdx}
           onChange={(e) => handleIndexChange(Number(e.target.value))}
           className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-          <span>{REALISTIC_PRESETS[0]} €</span>
-          <span>500 €</span>
-          <span>2.500 €</span>
-          <span>{REALISTIC_PRESETS[REALISTIC_PRESETS.length - 1].toLocaleString('de-DE')} €</span>
+          <span>{presets[0].toLocaleString('de-DE')} €</span>
+          <span>{presets[Math.floor(presets.length / 3)].toLocaleString('de-DE')} €</span>
+          <span>{presets[Math.floor((2 * presets.length) / 3)].toLocaleString('de-DE')} €</span>
+          <span>{presets[presets.length - 1].toLocaleString('de-DE')} €</span>
         </div>
       </div>
     </div>
