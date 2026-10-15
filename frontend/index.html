@@ -16,8 +16,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>HAVN — Quant Investment & Risikosteuerung</title>
   </head>
-  <body>
+  <body style="margin: 0; background-color: #070B14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <!-- Sofortiger nativer HAVN Ladebildschirm -->
+    <div id="havn-loader" style="
+      position: fixed;
+      inset: 0;
+      background-color: #070B14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      transition: opacity 0.4s ease-out;
+    ">
+      <div style="position: relative; width: 88px; height: 88px; margin-bottom: 24px;">
+        <!-- Pulsierender Scheinwerfer-Glow -->
+        <div style="
+          position: absolute;
+          inset: -12px;
+          border-radius: 28px;
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(7, 11, 20, 0) 70%);
+          animation: pulseGlow 2s infinite ease-in-out;
+        "></div>
+        <img 
+          src="/apple-touch-icon.png" 
+          alt="HAVN" 
+          style="
+            width: 88px;
+            height: 88px;
+            border-radius: 22px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+          "
+        />
+      </div>
+
+      <div style="text-align: center; space-y: 6px;">
+        <div style="color: #ffffff; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px;">
+          HAVN
+        </div>
+        <div style="color: #38bdf8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">
+          Quant Risk & Investment
+        </div>
+      </div>
+
+      <!-- Moderner Ladebalken -->
+      <div style="width: 140px; height: 3px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; margin-top: 24px; overflow: hidden; position: relative;">
+        <div style="
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 50%;
+          background: linear-gradient(90deg, #38bdf8, #10b981);
+          border-radius: 999px;
+          animation: loaderAnim 1.4s infinite ease-in-out;
+        "></div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes pulseGlow {
+        0%, 100% { transform: scale(0.95); opacity: 0.4; }
+        50% { transform: scale(1.15); opacity: 0.9; }
+      }
+      @keyframes loaderAnim {
+        0% { left: -50%; }
+        100% { left: 150%; }
+      }
+    </style>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Entferne den Ladescreen weich, sobald React gemountet ist
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          const loader = document.getElementById('havn-loader');
+          if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.remove(), 400);
+          }
+        }, 300);
+      });
+    </script>
   </body>
 </html>
