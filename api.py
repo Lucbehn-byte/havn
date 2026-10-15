@@ -56,50 +56,57 @@ def search_stocks(q: str = Query(..., min_length=1)):
 @app.post("/api/analyze")
 def analyze_stock(req: AnalysisRequest):
     """Führt die ganzheitliche Quant-Analyse über alle 6 Modelle durch."""
-    res = run_full_analysis(
-        ticker_symbol=req.ticker,
-        timeframe_label=req.timeframe,
-        investment_type=req.investment_type,
-        sparplan_frequenz=req.sparplan_frequenz,
-        kapital=req.kapital
-    )
+    try:
+        res = run_full_analysis(
+            ticker_symbol=req.ticker,
+            timeframe_label=req.timeframe,
+            investment_type=req.investment_type,
+            sparplan_frequenz=req.sparplan_frequenz,
+            kapital=req.kapital
+        )
 
-    if "error" in res and res["error"]:
-        raise HTTPException(status_code=400, detail=res["error"])
+        if "error" in res and res["error"]:
+            raise HTTPException(status_code=400, detail=res["error"])
 
-    # Pandas DataFrame für JSON-Serialisierung aufbereiten (letzte 380 Tage)
-    df_hist = res.pop("history_df", None)
-    chart_history = []
-    if df_hist is not None and not df_hist.empty:
-        plot_df = df_hist.iloc[-380:].copy() if len(df_hist) > 380 else df_hist.copy()
-        ma50 = plot_df['Close'].rolling(window=50).mean()
-        ma200 = plot_df['Close'].rolling(window=200).mean() if len(df_hist) >= 200 else pd.Series(index=plot_df.index)
-        dc_high = plot_df['High'].rolling(window=20).max()
-        dc_low = plot_df['Low'].rolling(window=20).min()
+        # Pandas DataFrame für JSON-Serialisierung aufbereiten (letzte 380 Tage)
+        df_hist = res.pop("history_df", None)
+        chart_history = []
+        if df_hist is not None and not df_hist.empty:
+            plot_df = df_hist.iloc[-380:].copy() if len(df_hist) > 380 else df_hist.copy()
+            ma50 = plot_df['Close'].rolling(window=50).mean()
+            ma200 = plot_df['Close'].rolling(window=200).mean() if len(df_hist) >= 200 else pd.Series(index=plot_df.index)
+            dc_high = plot_df['High'].rolling(window=20).max()
+            dc_low = plot_df['Low'].rolling(window=20).min()
 
-        for idx, row in plot_df.iterrows():
-            date_str = idx.strftime("%Y-%m-%d") if hasattr(idx, 'strftime') else str(idx)
-            m50_val = float(ma50.loc[idx]) if not np.isnan(ma50.loc[idx]) else None
-            m200_val = float(ma200.loc[idx]) if (idx in ma200.index and not np.isnan(ma200.loc[idx])) else None
-            dch_val = float(dc_high.loc[idx]) if not np.isnan(dc_high.loc[idx]) else None
-            dcl_val = float(dc_low.loc[idx]) if not np.isnan(dc_low.loc[idx]) else None
+            for idx, row in plot_df.iterrows():
+                date_str = idx.strftime("%Y-%m-%d") if hasattr(idx, 'strftime') else str(idx)
+                m50_val = float(ma50.loc[idx]) if (idx in ma50.index and not np.isnan(ma50.loc[idx])) else None
+                m200_val = float(ma200.loc[idx]) if (idx in ma200.index and not np.isnan(ma200.loc[idx])) else None
+                dch_val = float(dc_high.loc[idx]) if (idx in dc_high.index and not np.isnan(dc_high.loc[idx])) else None
+                dcl_val = float(dc_low.loc[idx]) if (idx in dc_low.index and not np.isnan(dc_low.loc[idx])) else None
 
-            chart_history.append({
-                "date": date_str,
-                "close": round(float(row["Close"]), 2),
-                "ma50": round(m50_val, 2) if m50_val is not None else None,
-                "ma200": round(m200_val, 2) if m200_val is not None else None,
-                "dc_high": round(dch_val, 2) if dch_val is not None else None,
-                "dc_low": round(dcl_val, 2) if dcl_val is not None else None,
-            })
+                chart_history.append({
+                    "date": date_str,
+                    "close": round(float(row["Close"]), 2),
+                    "ma50": round(m50_val, 2) if m50_val is not None else None,
+                    "ma200": round(m200_val, 2) if m200_val is not None else None,
+                    "dc_high": round(dch_val, 2) if dch_val is not None else None,
+                    "dc_low": round(dcl_val, 2) if dcl_val is not None else None,
+                })
 
-    res["chart_history"] = chart_history
+        res["chart_history"] = chart_history
 
-    # hist_score_series aus dem chart_model entfernen (ist pd.Series)
-    if "chart_model" in res and "hist_score_series" in res["chart_model"]:
-        res["chart_model"].pop("hist_score_series", None)
+        # hist_score_series aus dem chart_model entfernen (ist pd.Series)
+        if "chart_model" in res and "hist_score_series" in res["chart_model"]:
+            res["chart_model"].pop("hist_score_series", None)
 
-    return res
+        return res
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Berechnungsfehler für '{req.ticker}': {str(e)}")
 
 
 from fastapi.responses import FileResponse
