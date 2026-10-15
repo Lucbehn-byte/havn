@@ -18,7 +18,7 @@ export default function Navbar({ activeTab, onSelectTab, onReset }) {
           onClick={() => { onSelectTab('terminal'); if (onReset) onReset(); }}
           className="flex items-center gap-3 cursor-pointer group shrink-0"
         >
-          <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-700/80 shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform bg-slate-900">
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform bg-transparent">
             <img src="/apple-touch-icon.png" alt="HAVN Logo" className="w-full h-full object-cover" />
           </div>
           <div>
