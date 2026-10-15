@@ -60,6 +60,55 @@ PRESET_ASSETS = {
         "isin": "DE0008404005",
         "typ": "Einzelaktie (Dividende / Versicherung)",
         "beschreibung": "Führender globaler Finanz- und Versicherungskonzern mit hoher Dividendenrendite."
+    },
+    "🚗 BMW AG": {
+        "ticker": "BMW.DE",
+        "wkn": "519000",
+        "isin": "DE0005190003",
+        "typ": "Einzelaktie (Automobil / DAX)",
+        "beschreibung": "Bayerische Motoren Werke AG – Premium-Automobil- und Motorradhersteller."
+    },
+    "⭐ Mercedes-Benz Group": {
+        "ticker": "MBG.DE",
+        "wkn": "710000",
+        "isin": "DE0007100000",
+        "typ": "Einzelaktie (Automobil / DAX)",
+        "beschreibung": "Globaler Hersteller von Premium- und Luxus-Pkw und Vans."
+    },
+    "⚡ Tesla Inc.": {
+        "ticker": "TSLA",
+        "wkn": "A1CX3T",
+        "isin": "US88160R1014",
+        "typ": "Einzelaktie (E-Mobilität / US)",
+        "beschreibung": "Pionier für Elektrofahrzeuge, Batteriespeicher und Solartechnologie."
+    },
+    "🤖 NVIDIA Corp.": {
+        "ticker": "NVDA",
+        "wkn": "918422",
+        "isin": "US67066G1040",
+        "typ": "Einzelaktie (Halbleiter / KI)",
+        "beschreibung": "Weltweit führender Entwickler von Grafikprozessoren und KI-Beschleunigern."
+    },
+    "📦 Amazon.com Inc.": {
+        "ticker": "AMZN",
+        "wkn": "906866",
+        "isin": "US0231351067",
+        "typ": "Einzelaktie (E-Commerce & Cloud)",
+        "beschreibung": "Globaler E-Commerce-Riese und weltgrößter Cloud-Anbieter (AWS)."
+    },
+    "🔍 Alphabet (Google)": {
+        "ticker": "GOOGL",
+        "wkn": "A14Y6F",
+        "isin": "US02079K3059",
+        "typ": "Einzelaktie (Tech & Werbung)",
+        "beschreibung": "Mutterkonzern von Google, YouTube und Android."
+    },
+    "💊 Novo Nordisk": {
+        "ticker": "NOVO-B.CO",
+        "wkn": "A1XA8R",
+        "isin": "DK0062498333",
+        "typ": "Einzelaktie (Pharma / Europa)",
+        "beschreibung": "Führendes globales Pharmaunternehmen für Diabetes und Adipositas."
     }
 }
 

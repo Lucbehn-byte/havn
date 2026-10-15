@@ -124,7 +124,27 @@ def search_ticker_candidates(query: str, max_results: int = 6) -> list[dict]:
                 "exchange": "Preset"
             })
             
-    # 2. Yahoo Finance Search abfragen
+    # 2. Falls ein Direktsymbol eingegeben wurde (oder mit .DE), immer als Option anbieten
+    upper_q = clean_query.upper()
+    if not any(r["symbol"] == upper_q for r in results):
+        results.append({
+            "symbol": upper_q,
+            "name": f"Direkt-Ticker: {upper_q}",
+            "type": "Aktie / ETF",
+            "exchange": "Börse"
+        })
+        # Falls ohne Endung, auch die deutsche Xetra-Variante vorschlagen
+        if "." not in upper_q and len(upper_q) <= 6:
+            de_symbol = f"{upper_q}.DE"
+            if not any(r["symbol"] == de_symbol for r in results):
+                results.append({
+                    "symbol": de_symbol,
+                    "name": f"Xetra / Frankfurt: {de_symbol}",
+                    "type": "Deutsche Börse",
+                    "exchange": "XETRA"
+                })
+
+    # 3. Yahoo Finance Search abfragen (falls online verfügbar)
     try:
         s = yf.Search(clean_query, max_results=max_results)
         for q in s.quotes:
@@ -143,5 +163,7 @@ def search_ticker_candidates(query: str, max_results: int = 6) -> list[dict]:
             })
     except Exception:
         pass
+
+    return results[:max_results + 2]
         
     return results

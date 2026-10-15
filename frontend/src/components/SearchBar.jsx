@@ -15,8 +15,8 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
         setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, []);
 
   // Debounced Suche
@@ -78,8 +78,11 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
             {results.map((item, idx) => (
               <div
                 key={idx}
-                onClick={() => handleSelect(item.symbol, item.name)}
-                className="px-4 py-3 hover:bg-slate-800/80 cursor-pointer flex items-center justify-between transition-colors group"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(item.symbol, item.name);
+                }}
+                className="px-4 py-3 hover:bg-slate-800/80 active:bg-sky-600/30 cursor-pointer flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-sky-400 group-hover:bg-sky-500/20">

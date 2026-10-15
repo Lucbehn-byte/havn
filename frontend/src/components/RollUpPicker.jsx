@@ -1,77 +1,110 @@
-import React, { useRef, useEffect } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 
-const PRESET_VALUES = [25, 50, 100, 150, 200, 250, 500, 750, 1000, 1500, 2000, 2500, 5000, 10000, 20000, 50000];
+const REALISTIC_PRESETS = [
+  25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 
+  750, 1000, 1500, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 50000
+];
 
 export default function RollUpPicker({ value, onChange, label = 'Betrag (€)' }) {
-  const scrollRef = useRef(null);
+  const [touchStartX, setTouchStartX] = useState(null);
 
-  // Finde den passenden Index oder den nächsten Wert
-  const currentIndex = PRESET_VALUES.findIndex((v) => v >= value);
-  const activeIdx = currentIndex === -1 ? PRESET_VALUES.length - 1 : currentIndex;
+  // Finde den passenden Index
+  const currentIndex = REALISTIC_PRESETS.findIndex((v) => v >= value);
+  const activeIdx = currentIndex === -1 ? REALISTIC_PRESETS.length - 1 : currentIndex;
 
-  const handleStep = (direction) => {
-    let nextIdx = activeIdx + direction;
-    if (nextIdx < 0) nextIdx = 0;
-    if (nextIdx >= PRESET_VALUES.length) nextIdx = PRESET_VALUES.length - 1;
-    onChange(PRESET_VALUES[nextIdx]);
+  const handleIndexChange = (newIdx) => {
+    const clamped = Math.max(0, Math.min(REALISTIC_PRESETS.length - 1, newIdx));
+    onChange(REALISTIC_PRESETS[clamped]);
   };
 
-  const handleWheel = (e) => {
-    e.preventDefault();
-    if (e.deltaY < 0) {
-      handleStep(1);
-    } else if (e.deltaY > 0) {
-      handleStep(-1);
+  // Touch-Gesten (Wischen nach links/rechts für Touchscreen & Daumen)
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const diff = e.changedTouches[0].clientX - touchStartX;
+    if (diff > 25) {
+      // Nach rechts gewischt -> Betrag verringern
+      handleIndexChange(activeIdx - 1);
+    } else if (diff < -25) {
+      // Nach links gewischt -> Betrag erhöhen
+      handleIndexChange(activeIdx + 1);
     }
+    setTouchStartX(null);
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-slate-400">{label}</label>
-        <span className="text-[10px] text-sky-400 font-mono font-medium">Scroll / Tasten aktiv</span>
+        <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <Sliders className="w-3.5 h-3.5 text-sky-400" />
+          <span>{label}</span>
+        </label>
+        <span className="text-[10px] text-sky-400 font-mono font-medium">← Wischen / Tippen →</span>
       </div>
 
+      {/* Interaktiver Wisch- & Scroll-Kanal */}
       <div 
-        ref={scrollRef}
-        onWheel={handleWheel}
-        className="relative bg-slate-950 border border-slate-700/80 rounded-2xl p-2 flex items-center justify-between shadow-inner select-none group"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative bg-slate-950 border border-slate-700/80 rounded-2xl p-2.5 flex items-center justify-between shadow-inner select-none touch-pan-y"
       >
-        {/* Step Down Button */}
+        {/* Minus / Vorheriger Betrag */}
         <button
           type="button"
-          onClick={() => handleStep(-1)}
+          onClick={() => handleIndexChange(activeIdx - 1)}
           disabled={activeIdx === 0}
-          className="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 cursor-pointer"
-          title="Wert verringern"
+          className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all disabled:opacity-20 active:scale-90 cursor-pointer shrink-0"
+          title="Verringern"
         >
-          <ChevronDown className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
-        {/* Roller Window */}
-        <div className="flex-1 flex flex-col items-center justify-center py-1">
-          <div className="text-[11px] font-mono text-slate-600 h-4">
-            {activeIdx > 0 ? `${PRESET_VALUES[activeIdx - 1].toLocaleString('de-DE')} €` : ''}
+        {/* Zentraler rollender Zähler */}
+        <div className="flex-1 flex flex-col items-center justify-center px-2 text-center">
+          <div className="text-[11px] font-mono text-slate-500 h-4">
+            {activeIdx > 0 ? `${REALISTIC_PRESETS[activeIdx - 1].toLocaleString('de-DE')} €` : ''}
           </div>
-          <div className="text-xl font-black font-mono text-sky-400 tracking-tight my-0.5 transition-all duration-150 transform scale-105">
+          <div className="text-2xl font-black font-mono text-sky-400 tracking-tight my-0.5 transform scale-105 transition-transform duration-100">
             {Number(value).toLocaleString('de-DE')} €
           </div>
-          <div className="text-[11px] font-mono text-slate-600 h-4">
-            {activeIdx < PRESET_VALUES.length - 1 ? `${PRESET_VALUES[activeIdx + 1].toLocaleString('de-DE')} €` : ''}
+          <div className="text-[11px] font-mono text-slate-500 h-4">
+            {activeIdx < REALISTIC_PRESETS.length - 1 ? `${REALISTIC_PRESETS[activeIdx + 1].toLocaleString('de-DE')} €` : ''}
           </div>
         </div>
 
-        {/* Step Up Button */}
+        {/* Plus / Nächster Betrag */}
         <button
           type="button"
-          onClick={() => handleStep(1)}
-          disabled={activeIdx === PRESET_VALUES.length - 1}
-          className="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none active:scale-95 cursor-pointer"
-          title="Wert erhöhen"
+          onClick={() => handleIndexChange(activeIdx + 1)}
+          disabled={activeIdx === REALISTIC_PRESETS.length - 1}
+          className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all disabled:opacity-20 active:scale-90 cursor-pointer shrink-0"
+          title="Erhöhen"
         >
-          <ChevronUp className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Schnellauswahl-Slider für schnelles Springen */}
+      <div className="px-1 pt-1">
+        <input
+          type="range"
+          min="0"
+          max={REALISTIC_PRESETS.length - 1}
+          step="1"
+          value={activeIdx}
+          onChange={(e) => handleIndexChange(Number(e.target.value))}
+          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400"
+        />
+        <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+          <span>{REALISTIC_PRESETS[0]} €</span>
+          <span>500 €</span>
+          <span>2.500 €</span>
+          <span>{REALISTIC_PRESETS[REALISTIC_PRESETS.length - 1].toLocaleString('de-DE')} €</span>
+        </div>
       </div>
     </div>
   );
