@@ -236,31 +236,151 @@ export default function CrisisSimulator() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Tiefster Kurseinbruch</span>
-            <div className="text-2xl font-black font-mono text-rose-400 mt-1">
-              {crashValue.toLocaleString('de-DE')} €
-            </div>
-            <span className="text-[11px] text-rose-400/80 font-medium">-{effectiveDropPct}% Schockverlust im Tief</span>
-          </div>
-
+        {/* 2 Hauptkacheln: Gesamteinzahlung & Endwert */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
             <span className="text-xs text-slate-400">Gesamteinzahlung (36 Monate)</span>
             <div className="text-2xl font-black font-mono text-white mt-1">
               {totalCashIn.toLocaleString('de-DE')} €
             </div>
-            <span className="text-[11px] text-slate-400">Startkapital + 36 × {sparrate} € Sparrate</span>
+            <span className="text-[11px] text-slate-400">Startkapital ({kapital.toLocaleString('de-DE')} €) + 36 × {sparrate} € Sparrate</span>
           </div>
 
           <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Depotwert nach Erholungsphase</span>
+            <span className="text-xs text-slate-400">Depotwert nach Erholungsphase (3 Jahre)</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               {endValue.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-emerald-400 font-medium">
               +{netGain.toLocaleString('de-DE')} € ({gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`}) Reingewinn
             </span>
+          </div>
+        </div>
+
+        {/* NEU: Interaktiver Krisen- & Erholungs-Graph */}
+        <div className="bg-slate-950/90 border border-slate-800/90 rounded-2xl p-5 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <TrendingDown className="w-4 h-4 text-rose-400" />
+                <span>Simulierter Kursverlauf & Sparplan-Depotwert in der Krise</span>
+              </h4>
+              <p className="text-[11px] text-slate-400">
+                Visualisierung: Sofortiger Kursschock von <strong className="text-rose-400">-{effectiveDropPct}%</strong> und darauffolgende Markterholung mit Cost-Average-Effekt über 36 Monate.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5 text-sky-400 font-medium text-[11px]">
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span> Depotwert
+              </span>
+              <span className="flex items-center gap-1.5 text-slate-400 font-medium text-[11px]">
+                <span className="w-2.5 h-0.5 bg-slate-500 inline-block"></span> Eingezahltes Geld
+              </span>
+            </div>
+          </div>
+
+          {/* SVG Diagramm */}
+          <div className="w-full h-56 pt-2">
+            {(() => {
+              const svgW = 750;
+              const svgH = 200;
+              const padX = 40;
+              const padY = 25;
+
+              const allValues = recoveryPath.flatMap(p => [p.value, p.cash]);
+              const minV = Math.min(crashValue, ...allValues) * 0.9;
+              const maxV = Math.max(...allValues) * 1.08;
+              const rangeV = maxV - minV || 1;
+
+              const getSvgX = (m) => padX + (m / months) * (svgW - 2 * padX);
+              const getSvgY = (v) => svgH - padY - ((v - minV) / rangeV) * (svgH - 2 * padY);
+
+              // Depotwert Pfad (Start bei Monat 0 mit Crash)
+              const pathPoints = [
+                `M ${getSvgX(0)} ${getSvgY(crashValue)}`,
+                ...recoveryPath.map(p => `L ${getSvgX(p.month)} ${getSvgY(p.value)}`)
+              ].join(' ');
+
+              // Cash Pfad (linear wachsende Einzahlungen)
+              const cashPoints = [
+                `M ${getSvgX(0)} ${getSvgY(investedInitial)}`,
+                ...recoveryPath.map(p => `L ${getSvgX(p.month)} ${getSvgY(p.cash)}`)
+              ].join(' ');
+
+              // Crash-Tief Punkt
+              const crashX = getSvgX(0);
+              const crashY = getSvgY(crashValue);
+
+              return (
+                <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="depotGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Horizontale Gitterlinien */}
+                  {[0.25, 0.5, 0.75].map((ratio, i) => {
+                    const yPos = padY + ratio * (svgH - 2 * padY);
+                    return (
+                      <line 
+                        key={i} 
+                        x1={padX} 
+                        y1={yPos} 
+                        x2={svgW - padX} 
+                        y2={yPos} 
+                        stroke="#1e293b" 
+                        strokeDasharray="4 4" 
+                      />
+                    );
+                  })}
+
+                  {/* Fläche unter dem Depotwert */}
+                  <path
+                    d={`${pathPoints} L ${getSvgX(months)} ${svgH - padY} L ${getSvgX(0)} ${svgH - padY} Z`}
+                    fill="url(#depotGradient)"
+                  />
+
+                  {/* Eingezahltes Kapital Linie (Grau gestrichelt) */}
+                  <path
+                    d={cashPoints}
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="2"
+                    strokeDasharray="5 5"
+                  />
+
+                  {/* Depotwert Linie (Sky Blue leuchtend) */}
+                  <path
+                    d={pathPoints}
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  {/* Crash-Tiefpunkt Marker */}
+                  <circle cx={crashX} cy={crashY} r="5" fill="#f43f5e" />
+                  <text x={crashX + 8} y={crashY - 8} fill="#f43f5e" fontSize="11" fontWeight="bold">
+                    Crash-Tief (-{effectiveDropPct}%)
+                  </text>
+
+                  {/* Endwert Marker */}
+                  <circle cx={getSvgX(months)} cy={getSvgY(endValue)} r="5" fill="#10b981" />
+                  <text x={getSvgX(months) - 10} y={getSvgY(endValue) - 10} fill="#10b981" fontSize="11" fontWeight="bold" textAnchor="end">
+                    {endValue.toLocaleString('de-DE')} €
+                  </text>
+
+                  {/* X-Achsen Beschriftungen */}
+                  <text x={getSvgX(0)} y={svgH - 6} fill="#64748b" fontSize="10" textAnchor="middle">Monat 0 (Schock)</text>
+                  <text x={getSvgX(12)} y={svgH - 6} fill="#64748b" fontSize="10" textAnchor="middle">Jahr 1</text>
+                  <text x={getSvgX(24)} y={svgH - 6} fill="#64748b" fontSize="10" textAnchor="middle">Jahr 2</text>
+                  <text x={getSvgX(36)} y={svgH - 6} fill="#64748b" fontSize="10" textAnchor="middle">Jahr 3</text>
+                </svg>
+              );
+            })()}
           </div>
         </div>
 
