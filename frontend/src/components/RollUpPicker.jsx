@@ -6,7 +6,7 @@ const DEFAULT_PRESETS = [
   750, 1000, 1500, 2000, 2500, 3000, 5000, 7500, 10000, 15000, 20000, 50000
 ];
 
-export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', presets = DEFAULT_PRESETS }) {
+export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', presets = DEFAULT_PRESETS, unit = '€' }) {
   const [touchStartX, setTouchStartX] = useState(null);
 
   // Finde den passenden Index
@@ -34,6 +34,11 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', 
       handleIndexChange(activeIdx + 1);
     }
     setTouchStartX(null);
+  };
+
+  const formatVal = (v) => {
+    if (unit === '€') return `${v.toLocaleString('de-DE')} €`;
+    return `${v.toLocaleString('de-DE')} ${unit}`;
   };
 
   return (
@@ -66,13 +71,13 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', 
         {/* Zentraler rollender Zähler */}
         <div className="flex-1 flex flex-col items-center justify-center px-2 text-center">
           <div className="text-[11px] font-mono text-slate-500 h-4">
-            {activeIdx > 0 ? `${presets[activeIdx - 1].toLocaleString('de-DE')} €` : ''}
+            {activeIdx > 0 ? formatVal(presets[activeIdx - 1]) : ''}
           </div>
           <div className="text-2xl font-black font-mono text-sky-400 tracking-tight my-0.5 transform scale-105 transition-transform duration-100">
-            {Number(value).toLocaleString('de-DE')} €
+            {formatVal(Number(value))}
           </div>
           <div className="text-[11px] font-mono text-slate-500 h-4">
-            {activeIdx < presets.length - 1 ? `${presets[activeIdx + 1].toLocaleString('de-DE')} €` : ''}
+            {activeIdx < presets.length - 1 ? formatVal(presets[activeIdx + 1]) : ''}
           </div>
         </div>
 
@@ -100,10 +105,10 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', 
           className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-          <span>{presets[0].toLocaleString('de-DE')} €</span>
-          <span>{presets[Math.floor(presets.length / 3)].toLocaleString('de-DE')} €</span>
-          <span>{presets[Math.floor((2 * presets.length) / 3)].toLocaleString('de-DE')} €</span>
-          <span>{presets[presets.length - 1].toLocaleString('de-DE')} €</span>
+          <span>{formatVal(presets[0])}</span>
+          <span>{formatVal(presets[Math.floor(presets.length / 3)])}</span>
+          <span>{formatVal(presets[Math.floor((2 * presets.length) / 3)])}</span>
+          <span>{formatVal(presets[presets.length - 1])}</span>
         </div>
       </div>
     </div>

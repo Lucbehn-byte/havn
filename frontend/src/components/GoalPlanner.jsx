@@ -117,20 +117,24 @@ export default function GoalPlanner() {
         </div>
       </div>
 
-      {/* Regler Kacheln */}
+      {/* Regler Kacheln mit realistischen Stufen */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Dein Wunsch-Zielvermögen"
+            label="Wunsch-Zielvermögen"
             value={targetCapital}
             onChange={setTargetCapital}
+            unit="€"
+            presets={[5000, 10000, 15000, 20000, 25000, 35000, 50000, 60000, 80000, 100000, 150000, 200000, 250000, 350000, 500000, 750000, 1000000]}
           />
         </div>
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label={`Geplante Haltedauer in Jahren (${years} Jahre)`}
+            label="Zeit bis zum Ziel"
             value={years}
             onChange={setYears}
+            unit={years === 1 ? 'Jahr' : 'Jahre'}
+            presets={[1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 35, 40]}
           />
         </div>
       </div>
