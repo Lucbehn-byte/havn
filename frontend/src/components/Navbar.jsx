@@ -24,8 +24,12 @@ export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xl font-black tracking-tight text-white group-hover:text-sky-400 transition-colors">HAVN</span>
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-sky-950 border border-sky-800 text-sky-400">
-                {experienceMode === 'beginner' ? 'Einsteiger' : 'Quant Pro'}
+              <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border ${
+                experienceMode === 'beginner' 
+                  ? 'bg-emerald-950/80 border-emerald-800/80 text-emerald-400' 
+                  : 'bg-sky-950 border-sky-800 text-sky-400'
+              }`}>
+                {experienceMode === 'beginner' ? 'Basic' : 'Pro'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Dein sicherer Hafen für Aktien & ETFs</p>
@@ -56,32 +60,30 @@ export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode
 
         {/* Rechte Controls: Modus Switcher & Status */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Einsteiger / Pro Umschalter */}
+          {/* Basic / Pro Umschalter */}
           {onToggleMode && (
             <div className="bg-slate-900/90 border border-slate-800 p-1 rounded-2xl flex items-center shadow-inner">
               <button
                 type="button"
                 onClick={() => onToggleMode('beginner')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer ${
                   experienceMode === 'beginner'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span>🌱</span>
-                <span className="hidden xs:inline">Einsteiger</span>
+                Basic
               </button>
               <button
                 type="button"
                 onClick={() => onToggleMode('pro')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer ${
                   experienceMode === 'pro'
-                    ? 'bg-sky-500 text-white shadow-sm'
+                    ? 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <span>⚡</span>
-                <span className="hidden xs:inline">Pro</span>
+                Pro
               </button>
             </div>
           )}

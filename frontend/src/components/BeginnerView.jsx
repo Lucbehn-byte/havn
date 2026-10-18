@@ -35,9 +35,9 @@ export default function BeginnerView({ data, invType, sparplanFreq, onSwitchToPr
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Einsteiger-Perspektive: {assetName}</span>
+              <span>HAVN Basic: {assetName}</span>
             </div>
             <h2 className="text-xl md:text-2xl font-black text-white">
               Dein Vermögensaufbau einfach erklärt
