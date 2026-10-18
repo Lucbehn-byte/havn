@@ -2,12 +2,23 @@ import React, { useState } from 'react';
 import { Swords, Trophy, ShieldAlert, TrendingUp, AlertCircle, Sparkles } from 'lucide-react';
 
 const ASSETS = [
-  { symbol: 'EUNL.DE', name: 'iShares Core MSCI World', category: 'Welt-ETF', sortino: 1.85, maxDd: -33.6, vol: 14.8, winRate: 92, return5Y: 72 },
-  { symbol: 'SXR8.DE', name: 'iShares S&P 500 (USA)', category: 'US-Index', sortino: 2.15, maxDd: -34.1, vol: 17.2, winRate: 94, return5Y: 104 },
-  { symbol: 'APC.DE', name: 'Apple Inc.', category: 'Tech-Aktie', sortino: 1.95, maxDd: -38.5, vol: 24.5, winRate: 88, return5Y: 145 },
-  { symbol: 'MSF.DE', name: 'Microsoft Corp.', category: 'Tech-Aktie', sortino: 2.10, maxDd: -35.2, vol: 22.1, winRate: 90, return5Y: 130 },
-  { symbol: 'AMZ.DE', name: 'Amazon.com Inc.', category: 'E-Commerce / Cloud', sortino: 1.45, maxDd: -55.8, vol: 29.8, winRate: 82, return5Y: 88 },
-  { symbol: '2B76.DE', name: 'iShares Automation & Robotics', category: 'Themen-ETF', sortino: 1.25, maxDd: -42.0, vol: 25.1, winRate: 78, return5Y: 45 },
+  // 1. Kern- & Welt-ETFs (Fokus auf langfristigen Vermögensaufbau)
+  { symbol: 'EUNL.DE', name: 'iShares Core MSCI World ETF', category: 'Welt-ETF', sortino: 1.10, maxDd: -21.7, vol: 14.1, winRate: 86, return5Y: 77 },
+  { symbol: 'VWCE.DE', name: 'Vanguard FTSE All-World ETF', category: 'Welt-ETF', sortino: 1.09, maxDd: -21.1, vol: 13.7, winRate: 85, return5Y: 72 },
+  { symbol: 'SXR8.DE', name: 'iShares Core S&P 500 ETF', category: 'US-Leitindex ETF', sortino: 1.16, maxDd: -23.3, vol: 15.1, winRate: 84, return5Y: 88 },
+  { symbol: 'EXS1.DE', name: 'iShares Core DAX ETF', category: 'Deutschland ETF', sortino: 0.82, maxDd: -26.7, vol: 17.2, winRate: 91, return5Y: 61 },
+  { symbol: 'IS3N.DE', name: 'iShares Core EM IMI (Emerging Markets)', category: 'Schwellenländer ETF', sortino: 0.66, maxDd: -22.0, vol: 16.8, winRate: 76, return5Y: 46 },
+  { symbol: '2B76.DE', name: 'iShares Automation & Robotics ETF', category: 'Themen-ETF', sortino: 0.58, maxDd: -35.5, vol: 24.7, winRate: 82, return5Y: 62 },
+
+  // 2. Führende Einzelaktien
+  { symbol: 'AAPL', name: 'Apple Inc.', category: 'US-Qualitätsaktie', sortino: 0.98, maxDd: -33.4, vol: 28.0, winRate: 85, return5Y: 140 },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', category: 'Cloud & Software', sortino: 0.67, maxDd: -37.1, vol: 28.2, winRate: 71, return5Y: 79 },
+  { symbol: 'NVDA', name: 'NVIDIA Corp.', category: 'KI & Halbleiter', sortino: 1.80, maxDd: -66.3, vol: 51.9, winRate: 90, return5Y: 868 },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', category: 'E-Commerce & Cloud', sortino: 0.32, maxDd: -55.7, vol: 36.5, winRate: 80, return5Y: 45 },
+
+  // 3. Führende Kryptowährungen
+  { symbol: 'BTC-EUR', name: 'Bitcoin (EUR)', category: 'Kryptowährung', sortino: 0.21, maxDd: -73.6, vol: 41.6, winRate: 65, return5Y: 37 },
+  { symbol: 'ETH-EUR', name: 'Ethereum (EUR)', category: 'Kryptowährung', sortino: -0.20, maxDd: -77.2, vol: 56.2, winRate: 56, return5Y: -33 },
 ];
 
 export default function AssetBattle({ experienceMode = 'beginner' }) {
