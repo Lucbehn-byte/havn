@@ -16,7 +16,7 @@ import AssetBattle from './components/AssetBattle';
 import Academy from './components/Academy';
 import BeginnerView from './components/BeginnerView';
 import MobileNav from './components/MobileNav';
-import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const API_BASE = '';
 
