@@ -3,22 +3,22 @@ import { Swords, Trophy, ShieldAlert, TrendingUp, AlertCircle, Sparkles } from '
 
 const ASSETS = [
   // 1. Kern- & Welt-ETFs (Fokus auf langfristigen Vermögensaufbau)
-  { symbol: 'EUNL.DE', name: 'iShares Core MSCI World ETF', category: 'Welt-ETF', sortino: 1.10, maxDd: -21.7, vol: 14.1, winRate: 86, return5Y: 77 },
-  { symbol: 'VWCE.DE', name: 'Vanguard FTSE All-World ETF', category: 'Welt-ETF', sortino: 1.09, maxDd: -21.1, vol: 13.7, winRate: 85, return5Y: 72 },
-  { symbol: 'SXR8.DE', name: 'iShares Core S&P 500 ETF', category: 'US-Leitindex ETF', sortino: 1.16, maxDd: -23.3, vol: 15.1, winRate: 84, return5Y: 88 },
-  { symbol: 'EXS1.DE', name: 'iShares Core DAX ETF', category: 'Deutschland ETF', sortino: 0.82, maxDd: -26.7, vol: 17.2, winRate: 91, return5Y: 61 },
-  { symbol: 'IS3N.DE', name: 'iShares Core EM IMI (Emerging Markets)', category: 'Schwellenländer ETF', sortino: 0.66, maxDd: -22.0, vol: 16.8, winRate: 76, return5Y: 46 },
-  { symbol: '2B76.DE', name: 'iShares Automation & Robotics ETF', category: 'Themen-ETF', sortino: 0.58, maxDd: -35.5, vol: 24.7, winRate: 82, return5Y: 62 },
+  { symbol: 'EUNL.DE', name: 'iShares Core MSCI World ETF', category: 'Welt-ETF', sortino: 1.10, sharpe: 0.88, maxDd: -21.7, vol: 14.1, beta: 1.00, cvar: -6.8, winRate: 86, return5Y: 77, ter: 0.20, diversification: '~1.500 Unternehmen' },
+  { symbol: 'VWCE.DE', name: 'Vanguard FTSE All-World ETF', category: 'Welt-ETF', sortino: 1.09, sharpe: 0.87, maxDd: -21.1, vol: 13.7, beta: 0.98, cvar: -6.5, winRate: 85, return5Y: 72, ter: 0.22, diversification: '~3.700 Unternehmen' },
+  { symbol: 'SXR8.DE', name: 'iShares Core S&P 500 ETF', category: 'US-Leitindex ETF', sortino: 1.16, sharpe: 0.94, maxDd: -23.3, vol: 15.1, beta: 1.05, cvar: -7.1, winRate: 84, return5Y: 88, ter: 0.07, diversification: '500 Top-US-Konzerne' },
+  { symbol: 'EXS1.DE', name: 'iShares Core DAX ETF', category: 'Deutschland ETF', sortino: 0.82, sharpe: 0.65, maxDd: -26.7, vol: 17.2, beta: 1.12, cvar: -8.9, winRate: 91, return5Y: 61, ter: 0.16, diversification: '40 deutsche Leitbetriebe' },
+  { symbol: 'IS3N.DE', name: 'iShares Core EM IMI (Emerging Markets)', category: 'Schwellenländer ETF', sortino: 0.66, sharpe: 0.52, maxDd: -22.0, vol: 16.8, beta: 0.85, cvar: -8.2, winRate: 76, return5Y: 46, ter: 0.18, diversification: '~3.000 Unternehmen' },
+  { symbol: '2B76.DE', name: 'iShares Automation & Robotics ETF', category: 'Themen-ETF', sortino: 0.58, sharpe: 0.48, maxDd: -35.5, vol: 24.7, beta: 1.35, cvar: -12.4, winRate: 82, return5Y: 62, ter: 0.40, diversification: '~130 Zukunftsunternehmen' },
 
   // 2. Führende Einzelaktien
-  { symbol: 'AAPL', name: 'Apple Inc.', category: 'US-Qualitätsaktie', sortino: 0.98, maxDd: -33.4, vol: 28.0, winRate: 85, return5Y: 140 },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', category: 'Cloud & Software', sortino: 0.67, maxDd: -37.1, vol: 28.2, winRate: 71, return5Y: 79 },
-  { symbol: 'NVDA', name: 'NVIDIA Corp.', category: 'KI & Halbleiter', sortino: 1.80, maxDd: -66.3, vol: 51.9, winRate: 90, return5Y: 868 },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', category: 'E-Commerce & Cloud', sortino: 0.32, maxDd: -55.7, vol: 36.5, winRate: 80, return5Y: 45 },
+  { symbol: 'AAPL', name: 'Apple Inc.', category: 'US-Qualitätsaktie', sortino: 0.98, sharpe: 0.82, maxDd: -33.4, vol: 28.0, beta: 1.15, cvar: -11.5, winRate: 85, return5Y: 140, ter: 0.0, diversification: '1 Einzelaktie' },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', category: 'Cloud & Software', sortino: 0.67, sharpe: 0.61, maxDd: -37.1, vol: 28.2, beta: 1.18, cvar: -12.0, winRate: 71, return5Y: 79, ter: 0.0, diversification: '1 Einzelaktie' },
+  { symbol: 'NVDA', name: 'NVIDIA Corp.', category: 'KI & Halbleiter', sortino: 1.80, sharpe: 1.45, maxDd: -66.3, vol: 51.9, beta: 2.10, cvar: -21.8, winRate: 90, return5Y: 868, ter: 0.0, diversification: '1 Einzelaktie' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', category: 'E-Commerce & Cloud', sortino: 0.32, sharpe: 0.35, maxDd: -55.7, vol: 36.5, beta: 1.30, cvar: -15.4, winRate: 80, return5Y: 45, ter: 0.0, diversification: '1 Einzelaktie' },
 
   // 3. Führende Kryptowährungen
-  { symbol: 'BTC-EUR', name: 'Bitcoin (EUR)', category: 'Kryptowährung', sortino: 0.21, maxDd: -73.6, vol: 41.6, winRate: 65, return5Y: 37 },
-  { symbol: 'ETH-EUR', name: 'Ethereum (EUR)', category: 'Kryptowährung', sortino: -0.20, maxDd: -77.2, vol: 56.2, winRate: 56, return5Y: -33 },
+  { symbol: 'BTC-EUR', name: 'Bitcoin (EUR)', category: 'Kryptowährung', sortino: 0.21, sharpe: 0.28, maxDd: -73.6, vol: 41.6, beta: 1.40, cvar: -24.5, winRate: 65, return5Y: 37, ter: 0.0, diversification: '1 Krypto-Asset (Dezentral)' },
+  { symbol: 'ETH-EUR', name: 'Ethereum (EUR)', category: 'Kryptowährung', sortino: -0.20, sharpe: -0.12, maxDd: -77.2, vol: 56.2, beta: 1.75, cvar: -29.0, winRate: 56, return5Y: -33, ter: 0.0, diversification: '1 Smart-Contract-Netzwerk' },
 ];
 
 export default function AssetBattle({ experienceMode = 'beginner' }) {
