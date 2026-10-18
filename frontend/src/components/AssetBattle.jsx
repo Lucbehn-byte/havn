@@ -32,11 +32,30 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
   let scoreA = 0;
   let scoreB = 0;
 
-  if (dataA.return5Y > dataB.return5Y) scoreA++; else scoreB++;
-  if (dataA.sortino > dataB.sortino) scoreA++; else scoreB++;
-  if (dataA.maxDd > dataB.maxDd) scoreA++; else scoreB++; // Weniger Minus ist besser!
-  if (dataA.winRate > dataB.winRate) scoreA++; else scoreB++;
+  // 1. 5-Jahres-Rendite
+  if (dataA.return5Y > dataB.return5Y) scoreA++; else if (dataB.return5Y > dataA.return5Y) scoreB++;
+  // 2. Sortino-Ratio
+  if (dataA.sortino > dataB.sortino) scoreA++; else if (dataB.sortino > dataA.sortino) scoreB++;
+  // 3. Max Drawdown (höher/weniger negativ ist besser)
+  if (dataA.maxDd > dataB.maxDd) scoreA++; else if (dataB.maxDd > dataA.maxDd) scoreB++;
+  // 4. Gewinn-Wahrscheinlichkeit
+  if (dataA.winRate > dataB.winRate) scoreA++; else if (dataB.winRate > dataA.winRate) scoreB++;
 
+  // Zusätzliche Runden im Pro-Modus
+  if (experienceMode === 'pro') {
+    // 5. Sharpe-Ratio
+    if (dataA.sharpe > dataB.sharpe) scoreA++; else if (dataB.sharpe > dataA.sharpe) scoreB++;
+    // 6. Volatilität (geringer ist besser)
+    if (dataA.vol < dataB.vol) scoreA++; else if (dataB.vol < dataA.vol) scoreB++;
+    // 7. Markt-Beta (näher an 1.0 bzw. geringere Überhitzung; geringer ist defensiver)
+    if (dataA.beta < dataB.beta) scoreA++; else if (dataB.beta < dataA.beta) scoreB++;
+    // 8. CVaR 95% (höher/weniger negativ ist besser)
+    if (dataA.cvar > dataB.cvar) scoreA++; else if (dataB.cvar > dataA.cvar) scoreB++;
+    // 9. Laufende Fondskosten TER (geringer ist besser)
+    if (dataA.ter < dataB.ter) scoreA++; else if (dataB.ter < dataA.ter) scoreB++;
+  }
+
+  const totalRounds = experienceMode === 'pro' ? 9 : 4;
   const winner = scoreA > scoreB ? dataA : (scoreB > scoreA ? dataB : null);
 
   return (
@@ -95,8 +114,8 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
             <Trophy className="w-5 h-5 text-amber-400" />
             <span>Quant-Vergleichskriterien</span>
           </h3>
-          <span className="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
-            {scoreA} : {scoreB} Runden
+          <span className="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-slate-200 font-mono font-bold tracking-wide">
+            <span className="text-sky-400">{scoreA}</span> : <span className="text-indigo-400">{scoreB}</span> von {totalRounds} Runden
           </span>
         </div>
 
