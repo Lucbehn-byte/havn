@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap, CloudLightning, ShieldAlert, Sparkles } from 'lucide-react';
+import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap, CloudLightning, ShieldAlert, Sparkles, Calendar, Layers } from 'lucide-react';
 import RollUpPicker from './RollUpPicker';
+import HISTORICAL_CRISIS_DATA from '../data/historical_crisis_data.json';
 
-// Wählbare Basis-Assets mit realistischen Beta- & Volatilitäts-Profilen
+// Wählbare Basis-Assets
 const ASSET_OPTIONS = [
   { id: 'EUNL.DE', name: 'MSCI World ETF (Core)', type: 'Welt-ETF', beta: 1.0, color: 'text-sky-400' },
   { id: 'VUSA.DE', name: 'S&P 500 ETF (Vanguard)', type: 'US-Leitindex', beta: 1.05, color: 'text-blue-400' },
@@ -15,168 +16,106 @@ const ASSET_OPTIONS = [
   { id: 'BTC-EUR', name: 'Bitcoin (EUR)', type: 'Kryptowährung', beta: 2.60, color: 'text-orange-400' },
 ];
 
-// Historische & makroökonomische Krisenereignisse mit authentischer Crash- & Erholungs-Dynamik
+// Historische Krisenereignisse mit echten Zeiträumen
 const CRISIS_EVENTS = [
   {
     id: 'corona_shock',
     title: 'Corona-Crash (2020)',
-    baseDrop: 34,
-    crashMonths: 2,         // Schock dauerte nur wenige Wochen (Februar-März 2020)
-    recoveryMonths: 7,      // Bis Herbst 2020 war der Weltmarkt bereits wieder auf Allzeithoch (V-Shape)
-    postCrashBoomRate: 2.8, // Extrem steile V-Erholung durch weltweite Zentralbank-Liquidität
-    desc: 'Rasanter 34%-Schock in nur 33 Tagen, gefolgt von einer historischen V-förmigen Rallye auf neue Rekorde.'
+    period: 'Jan 2020 – Jan 2023',
+    desc: 'Schockartiger 34%-Crash im Frühjahr 2020, gefolgt von einer historischen V-Erholung auf neue Höchststände.'
   },
   {
     id: 'bear_market',
     title: 'Zinsschock & Bärenmarkt (2022)',
-    baseDrop: 26,
-    crashMonths: 9,         // Zäher Abwärtstrend über fast das gesamte Jahr 2022
-    recoveryMonths: 14,     // Zähe Bodenbildung
-    postCrashBoomRate: 1.1,
-    desc: 'Zermürbender, monatelanger Abwärtstrend getrieben von Rekordinflation und rasanten Zinsanhebungen.'
+    period: 'Jan 2022 – Jan 2025',
+    desc: 'Zäher monatelanger Zinsanstiegs-Bärenmarkt mit anschließender starker Erholung der Technologiemärkte.'
   },
   {
     id: 'financial_crisis',
     title: 'Globale Finanzkrise (2008)',
-    baseDrop: 54,
-    crashMonths: 14,        // Lehman-Kollaps mit langwieriger Talfahrt
-    recoveryMonths: 28,     // Langwierige U-förmige Erholung der Weltwirtschaft
-    postCrashBoomRate: 1.4,
-    desc: 'Schwerste Banken- und Vertrauenskrise der Moderne mit dramatischem Einbruch und U-Erholung.'
+    period: 'Okt 2007 – Okt 2010',
+    desc: 'Schwerste Banken- und Wirtschaftskrise der Moderne mit langwierigem Einbruch und anschließender Erholung.'
   },
   {
     id: 'tech_bubble',
-    title: 'Dotcom- / Tech-Korrektur',
-    baseDrop: 44,
-    crashMonths: 10,
-    recoveryMonths: 20,
-    postCrashBoomRate: 1.3,
-    desc: 'Plötzliche Entzauberung überhitzter Wachstumswerte bei robusterem Gesamtmarkt.'
+    title: 'Dotcom- / Tech-Korrektur (2000)',
+    period: 'Jan 2000 – Jan 2003',
+    desc: 'Platzen der ersten großen Tech-Blase und anschließende Marktbereinigung über 3 Jahre.'
   }
-];
-
-// Wählbare Härte- / Stärkegrade
-const SEVERITY_LEVELS = [
-  { id: 'mild', label: 'Moderat (-25% Skalierung)', multiplier: 0.75, badge: 'Moderat' },
-  { id: 'realistic', label: 'Realistisch (100% Historischer Standard)', multiplier: 1.0, badge: 'Standard' },
-  { id: 'severe', label: 'Schwer (+30% Verschärfung)', multiplier: 1.3, badge: 'Schwer' },
-  { id: 'extreme', label: 'Extremer Jahrhundertsturm (+60%)', multiplier: 1.6, badge: 'Katastrophe' },
 ];
 
 export default function CrisisSimulator() {
   const [selectedAssetId, setSelectedAssetId] = useState('EUNL.DE');
   const [selectedEventId, setSelectedEventId] = useState('corona_shock');
-  const [selectedSeverity, setSelectedSeverity] = useState('realistic');
   const [kapital, setKapital] = useState(1000);
   const [sparrate, setSparrate] = useState(150);
+  const [viewMode, setViewMode] = useState('both'); // 'both', 'depot', 'price'
 
   const asset = ASSET_OPTIONS.find((a) => a.id === selectedAssetId) || ASSET_OPTIONS[0];
   const event = CRISIS_EVENTS.find((e) => e.id === selectedEventId) || CRISIS_EVENTS[0];
-  const severity = SEVERITY_LEVELS.find((s) => s.id === selectedSeverity) || SEVERITY_LEVELS[1];
 
-  // Dynamische Schadensberechnung unter Berücksichtigung des Asset-Beta
-  // Asset-Beta skaliert den Marktschock (z.B. Bitcoin oder Tesla schlagen stärker aus als MSCI World)
-  const effectiveDropPct = Math.min(92, Math.round(event.baseDrop * severity.multiplier * Math.sqrt(asset.beta)));
-  
-  const investedInitial = kapital;
+  // Reale historische Kursdaten abgreifen
+  const eventData = HISTORICAL_CRISIS_DATA[selectedEventId] || HISTORICAL_CRISIS_DATA['corona_shock'];
+  const assetData = eventData[selectedAssetId] || eventData['EUNL.DE'];
+  const rawPrices = assetData.prices || [100];
+  const dates = assetData.dates || [];
+  const isProxy = assetData.is_proxy || false;
 
-  // DYNAMISCHE KALIBRIERUNG JE NACH KRISEN-EREIGNIS:
-  // Corona-Crash: Extrem rasanter Einbruch in ~1-2 Monaten (Feb-März 2020), extrem steile V-förmige Erholung
-  // Bärenmarkt 2022: Zäher monatelanger Zinsanstiegs-Trend (ca. 8-9 Monate)
-  // Finanzkrise 2008: Langwieriger Einbruch über 14 Monate mit tiefer U-Erholung
-  const totalMonths = 36;
-  const crashStartMonth = 1; // Unmittelbar nach der Einzahlung trifft die Krise ein
-  const crashDuration = Math.min(event.crashMonths, 12);
-  const crashTroughMonth = crashStartMonth + crashDuration; // Für Corona z.B. Monat 1+2 = Monat 3
-
-  let currentPortfolio = investedInitial;
-  let currentCashIn = investedInitial;
-  const fullTimeline = [];
-
-  // Monat 0: Tag der Einzahlung / Einstieg
-  fullTimeline.push({
-    month: 0,
-    label: 'Start',
-    phase: 'entry',
-    value: Math.round(currentPortfolio),
-    cash: currentCashIn,
-    info: `Einzahlung Startkapital: ${investedInitial.toLocaleString('de-DE')} €`
+  // Realer Tiefpunkt im Kursverlauf
+  let minPrice = rawPrices[0];
+  let troughIndex = 0;
+  rawPrices.forEach((p, idx) => {
+    if (p < minPrice) {
+      minPrice = p;
+      troughIndex = idx;
+    }
   });
 
-  // Dynamische Wachstumsrate für Erholung
-  // Bei Corona war die Erholungsrallye durch weltweite Zentralbank-Stimuli historisch steil
-  const baseMonthlyRecoveryRate = (0.012 * event.postCrashBoomRate) * (0.8 + 0.2 * asset.beta);
+  const startPrice = rawPrices[0];
+  const endPrice = rawPrices[rawPrices.length - 1];
+  const priceChangeTrough = Math.round(((minPrice - startPrice) / startPrice) * 100);
+  const priceChange3Y = Math.round(((endPrice - startPrice) / startPrice) * 100);
 
-  for (let m = 1; m <= totalMonths; m++) {
-    currentCashIn += sparrate;
+  // Echte Simulation des Depots mit den tatsächlichen historischen Kursen:
+  // Monat 0: Kauf von Anteilen mit Startkapital
+  // Monat 1..36: Regelmäßiger Zukauf von Anteilen mit Sparrate zum realen Monatspreis
+  let accumulatedShares = kapital / startPrice;
+  let accumulatedCash = kapital;
 
-    if (m < crashStartMonth) {
-      currentPortfolio = (currentPortfolio + sparrate) * 1.008;
-      fullTimeline.push({
-        month: m,
-        label: `M${m}`,
-        phase: 'pre_crash',
-        value: Math.round(currentPortfolio),
-        cash: currentCashIn,
-      });
-    } else if (m <= crashTroughMonth) {
-      // Phase 2: Der Crash vollzieht sich über event.crashMonths
-      // Fortschritt des Einbruchs von 0% bis 100% des maximalen Schocks
-      const progress = (m - crashStartMonth + 1) / crashDuration;
-      // Bei Corona schlug der Crash exponentiell schnell durch
-      const curveFactor = event.id === 'corona_shock' ? Math.pow(progress, 0.7) : Math.pow(progress, 1.1);
-      const currentDrop = (effectiveDropPct * curveFactor) / 100;
-      
-      const baselineDepot = investedInitial + (m * sparrate);
-      currentPortfolio = Math.max(10, baselineDepot * (1 - currentDrop));
+  const fullTimeline = [];
+  fullTimeline.push({
+    month: 0,
+    date: dates[0] || 'M0',
+    price: startPrice,
+    shares: accumulatedShares,
+    cash: accumulatedCash,
+    depotValue: Math.round(accumulatedShares * startPrice),
+  });
 
-      fullTimeline.push({
-        month: m,
-        label: m === crashTroughMonth ? 'Crash-Tief' : `M${m}`,
-        phase: 'crash',
-        value: Math.round(currentPortfolio),
-        cash: currentCashIn,
-        info: m === crashTroughMonth ? `Tiefststand: -${effectiveDropPct}%` : `Crash-Verlauf: -${Math.round(currentDrop * 100)}%`
-      });
-    } else {
-      // Phase 3: Erholungsphase (V-Shape bei Corona vs. U-Shape bei Finanzkrise)
-      const monthsSinceTrough = m - crashTroughMonth;
-      
-      // Bei Corona verdoppelt sich das Momentum in den ersten 6 Monaten nach dem Tief
-      let monthlyBoost = baseMonthlyRecoveryRate;
-      if (event.id === 'corona_shock') {
-        if (monthsSinceTrough <= event.recoveryMonths) {
-          // Extrem steile V-Rallye in den ersten Monaten nach dem März-Tief 2020
-          monthlyBoost = 0.045 * (0.8 + 0.2 * asset.beta); 
-        } else {
-          // Nach Übertreffen der Vorkrisen-Hochs solides technologisches Bullenmarkt-Wachstum (2020/2021)
-          monthlyBoost = 0.016 * (0.8 + 0.2 * asset.beta);
-        }
-      } else {
-        // Standard / U-Erholung
-        monthlyBoost = baseMonthlyRecoveryRate * (1 + Math.min(1.0, monthsSinceTrough / 15));
-      }
+  for (let m = 1; m < rawPrices.length; m++) {
+    const currentP = rawPrices[m];
+    accumulatedCash += sparrate;
+    const boughtShares = sparrate / currentP;
+    accumulatedShares += boughtShares;
+    const currentDepot = accumulatedShares * currentP;
 
-      currentPortfolio = (currentPortfolio + sparrate) * (1 + monthlyBoost);
-
-      fullTimeline.push({
-        month: m,
-        label: `M${m}`,
-        phase: 'recovery',
-        value: Math.round(currentPortfolio),
-        cash: currentCashIn,
-      });
-    }
+    fullTimeline.push({
+      month: m,
+      date: dates[m] || `M${m}`,
+      price: currentP,
+      shares: accumulatedShares,
+      cash: accumulatedCash,
+      depotValue: Math.round(currentDepot),
+    });
   }
 
-  const endValue = fullTimeline[fullTimeline.length - 1].value;
-  const netGain = endValue - currentCashIn;
-  const gainPct = Math.round((netGain / currentCashIn) * 100);
-  const troughEntry = fullTimeline[crashTroughMonth];
-  const troughValue = troughEntry.value;
+  const endDepotValue = fullTimeline[fullTimeline.length - 1].depotValue;
+  const troughDepotValue = fullTimeline[troughIndex].depotValue;
+  const netGain = endDepotValue - accumulatedCash;
+  const gainPct = Math.round((netGain / accumulatedCash) * 100);
 
-  // Erholungsmonat finden (wann übersteigt der Depotwert das eingezahlte Geld nach dem Crash?)
-  const breakEvenEntry = fullTimeline.slice(crashTroughMonth).find(p => p.value >= p.cash);
+  // Breakeven-Monat nach dem Tief
+  const breakEvenEntry = fullTimeline.slice(troughIndex).find(p => p.depotValue >= p.cash);
   const breakEvenMonth = breakEvenEntry ? breakEvenEntry.month : '> 36';
 
   return (
@@ -185,24 +124,31 @@ export default function CrisisSimulator() {
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
         
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-            <CloudLightning className="w-5 h-5" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <CloudLightning className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white tracking-tight">Sturm (Krisen-Stresstest mit realen Kursen)</h2>
+              <p className="text-xs text-slate-400">Verfolge den echten, ungeschönten Börsenkurs während historischer Krisen und sieh, wie dein Sparplan reagiert hätte.</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Sturmmodus (Krisen- & Stress-Simulator)</h2>
-            <p className="text-xs text-slate-400">Wähle dein Wertpapier, das Krisenereignis und die Stärke des Marktschocks individuell aus.</p>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700/80 text-[11px] font-mono text-slate-300 self-start sm:self-auto">
+            <Calendar className="w-3.5 h-3.5 text-sky-400" />
+            <span>Zeitraum: {event.period}</span>
           </div>
         </div>
 
-        {/* 3 Dropdown-Menüs: Wertpapier, Ereignis & Stärke */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-800/80">
+        {/* 2 Dropdown-Menüs: Wertpapier & Krisen-Ereignis */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
           
           {/* 1. Wertpapier / Asset Auswahl */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
               <span>1. Wertpapier / ETF</span>
-              <span className="text-[10px] text-sky-400 font-mono">Beta: {asset.beta.toFixed(2)}</span>
+              <span className="text-[10px] text-sky-400 font-mono">Real-Daten verfügbar</span>
             </label>
             <select
               value={selectedAssetId}
@@ -216,14 +162,14 @@ export default function CrisisSimulator() {
               ))}
             </select>
             <p className="text-[11px] text-slate-400">
-              Sensitivität: {asset.beta > 1.3 ? 'Hochvolatil (stärkere Ausschläge)' : asset.beta < 1.05 ? 'Breit diversifiziert (defensiv)' : 'Standard Markt-Beta'}
+              {isProxy ? 'Historischer Benchmark-Index herangezogen (da vor Auflage des Wertpapiers).' : 'Exakter historischer Börsenkurs aus diesem Zeitraum.'}
             </p>
           </div>
 
           {/* 2. Krisen-Ereignis Dropdown */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300">
-              2. Krisen-Ereignis
+              2. Historisches Krisen-Ereignis
             </label>
             <select
               value={selectedEventId}
@@ -232,7 +178,7 @@ export default function CrisisSimulator() {
             >
               {CRISIS_EVENTS.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {e.title}
+                  {e.title} ({e.period})
                 </option>
               ))}
             </select>
@@ -240,35 +186,6 @@ export default function CrisisSimulator() {
               {event.desc}
             </p>
           </div>
-
-          {/* 3. Stärke / Härtegrad Dropdown */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
-              <span>3. Stärke des Schocks</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                selectedSeverity === 'extreme' ? 'bg-rose-500/20 text-rose-400' :
-                selectedSeverity === 'severe' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-sky-500/20 text-sky-400'
-              }`}>
-                {severity.badge}
-              </span>
-            </label>
-            <select
-              value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
-            >
-              {SEVERITY_LEVELS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-            <p className="text-[11px] text-slate-400">
-              Errechneter Schock: <strong className="text-rose-400">-{effectiveDropPct}%</strong> für {asset.name}
-            </p>
-          </div>
-
         </div>
       </div>
 
@@ -276,7 +193,7 @@ export default function CrisisSimulator() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label={`Startkapital in ${asset.name}`}
+            label={`Geldeinsatz (Startkapital bei Krisenbeginn)`}
             value={kapital}
             onChange={setKapital}
             presets={[100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
@@ -284,7 +201,7 @@ export default function CrisisSimulator() {
         </div>
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Monatliche Sparrate nach dem Crash"
+            label="Monatliche Sparrate während & nach dem Crash"
             value={sparrate}
             onChange={setSparrate}
             presets={[25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000]}
@@ -298,7 +215,7 @@ export default function CrisisSimulator() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white">
-              Stresstest-Ergebnis für {asset.name} nach 3 Jahren
+              Historischer Echt-Verlauf für {asset.name}
             </h3>
           </div>
           <span className="text-xs px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 font-mono font-bold">
@@ -306,104 +223,144 @@ export default function CrisisSimulator() {
           </span>
         </div>
 
-        {/* 2 Hauptkacheln: Gesamteinzahlung & Endwert */}
+        {/* 2 Hauptkacheln: Reale Kursveränderung & Sparplan-Endwert */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Gesamteinzahlung (36 Monate)</span>
-            <div className="text-2xl font-black font-mono text-white mt-1">
-              {currentCashIn.toLocaleString('de-DE')} €
+            <span className="text-xs text-slate-400">Reale Kursentwicklung ({event.title})</span>
+            <div className="text-2xl font-black font-mono text-white mt-1 flex items-baseline gap-2">
+              <span>{priceChange3Y >= 0 ? `+${priceChange3Y}%` : `${priceChange3Y}%`}</span>
+              <span className="text-xs font-normal text-slate-400">({startPrice.toFixed(2)} € → {endPrice.toFixed(2)} €)</span>
             </div>
-            <span className="text-[11px] text-slate-400">Startkapital ({kapital.toLocaleString('de-DE')} €) + 36 × {sparrate} € Sparrate</span>
+            <span className="text-[11px] text-rose-400 font-medium">
+              Tiefststand: {minPrice.toFixed(2)} € ({priceChangeTrough}% Einbruch in Monat {troughIndex})
+            </span>
           </div>
 
           <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Depotwert nach Erholungsphase (3 Jahre)</span>
+            <span className="text-xs text-slate-400">Dein Depotwert nach 3 Jahren (mit Sparplan)</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
-              {endValue.toLocaleString('de-DE')} €
+              {endDepotValue.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-emerald-400 font-medium">
-              +{netGain.toLocaleString('de-DE')} € ({gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`}) Reingewinn
+              +{netGain.toLocaleString('de-DE')} € ({gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`}) Reingewinn bei {accumulatedCash.toLocaleString('de-DE')} € Einzahlung
             </span>
           </div>
         </div>
 
-        {/* NEU: Großformatiger 3-Phasen Krisen- & Erholungs-Graph */}
+        {/* GROSSFORMATIGER HISTORISCHER ECHTDATEN-GRAPH */}
         <div className="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-6 space-y-4 shadow-inner">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="p-2 rounded-xl bg-rose-500/10 text-rose-400">
+                <span className="p-2 rounded-xl bg-sky-500/10 text-sky-400">
                   <TrendingDown className="w-5 h-5" />
                 </span>
                 <h4 className="text-base sm:text-lg font-black text-white">
-                  3-Phasen-Verlauf: Einstieg → Marktkrise → Erholung
+                  Realer historischer Kurs & Depot-Erholung
                 </h4>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Chronologische Simulation: Du startest mit {investedInitial.toLocaleString('de-DE')} €, der Markt stürzt in Monat 4/5 um <strong className="text-rose-400">-{effectiveDropPct}%</strong> ein, danach greift dein monatlicher Sparplan von <strong>{sparrate} €</strong>.
+                Keine vereinfachte Skizze, sondern der <strong>tatsächliche historische Börsenkurs</strong>. Erkennbar sind der Einstiegspunkt, der reale Tiefpunkt und die Kurserholung nach 3 Jahren.
               </p>
             </div>
             
-            {/* Phasen-Legende */}
-            <div className="flex items-center flex-wrap gap-2 text-xs">
-              <span className="px-3 py-1 rounded-lg bg-sky-950/60 border border-sky-800/60 text-sky-400 font-bold flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span> 1. Einstieg
-              </span>
-              <span className="px-3 py-1 rounded-lg bg-rose-950/60 border border-rose-800/60 text-rose-400 font-bold flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400"></span> 2. Krise (-{effectiveDropPct}%)
-              </span>
-              <span className="px-3 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 font-bold flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 3. Erholung
-              </span>
+            {/* Ansichts-Filter */}
+            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 p-1 rounded-2xl self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setViewMode('both')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                  viewMode === 'both' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Beides
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('depot')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                  viewMode === 'depot' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Nur Depot
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('price')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+                  viewMode === 'price' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Nur Kurs
+              </button>
             </div>
           </div>
 
-          {/* Responsive SVG Diagramm (Mobil-optimiert mit dynamischen Proportionen & großer Typografie) */}
-          <div className="w-full h-[360px] sm:h-[420px] pt-2">
+          {/* Legende */}
+          <div className="flex items-center flex-wrap gap-3 text-xs pt-1">
+            <span className="px-3 py-1 rounded-lg bg-sky-950/60 border border-sky-800/60 text-sky-400 font-bold flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span> Reales Depot (mit Sparplan)
+            </span>
+            <span className="px-3 py-1 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-300 font-bold flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> Realer Aktienkurs (€)
+            </span>
+            <span className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 font-bold flex items-center gap-1.5">
+              <span className="w-2.5 h-0.5 bg-slate-500"></span> Eingezahltes Kapital
+            </span>
+          </div>
+
+          {/* SVG Diagramm */}
+          <div className="w-full h-[380px] sm:h-[440px] pt-4">
             {(() => {
-              // Mobil-freundliches Koordinatensystem: 640px Breite sorgt für scharfe, große Texte auf Handys
-              const svgW = 640;
-              const svgH = 360;
-              const padLeft = 70;
-              const padRight = 35;
+              const svgW = 680;
+              const svgH = 380;
+              const padLeft = 65;
+              const padRight = 55;
               const padTop = 45;
               const padBottom = 45;
+              const totalMonths = fullTimeline.length - 1 || 36;
 
-              const allValues = fullTimeline.flatMap(p => [p.value, p.cash]);
-              const minV = Math.min(...allValues) * 0.88;
-              const maxV = Math.max(...allValues) * 1.15;
-              const rangeV = maxV - minV || 1;
+              // Skalierung für Depotwert & Cash (€)
+              const depotValues = fullTimeline.flatMap(p => [p.depotValue, p.cash]);
+              const minDepot = Math.min(...depotValues) * 0.85;
+              const maxDepot = Math.max(...depotValues) * 1.15;
+              const rangeDepot = maxDepot - minDepot || 1;
+
+              // Skalierung für realen Kurs (€)
+              const priceValues = fullTimeline.map(p => p.price);
+              const minPriceVal = Math.min(...priceValues) * 0.90;
+              const maxPriceVal = Math.max(...priceValues) * 1.10;
+              const rangePrice = maxPriceVal - minPriceVal || 1;
 
               const getSvgX = (m) => padLeft + (m / totalMonths) * (svgW - padLeft - padRight);
-              const getSvgY = (v) => svgH - padBottom - ((v - minV) / rangeV) * (svgH - padTop - padBottom);
+              const getDepotY = (v) => svgH - padBottom - ((v - minDepot) / rangeDepot) * (svgH - padTop - padBottom);
+              const getPriceY = (p) => svgH - padBottom - ((p - minPriceVal) / rangePrice) * (svgH - padTop - padBottom);
 
-              // Depotwert Pfad
-              const pathPoints = fullTimeline.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getSvgX(p.month)} ${getSvgY(p.value)}`).join(' ');
+              // Pfade generieren
+              const depotPath = fullTimeline.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getSvgX(p.month)} ${getDepotY(p.depotValue)}`).join(' ');
+              const cashPath = fullTimeline.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getSvgX(p.month)} ${getDepotY(p.cash)}`).join(' ');
+              const pricePath = fullTimeline.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getSvgX(p.month)} ${getPriceY(p.price)}`).join(' ');
 
-              // Cash Pfad (linear wachsende Gesamteinzahlungen)
-              const cashPoints = fullTimeline.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getSvgX(p.month)} ${getSvgY(p.cash)}`).join(' ');
-
-              // Markante Schlüsselpunkte
+              // 3 Schlüsselpunkte: Einstieg, Tiefpunkt, Ende
               const startX = getSvgX(0);
-              const startY = getSvgY(investedInitial);
+              const startDepotY = getDepotY(fullTimeline[0].depotValue);
+              const startPriceY = getPriceY(startPrice);
 
-              const troughX = getSvgX(crashTroughMonth);
-              const troughY = getSvgY(troughValue);
+              const troughX = getSvgX(troughIndex);
+              const troughDepotY = getDepotY(troughDepotValue);
+              const troughPriceY = getPriceY(minPrice);
 
               const endX = getSvgX(totalMonths);
-              const endY = getSvgY(endValue);
+              const endDepotY = getDepotY(endDepotValue);
+              const endPriceY = getPriceY(endPrice);
 
-              // Y-Achsen Skalenwerte (4 Ticks)
+              // Y-Ticks für Depot
               const yTicks = [
-                minV,
-                minV + rangeV * 0.33,
-                minV + rangeV * 0.66,
-                maxV
+                minDepot,
+                minDepot + rangeDepot * 0.33,
+                minDepot + rangeDepot * 0.66,
+                maxDepot
               ];
-
-              // Dynamische Begrenzung der Krisenzone
-              const zoneStart = Math.max(0.5, crashStartMonth - 0.5);
-              const zoneEnd = crashTroughMonth + 1;
 
               return (
                 <svg 
@@ -412,44 +369,33 @@ export default function CrisisSimulator() {
                   className="w-full h-full overflow-visible select-none"
                 >
                   <defs>
-                    <linearGradient id="depotLargeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.38" />
-                      <stop offset="70%" stopColor="#38bdf8" stopOpacity="0.08" />
+                    <linearGradient id="realDepotGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.35" />
+                      <stop offset="70%" stopColor="#38bdf8" stopOpacity="0.05" />
                       <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
                     </linearGradient>
 
-                    {/* Krisen-Zone Schattierung */}
-                    <linearGradient id="crisisZoneGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="rgba(244, 63, 94, 0.04)" />
-                      <stop offset="50%" stopColor="rgba(244, 63, 94, 0.22)" />
-                      <stop offset="100%" stopColor="rgba(244, 63, 94, 0.04)" />
+                    <linearGradient id="crisisZoneMarker" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(244, 63, 94, 0.25)" />
+                      <stop offset="100%" stopColor="rgba(244, 63, 94, 0.0)" />
                     </linearGradient>
                   </defs>
 
-                  {/* Vertikaler Schattierungs-Balken für die Krisenphase */}
-                  <rect
-                    x={getSvgX(zoneStart)}
-                    y={padTop - 10}
-                    width={Math.max(30, getSvgX(zoneEnd) - getSvgX(zoneStart))}
-                    height={svgH - padTop - padBottom + 10}
-                    fill="url(#crisisZoneGradient)"
-                    rx="8"
+                  {/* Vertikale Markierungslinie am realen Tiefpunkt */}
+                  <line 
+                    x1={troughX} 
+                    y1={padTop - 15} 
+                    x2={troughX} 
+                    y2={svgH - padBottom} 
+                    stroke="#f43f5e" 
+                    strokeWidth="1.5" 
+                    strokeDasharray="4 4" 
+                    opacity="0.7"
                   />
-                  <text 
-                    x={(getSvgX(zoneStart) + getSvgX(zoneEnd)) / 2} 
-                    y={padTop + 10} 
-                    fill="#f43f5e" 
-                    fontSize="11" 
-                    fontWeight="900" 
-                    textAnchor="middle" 
-                    letterSpacing="0.8"
-                  >
-                    CRASH ({event.title.split(' ')[0]})
-                  </text>
 
-                  {/* Horizontale Gitterlinien mit großen, lesbaren Euro-Beträgen */}
+                  {/* Horizontale Gitterlinien */}
                   {yTicks.map((val, i) => {
-                    const yPos = getSvgY(val);
+                    const yPos = getDepotY(val);
                     return (
                       <g key={i}>
                         <line 
@@ -464,8 +410,8 @@ export default function CrisisSimulator() {
                         <text 
                           x={padLeft - 10} 
                           y={yPos + 4} 
-                          fill="#94a3b8" 
-                          fontSize="12" 
+                          fill="#64748b" 
+                          fontSize="11" 
                           fontWeight="700" 
                           fontFamily="monospace"
                           textAnchor="end"
@@ -476,69 +422,118 @@ export default function CrisisSimulator() {
                     );
                   })}
 
-                  {/* Fläche unter dem Depotwert */}
-                  <path
-                    d={`${pathPoints} L ${getSvgX(totalMonths)} ${svgH - padBottom} L ${getSvgX(0)} ${svgH - padBottom} Z`}
-                    fill="url(#depotLargeGradient)"
-                  />
-
-                  {/* Eingezahltes Kapital Linie (Grau gestrichelt) */}
-                  <path
-                    d={cashPoints}
-                    fill="none"
-                    stroke="#64748b"
-                    strokeWidth="2.5"
-                    strokeDasharray="5 5"
-                  />
-
-                  {/* Depotwert Linie (Sky Blue leuchtend) */}
-                  <path
-                    d={pathPoints}
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* 1. STARTPUNKT MARKER */}
-                  <circle cx={startX} cy={startY} r="5.5" fill="#38bdf8" stroke="#070B14" strokeWidth="2" />
-                  <rect x={startX} y={startY - 34} width="105" height="24" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.2" />
-                  <text x={startX + 52} y={startY - 18} fill="#ffffff" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">
-                    Start: {investedInitial.toLocaleString('de-DE')} €
+                  {/* Rechter Y-Achsen-Tick für den realen Aktienkurs */}
+                  <text 
+                    x={svgW - padRight + 8} 
+                    y={getPriceY(maxPriceVal) + 4} 
+                    fill="#818cf8" 
+                    fontSize="10" 
+                    fontWeight="700" 
+                    fontFamily="monospace"
+                  >
+                    {maxPriceVal.toFixed(1)} €
+                  </text>
+                  <text 
+                    x={svgW - padRight + 8} 
+                    y={getPriceY(minPriceVal) + 4} 
+                    fill="#818cf8" 
+                    fontSize="10" 
+                    fontWeight="700" 
+                    fontFamily="monospace"
+                  >
+                    {minPriceVal.toFixed(1)} €
                   </text>
 
-                  {/* 2. CRASH-TIEFPUNKT MARKER */}
-                  <circle cx={troughX} cy={troughY} r="6.5" fill="#f43f5e" stroke="#070B14" strokeWidth="2" className="animate-pulse" />
-                  {/* Positionierung des Tief-Badges leicht oberhalb oder unterhalb je nach Platz */}
-                  <g transform={`translate(${troughX > 150 ? troughX - 55 : troughX - 10}, ${troughY < svgH - 100 ? troughY + 14 : troughY - 50})`}>
-                    <rect x="0" y="0" width="118" height="38" rx="8" fill="#1e1014" stroke="#f43f5e" strokeWidth="1.5" />
-                    <text x="59" y="16" fill="#f43f5e" fontSize="11" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                      Tief: {troughValue.toLocaleString('de-DE')} €
-                    </text>
-                    <text x="59" y="30" fill="#f87171" fontSize="10" fontWeight="700" textAnchor="middle">
-                      Schock: -{effectiveDropPct}%
+                  {/* Fläche unter dem Depot */}
+                  {(viewMode === 'both' || viewMode === 'depot') && (
+                    <path
+                      d={`${depotPath} L ${getSvgX(totalMonths)} ${svgH - padBottom} L ${getSvgX(0)} ${svgH - padBottom} Z`}
+                      fill="url(#realDepotGradient)"
+                    />
+                  )}
+
+                  {/* Eingezahltes Kapital Linie (Grau gestrichelt) */}
+                  {(viewMode === 'both' || viewMode === 'depot') && (
+                    <path
+                      d={cashPath}
+                      fill="none"
+                      stroke="#64748b"
+                      strokeWidth="2"
+                      strokeDasharray="5 5"
+                    />
+                  )}
+
+                  {/* REALER AKTIENKURS PFAD (Violett/Indigo mit realem Zacken-Muster) */}
+                  {(viewMode === 'both' || viewMode === 'price') && (
+                    <path
+                      d={pricePath}
+                      fill="none"
+                      stroke="#818cf8"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+
+                  {/* DEPOTWERT PFAD (Sky Blue) */}
+                  {(viewMode === 'both' || viewMode === 'depot') && (
+                    <path
+                      d={depotPath}
+                      fill="none"
+                      stroke="#38bdf8"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+
+                  {/* 1. EINSTIEGSPUNKT KENNZEICHNUNG */}
+                  <circle cx={startX} cy={startDepotY} r="5.5" fill="#38bdf8" stroke="#070B14" strokeWidth="2" />
+                  <g transform={`translate(${startX}, ${startDepotY - 36})`}>
+                    <rect x="0" y="0" width="112" height="26" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.2" />
+                    <text x="56" y="17" fill="#ffffff" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">
+                      1. Einstieg: {kapital} €
                     </text>
                   </g>
 
-                  {/* 3. ENDWERT MARKER */}
-                  <circle cx={endX} cy={endY} r="6.5" fill="#10b981" stroke="#070B14" strokeWidth="2" />
-                  <g transform={`translate(${endX - 130}, ${endY - 38})`}>
-                    <rect x="0" y="0" width="130" height="34" rx="8" fill="#062d1f" stroke="#10b981" strokeWidth="1.5" />
-                    <text x="65" y="14" fill="#ffffff" fontSize="11.5" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                      Ende: {endValue.toLocaleString('de-DE')} €
+                  {/* 2. TIEFPUNKT KENNZEICHNUNG (ECHTER HISTORISCHER CRASH-BODEN) */}
+                  <circle cx={troughX} cy={viewMode === 'price' ? troughPriceY : troughDepotY} r="7" fill="#f43f5e" stroke="#070B14" strokeWidth="2" className="animate-pulse" />
+                  <g transform={`translate(${troughX > 160 ? troughX - 65 : troughX - 10}, ${troughDepotY < svgH - 120 ? troughDepotY + 16 : troughDepotY - 55})`}>
+                    <rect x="0" y="0" width="135" height="42" rx="8" fill="#1e1014" stroke="#f43f5e" strokeWidth="1.5" />
+                    <text x="67" y="17" fill="#f43f5e" fontSize="11" fontWeight="900" textAnchor="middle" fontFamily="monospace">
+                      2. Tiefpunkt ({dates[troughIndex] || `M${troughIndex}`})
                     </text>
-                    <text x="65" y="27" fill="#34d399" fontSize="10" fontWeight="800" textAnchor="middle">
-                      +{netGain.toLocaleString('de-DE')} € ({gainPct}%)
+                    <text x="67" y="32" fill="#f87171" fontSize="10.5" fontWeight="700" textAnchor="middle">
+                      Kurs: {minPrice.toFixed(2)} € ({priceChangeTrough}%)
                     </text>
                   </g>
 
-                  {/* X-Achsen Beschriftungen (Monate & Phasen) */}
+                  {/* 3. ENDE NACH 3 JAHREN KENNZEICHNUNG */}
+                  <circle cx={endX} cy={viewMode === 'price' ? endPriceY : endDepotY} r="6.5" fill="#10b981" stroke="#070B14" strokeWidth="2" />
+                  <g transform={`translate(${endX - 142}, ${endDepotY - 42})`}>
+                    <rect x="0" y="0" width="142" height="38" rx="8" fill="#062d1f" stroke="#10b981" strokeWidth="1.5" />
+                    <text x="71" y="16" fill="#ffffff" fontSize="11.5" fontWeight="900" textAnchor="middle" fontFamily="monospace">
+                      3. Ende: {endDepotValue.toLocaleString('de-DE')} €
+                    </text>
+                    <text x="71" y="30" fill="#34d399" fontSize="10.5" fontWeight="800" textAnchor="middle">
+                      Kurs: {endPrice.toFixed(2)} € (+{priceChange3Y}%)
+                    </text>
+                  </g>
+
+                  {/* X-Achsen Beschriftungen (Monate / Realer Kalender) */}
                   <g transform={`translate(0, ${svgH - 12})`}>
-                    <text x={getSvgX(0)} y="0" fill="#cbd5e1" fontSize="11" fontWeight="700" textAnchor="middle">Monat 0</text>
-                    <text x={getSvgX(crashTroughMonth)} y="0" fill="#f87171" fontSize="11" fontWeight="800" textAnchor="middle">M{crashTroughMonth} (Tief)</text>
-                    <text x={getSvgX(18)} y="0" fill="#94a3b8" fontSize="11" fontWeight="600" textAnchor="middle">1,5 Jahre</text>
-                    <text x={getSvgX(totalMonths)} y="0" fill="#34d399" fontSize="11" fontWeight="800" textAnchor="middle">3 Jahre (Ziel)</text>
+                    <text x={getSvgX(0)} y="0" fill="#cbd5e1" fontSize="11" fontWeight="700" textAnchor="middle">
+                      {dates[0] || 'Start'}
+                    </text>
+                    <text x={getSvgX(troughIndex)} y="0" fill="#f87171" fontSize="11" fontWeight="800" textAnchor="middle">
+                      {dates[troughIndex] || `M${troughIndex}`} (Tief)
+                    </text>
+                    <text x={getSvgX(18)} y="0" fill="#94a3b8" fontSize="11" fontWeight="600" textAnchor="middle">
+                      {dates[18] || '1,5 Jahre'}
+                    </text>
+                    <text x={getSvgX(totalMonths)} y="0" fill="#34d399" fontSize="11" fontWeight="800" textAnchor="middle">
+                      {dates[totalMonths] || '3 Jahre'} (Ziel)
+                    </text>
                   </g>
                 </svg>
               );
@@ -546,19 +541,18 @@ export default function CrisisSimulator() {
           </div>
         </div>
 
-        {/* Quant-Lektion */}
+        {/* Quant- & Historische Lektion */}
         <div className="p-4 rounded-2xl bg-sky-950/30 border border-sky-800/50 text-xs text-slate-300 leading-relaxed space-y-2">
           <div className="font-bold text-sky-400 flex items-center gap-1.5 uppercase tracking-wide">
-            <Zap className="w-4 h-4" /> Mathematische Erkenntnis für {asset.name}:
+            <Zap className="w-4 h-4" /> Historischer Beweis für {asset.name}:
           </div>
           <p>
-            Im gewählten Szenario <strong>{event.title}</strong> mit der Stärke <strong>{severity.badge}</strong> bricht der Kurs von <strong>{asset.name}</strong> um <strong>{effectiveDropPct} %</strong> ein. 
-            Durch das Weiterbesparen mit <strong>{sparrate} € monatlich</strong> profitierst du massiv vom Cost-Average-Effekt: Dein Einstiegspreis wird dramatisch nach unten verbilligt. 
-            Bereits nach circa <strong>{breakEvenMonth} Monaten</strong> hat dein Sparplan den gesamten Crash-Schaden neutralisiert und schließt nach 3 Jahren mit <strong>+{netGain.toLocaleString('de-DE')} € Gewinn</strong> ab.
+            Im echten Verlauf der <strong>{event.title}</strong> stürzte der Kurs von <strong>{startPrice.toFixed(2)} €</strong> auf das Tief von <strong>{minPrice.toFixed(2)} € ({priceChangeTrough}%)</strong> im Monat <strong>{dates[troughIndex] || troughIndex}</strong> ab. 
+            Wer jedoch nicht panisch verkaufte, sondern den Sparplan von <strong>{sparrate} € monatlich</strong> stur weiterlaufen ließ, kaufte am Boden extrem günstig ein. 
+            Bereits nach ca. <strong>{breakEvenMonth} Monaten</strong> war der Verlust vollständig ausgeglichen. Nach 3 Jahren schloss das Depot mit <strong>{endDepotValue.toLocaleString('de-DE')} €</strong> ab (Reingewinn: <strong>+{netGain.toLocaleString('de-DE')} €</strong>).
           </p>
         </div>
       </div>
     </div>
   );
 }
-

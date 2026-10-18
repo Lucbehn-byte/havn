@@ -4,7 +4,7 @@ import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react'
 export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode }) {
   const tabs = [
     { id: 'terminal', label: 'Hafen', icon: Anchor },
-    { id: 'crisis', label: 'Sturmmodus', icon: CloudLightning },
+    { id: 'crisis', label: 'Sturm', icon: CloudLightning },
     { id: 'goals', label: 'Kompass', icon: Compass },
     { id: 'battle', label: 'Duell', icon: Swords },
     { id: 'academy', label: 'Logbuch', icon: BookOpen },
