@@ -68,7 +68,7 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
             <Swords className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Asset-Battle (Direkt-Duell)</h2>
+            <h2 className="text-xl font-black text-white tracking-tight">Duell</h2>
             <p className="text-xs text-slate-400">Vergleiche zwei deiner Favoriten auf Basis stochastischer Stabilität und Krisenresistenz.</p>
           </div>
         </div>
