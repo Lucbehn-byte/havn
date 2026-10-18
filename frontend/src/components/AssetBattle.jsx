@@ -10,7 +10,7 @@ const ASSETS = [
   { symbol: '2B76.DE', name: 'iShares Automation & Robotics', category: 'Themen-ETF', sortino: 1.25, maxDd: -42.0, vol: 25.1, winRate: 78, return5Y: 45 },
 ];
 
-export default function AssetBattle() {
+export default function AssetBattle({ experienceMode = 'beginner' }) {
   const [assetA, setAssetA] = useState(ASSETS[0].symbol);
   const [assetB, setAssetB] = useState(ASSETS[1].symbol);
 
@@ -110,8 +110,12 @@ export default function AssetBattle() {
               {dataA.sortino.toFixed(2)}
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">Sortino-Ratio (Präzision)</span>
-              <span className="text-[10px] text-slate-500">Rendite pro Verlustrisiko</span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">
+                {experienceMode === 'beginner' ? 'Rendite-Präzision' : 'Sortino-Ratio (Downside Risk)'}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {experienceMode === 'beginner' ? 'Höherer Wert = Stabilerer Ertrag' : 'Rendite pro Abwärtsrisiko'}
+              </span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.sortino >= dataA.sortino ? 'text-indigo-400' : 'text-slate-500'}`}>
               {dataB.sortino.toFixed(2)}
@@ -124,8 +128,12 @@ export default function AssetBattle() {
               {dataA.maxDd}%
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">Maximaler Crash-Rücksetzer</span>
-              <span className="text-[10px] text-slate-500">Geringerer Absturz gewinnt</span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">
+                {experienceMode === 'beginner' ? 'Krisen-Dämpfer' : 'Maximaler Drawdown'}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {experienceMode === 'beginner' ? 'Geringerer Absturz im Sturm gewinnt' : 'Historischer Höchsteinbruch'}
+              </span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.maxDd >= dataA.maxDd ? 'text-emerald-400' : 'text-slate-500'}`}>
               {dataB.maxDd}%
@@ -138,8 +146,12 @@ export default function AssetBattle() {
               {dataA.winRate}%
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">Gewinn-Wahrscheinlichkeit</span>
-              <span className="text-[10px] text-slate-500">Historische 1-Jahres-Erfolgsrate</span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">
+                {experienceMode === 'beginner' ? 'Gewinn-Wahrscheinlichkeit' : 'Rollierende 1J-Win-Rate'}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {experienceMode === 'beginner' ? 'Anteil der 1-Jahres-Zeitfenster im Plus' : 'Empirische Perioden-Trefferquote'}
+              </span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.winRate >= dataA.winRate ? 'text-indigo-400' : 'text-slate-500'}`}>
               {dataB.winRate}%

@@ -60,9 +60,9 @@ export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode
 
         {/* Rechte Controls: Modus Switcher & Status */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Basic / Pro Umschalter */}
-          {onToggleMode && (
-            <div className="bg-slate-900/90 border border-slate-800 p-1 rounded-2xl flex items-center shadow-inner">
+          {/* Basic / Pro Umschalter: Nur im Hafen ('terminal') und Duell ('battle') sichtbar */}
+          {onToggleMode && (activeTab === 'terminal' || activeTab === 'battle') && (
+            <div className="bg-slate-900/90 border border-slate-800 p-1 rounded-2xl flex items-center shadow-inner animate-fadeIn">
               <button
                 type="button"
                 onClick={() => onToggleMode('beginner')}
