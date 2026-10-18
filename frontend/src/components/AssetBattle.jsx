@@ -101,14 +101,14 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
         </div>
 
         <div className="space-y-3">
-          {/* Kriterium 1: Rendite 5 Jahre */}
+          {/* Kriterium 1: 5-Jahres-Rendite */}
           <div className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between">
             <div className={`text-lg font-mono font-black ${dataA.return5Y >= dataB.return5Y ? 'text-sky-400' : 'text-slate-500'}`}>
               +{dataA.return5Y}%
             </div>
             <div className="text-center">
               <span className="text-xs font-bold text-slate-300 uppercase block">5-Jahres-Rendite</span>
-              <span className="text-[10px] text-slate-500">Gesamtwachstum</span>
+              <span className="text-[10px] text-slate-500">Gesamtwachstum seit 2021</span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.return5Y >= dataA.return5Y ? 'text-indigo-400' : 'text-slate-500'}`}>
               +{dataB.return5Y}%
@@ -121,12 +121,8 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
               {dataA.sortino.toFixed(2)}
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">
-                {experienceMode === 'beginner' ? 'Rendite-Präzision' : 'Sortino-Ratio (Downside Risk)'}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {experienceMode === 'beginner' ? 'Höherer Wert = Stabilerer Ertrag' : 'Rendite pro Abwärtsrisiko'}
-              </span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">Sortino-Ratio</span>
+              <span className="text-[10px] text-slate-500">Rendite pro Abwärtsrisiko</span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.sortino >= dataA.sortino ? 'text-indigo-400' : 'text-slate-500'}`}>
               {dataB.sortino.toFixed(2)}
@@ -139,12 +135,8 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
               {dataA.maxDd}%
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">
-                {experienceMode === 'beginner' ? 'Krisen-Dämpfer' : 'Maximaler Drawdown'}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {experienceMode === 'beginner' ? 'Geringerer Absturz im Sturm gewinnt' : 'Historischer Höchsteinbruch'}
-              </span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">Maximaler Crash-Rücksetzer</span>
+              <span className="text-[10px] text-slate-500">Tiefster Einbruch in 5 Jahren</span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.maxDd >= dataA.maxDd ? 'text-emerald-400' : 'text-slate-500'}`}>
               {dataB.maxDd}%
@@ -157,17 +149,90 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
               {dataA.winRate}%
             </div>
             <div className="text-center">
-              <span className="text-xs font-bold text-slate-300 uppercase block">
-                {experienceMode === 'beginner' ? 'Gewinn-Wahrscheinlichkeit' : 'Rollierende 1J-Win-Rate'}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {experienceMode === 'beginner' ? 'Anteil der 1-Jahres-Zeitfenster im Plus' : 'Empirische Perioden-Trefferquote'}
-              </span>
+              <span className="text-xs font-bold text-slate-300 uppercase block">Gewinn-Wahrscheinlichkeit</span>
+              <span className="text-[10px] text-slate-500">Historische 1-Jahres-Erfolgsrate</span>
             </div>
             <div className={`text-lg font-mono font-black ${dataB.winRate >= dataA.winRate ? 'text-indigo-400' : 'text-slate-500'}`}>
               {dataB.winRate}%
             </div>
           </div>
+
+          {/* ZUSÄTZLICHE PRO-METRIKEN NUR IM PRO-MODUS */}
+          {experienceMode === 'pro' && (
+            <>
+              {/* Pro 1: Sharpe-Ratio */}
+              <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between ring-1 ring-sky-500/20">
+                <div className={`text-lg font-mono font-black ${dataA.sharpe >= dataB.sharpe ? 'text-sky-400' : 'text-slate-500'}`}>
+                  {dataA.sharpe.toFixed(2)}
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-sky-400 uppercase block">Sharpe-Ratio (Gesamtrisiko)</span>
+                  <span className="text-[10px] text-slate-500">Überschussrendite / Gesamtvolatilität</span>
+                </div>
+                <div className={`text-lg font-mono font-black ${dataB.sharpe >= dataA.sharpe ? 'text-indigo-400' : 'text-slate-500'}`}>
+                  {dataB.sharpe.toFixed(2)}
+                </div>
+              </div>
+
+              {/* Pro 2: Annualisierte Volatilität */}
+              <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div className={`text-lg font-mono font-black ${dataA.vol <= dataB.vol ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  {dataA.vol}%
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-slate-300 uppercase block">Annualisierte Volatilität (σ)</span>
+                  <span className="text-[10px] text-slate-500">Geringere Schwankungsbreite gewinnt</span>
+                </div>
+                <div className={`text-lg font-mono font-black ${dataB.vol <= dataA.vol ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  {dataB.vol}%
+                </div>
+              </div>
+
+              {/* Pro 3: Markt-Beta */}
+              <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div className={`text-lg font-mono font-black ${dataA.beta <= dataB.beta ? 'text-sky-400' : 'text-slate-500'}`}>
+                  {dataA.beta.toFixed(2)}
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-slate-300 uppercase block">Markt-Beta (Sensitivität)</span>
+                  <span className="text-[10px] text-slate-500">Ausschlag im Verhältnis zum Weltmarkt</span>
+                </div>
+                <div className={`text-lg font-mono font-black ${dataB.beta <= dataA.beta ? 'text-indigo-400' : 'text-slate-500'}`}>
+                  {dataB.beta.toFixed(2)}
+                </div>
+              </div>
+
+              {/* Pro 4: Conditional Value at Risk (CVaR 95%) */}
+              <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div className={`text-lg font-mono font-black ${dataA.cvar >= dataB.cvar ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {dataA.cvar}%
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-slate-300 uppercase block">CVaR 95% (Tail Risk)</span>
+                  <span className="text-[10px] text-slate-500">Erwarteter Monatsverlust im Extremfall</span>
+                </div>
+                <div className={`text-lg font-mono font-black ${dataB.cvar >= dataA.cvar ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {dataB.cvar}%
+                </div>
+              </div>
+
+              {/* Pro 5: Diversifikation & Gebühren (TER) */}
+              <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div className="text-left font-mono">
+                  <div className="text-xs font-black text-sky-400">{dataA.ter > 0 ? `${dataA.ter}% TER` : 'Keine TER'}</div>
+                  <div className="text-[10px] text-slate-400">{dataA.diversification}</div>
+                </div>
+                <div className="text-center">
+                  <span className="text-xs font-bold text-slate-300 uppercase block">Kosten & Streuung</span>
+                  <span className="text-[10px] text-slate-500">Laufende Kosten (TER) / Korbgröße</span>
+                </div>
+                <div className="text-right font-mono">
+                  <div className="text-xs font-black text-indigo-400">{dataB.ter > 0 ? `${dataB.ter}% TER` : 'Keine TER'}</div>
+                  <div className="text-[10px] text-slate-400">{dataB.diversification}</div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Fazit */}
