@@ -1,7 +1,7 @@
 import React from 'react';
 import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react';
 
-export default function Navbar({ activeTab, onSelectTab, onReset }) {
+export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode }) {
   const tabs = [
     { id: 'terminal', label: 'Hafen', icon: Anchor },
     { id: 'crisis', label: 'Sturmmodus', icon: CloudLightning },
@@ -12,7 +12,7 @@ export default function Navbar({ activeTab, onSelectTab, onReset }) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
         {/* Logo */}
         <div 
           onClick={() => { onSelectTab('terminal'); if (onReset) onReset(); }}
@@ -25,7 +25,7 @@ export default function Navbar({ activeTab, onSelectTab, onReset }) {
             <div className="flex items-center gap-2">
               <span className="text-xl font-black tracking-tight text-white group-hover:text-sky-400 transition-colors">HAVN</span>
               <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-sky-950 border border-sky-800 text-sky-400">
-                Quant Pro
+                {experienceMode === 'beginner' ? 'Einsteiger' : 'Quant Pro'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Dein sicherer Hafen für Aktien & ETFs</p>
@@ -54,11 +54,42 @@ export default function Navbar({ activeTab, onSelectTab, onReset }) {
           })}
         </nav>
 
-        {/* Live Badge */}
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+        {/* Rechte Controls: Modus Switcher & Status */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Einsteiger / Pro Umschalter */}
+          {onToggleMode && (
+            <div className="bg-slate-900/90 border border-slate-800 p-1 rounded-2xl flex items-center shadow-inner">
+              <button
+                type="button"
+                onClick={() => onToggleMode('beginner')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  experienceMode === 'beginner'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>🌱</span>
+                <span className="hidden xs:inline">Einsteiger</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onToggleMode('pro')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  experienceMode === 'pro'
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>⚡</span>
+                <span className="hidden xs:inline">Pro</span>
+              </button>
+            </div>
+          )}
+
+          {/* Live Status Punkt */}
+          <span className="hidden sm:inline-flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="hidden sm:inline">Live API</span> Aktiv
+            <span className="hidden md:inline">Live API</span>
           </span>
         </div>
       </div>

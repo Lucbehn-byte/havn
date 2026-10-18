@@ -14,6 +14,7 @@ import CrisisSimulator from './components/CrisisSimulator';
 import GoalPlanner from './components/GoalPlanner';
 import AssetBattle from './components/AssetBattle';
 import Academy from './components/Academy';
+import BeginnerView from './components/BeginnerView';
 import MobileNav from './components/MobileNav';
 import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -21,12 +22,20 @@ const API_BASE = '';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('terminal');
+  const [experienceMode, setExperienceMode] = useState(() => {
+    return localStorage.getItem('havn_experience_mode') || 'beginner';
+  });
   const [ticker, setTicker] = useState('EUNL.DE');
   const [timeframe, setTimeframe] = useState('1 Jahr (Jahres-Trend)');
   const [invType, setInvType] = useState('Einmalanlage');
   const [sparplanFreq, setSparplanFreq] = useState('monatlich');
   const [kapital, setKapital] = useState(1000);
   const [startkapital, setStartkapital] = useState(0);
+
+  const handleToggleMode = (newMode) => {
+    setExperienceMode(newMode);
+    localStorage.setItem('havn_experience_mode', newMode);
+  };
 
   const [presets, setPresets] = useState({});
   const [timeframes, setTimeframes] = useState({});
@@ -105,6 +114,8 @@ export default function App() {
         activeTab={activeTab} 
         onSelectTab={setActiveTab} 
         onReset={() => runAnalysis('EUNL.DE')} 
+        experienceMode={experienceMode}
+        onToggleMode={handleToggleMode}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -297,45 +308,57 @@ export default function App() {
               </div>
             </div>
 
-            {/* 1. Signal & Trend-Banner */}
-            <SignalBanner chartModel={data.chart_model} />
+            {/* MODUS-ABHÄNGIGE ANSICHT: EINSTEIGER vs. PRO */}
+            {experienceMode === 'beginner' ? (
+              <BeginnerView
+                data={data}
+                invType={invType}
+                sparplanFreq={sparplanFreq}
+                onSwitchToPro={() => handleToggleMode('pro')}
+              />
+            ) : (
+              <div className="space-y-8 animate-fadeIn">
+                {/* 1. Signal & Trend-Banner */}
+                <SignalBanner chartModel={data.chart_model} />
 
-            {/* 2. Realer Kursverlauf & Trendlinien (Letzte 1,5 Jahre) */}
-            <PriceChart history={data.chart_history} ticker={data.ticker} />
+                {/* 2. Realer Kursverlauf & Trendlinien (Letzte 1,5 Jahre) */}
+                <PriceChart history={data.chart_history} ticker={data.ticker} />
 
-            {/* 3. Finanzmathematische Hochrechnung */}
-            <FinancialMetrics 
-              monteCarlo={data.monte_carlo}
-              invType={data.investment_type}
-              sparplanFreq={data.sparplan_frequenz}
-            />
+                {/* 3. Finanzmathematische Hochrechnung */}
+                <FinancialMetrics 
+                  monteCarlo={data.monte_carlo}
+                  invType={data.investment_type}
+                  sparplanFreq={data.sparplan_frequenz}
+                />
 
-            {/* 4. Risikoprofil & Wahrscheinlichkeiten */}
-            <RiskProfile
-              monteCarlo={data.monte_carlo}
-              rollingReturns={data.rolling_returns}
-              beta={data.beta}
-            />
+                {/* 4. Risikoprofil & Wahrscheinlichkeiten */}
+                <RiskProfile
+                  monteCarlo={data.monte_carlo}
+                  rollingReturns={data.rolling_returns}
+                  beta={data.beta}
+                />
 
-            {/* 5. Historischer Krisen- & Stresstest */}
-            <CrisisStressTest crisisModel={data.crisis_model} />
+                {/* 5. Historischer Krisen- & Stresstest */}
+                <CrisisStressTest crisisModel={data.crisis_model} />
 
-            {/* 6. Simulationsfächer (Merton Jump-Diffusion) */}
-            <FanChart 
-              paths={data.monte_carlo?.sample_paths} 
-              medianPath={data.monte_carlo?.median_path} 
-            />
+                {/* 6. Simulationsfächer (Merton Jump-Diffusion) */}
+                <FanChart 
+                  paths={data.monte_carlo?.sample_paths} 
+                  medianPath={data.monte_carlo?.median_path} 
+                />
 
-            {/* 7. Fundamentale Bewertung (KGV & Multiples) */}
-            <FundamentalCards fundamental={data.fundamental} />
+                {/* 7. Fundamentale Bewertung (KGV & Multiples) */}
+                <FundamentalCards fundamental={data.fundamental} />
 
-            {/* 8. Broker-Leitfaden */}
-            <BrokerGuide
-              assetInfo={data.asset_info}
-              invType={data.investment_type}
-              sparplanFreq={data.sparplan_frequenz}
-              kapital={data.kapital_input}
-            />
+                {/* 8. Broker-Leitfaden */}
+                <BrokerGuide
+                  assetInfo={data.asset_info}
+                  invType={data.investment_type}
+                  sparplanFreq={data.sparplan_frequenz}
+                  kapital={data.kapital_input}
+                />
+              </div>
+            )}
           </div>
         )}
           </div>
