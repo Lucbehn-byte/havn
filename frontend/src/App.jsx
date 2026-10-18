@@ -157,8 +157,8 @@ export default function App() {
     : ["3 Tage (Kurzfrist-Impuls)", "10 Tage (Kurzfrist-Trend)", "8 Wochen (Mittelfrist-Swing)", "1 Jahr (Jahres-Trend)", "3 Jahre (Makro-Zyklus)", "5 Jahre (Vermögensaufbau)"];
 
   return (
-    <div className={`min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0 transition-colors duration-300 ${
-      theme === 'light' ? 'bg-[#F1F5F9] text-slate-900' : 'bg-[#070B14] text-slate-100'
+    <div className={`min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-white pb-20 lg:pb-0 transition-colors duration-300 ${
+      theme === 'light' ? 'bg-[#FFFDF9] text-stone-900' : 'bg-[#070B14] text-slate-100'
     }`}>
       <Navbar 
         activeTab={activeTab} 
