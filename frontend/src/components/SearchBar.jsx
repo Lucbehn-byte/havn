@@ -112,14 +112,16 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
         )}
       </div>
 
-      {/* Schnellauswahl-Chips: 3 wichtigste ETFs, 1 Aktie, 1 Krypto */}
+      {/* Schnellauswahl-Chips: Professionell mit WKN und Typ-Badge */}
       <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {[
-          { label: 'MSCI World', symbol: 'EUNL.DE' },
-          { label: 'S&P 500', symbol: 'VUSA.DE' },
-          { label: 'All-World', symbol: 'VWCE.DE' },
-          { label: 'Apple', symbol: 'AAPL' },
-          { label: 'Bitcoin', symbol: 'BTC-EUR' },
+          { label: 'MSCI World', symbol: 'EUNL.DE', wkn: 'A0RPWH', tag: 'Welt-ETF' },
+          { label: 'All-World', symbol: 'VWCE.DE', wkn: 'A2PKXG', tag: 'Welt-ETF' },
+          { label: 'S&P 500', symbol: 'SXR8.DE', wkn: 'A0YEDG', tag: 'US 500' },
+          { label: 'DAX 40', symbol: 'EXS1.DE', wkn: '593393', tag: 'Deutschland' },
+          { label: 'Apple', symbol: 'AAPL', wkn: '865985', tag: 'Qualitätsaktie' },
+          { label: 'NVIDIA', symbol: 'NVDA', wkn: '918422', tag: 'Halbleiter/KI' },
+          { label: 'Bitcoin', symbol: 'BTC-EUR', wkn: 'Krypto', tag: 'Dezentral' },
         ].map((item) => {
           const isActive = currentTicker === item.symbol;
           return (
@@ -134,14 +136,16 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
                 e.preventDefault();
                 onSelectAsset(item.symbol, item.label);
               }}
-              className={`shrink-0 text-xs px-3.5 py-1.5 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
+              className={`shrink-0 text-xs px-3 py-1.5 rounded-xl border transition-all flex items-center gap-2 cursor-pointer select-none ${
                 isActive
                   ? 'bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-500/20 font-bold'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
               }`}
             >
-              <span className="font-medium">{item.label}</span>
-              <span className="text-[10px] opacity-75 font-mono">{item.symbol}</span>
+              <span className="font-semibold">{item.label}</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${isActive ? 'bg-sky-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                {item.wkn}
+              </span>
             </button>
           );
         })}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wallet, TrendingUp, PiggyBank, ShieldAlert, SunMedium, CloudRain, Coins, Target } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparplanFreq = '' }) {
   const invested = monteCarlo.eingezahltes_kapital ?? 0;
@@ -30,7 +31,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         {/* Eingezahlt */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-medium">Eingezahltes Kapital</span>
+            <span className="font-medium flex items-center">
+              Eingezahltes Kapital
+              <InfoTooltip 
+                title="Eingezahltes Kapital" 
+                text="Die Summe deines tatsächlich aus eigener Tasche investierten Geldes über den gewählten Anlagezeitraum." 
+              />
+            </span>
             <Wallet className="w-4 h-4 text-slate-400" />
           </div>
           <div className="text-2xl font-black text-white font-mono">
@@ -44,7 +51,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         {/* Gewinn */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-medium">Erwarteter Reingewinn (Median)</span>
+            <span className="font-medium flex items-center">
+              Erwarteter Reingewinn
+              <InfoTooltip 
+                title="Erwarteter Reingewinn (Median)" 
+                text="Der statistische Mittelwert (50. Perzentil) deiner Gewinne nach 5.000 Monte-Carlo-Simulationen. 50 % aller Szenarien schnitten historisch besser, 50 % schlechter ab." 
+              />
+            </span>
             <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="flex items-baseline gap-2">
@@ -60,7 +73,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         {/* Endwert */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span className="font-medium">Voraussichtlicher Endwert</span>
+            <span className="font-medium flex items-center">
+              Voraussichtlicher Endwert
+              <InfoTooltip 
+                title="Voraussichtlicher Endwert" 
+                text="Der Gesamtbetrag deines Depots (dein eingezahltes Eigenkapital plus alle erwirtschafteten Renditen) zum Ende der Haltedauer." 
+              />
+            </span>
             <PiggyBank className="w-4 h-4 text-sky-400" />
           </div>
           <div className="text-2xl font-black text-sky-400 font-mono">

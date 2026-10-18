@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, AlertTriangle, Activity, CheckCircle2, TrendingUp, TrendingDown, RefreshCw, BarChart2 } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta = 1.0 }) {
   const pUp = monteCarlo.prob_up ?? 50;
@@ -88,7 +89,13 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           {/* Sortino */}
           <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span className="font-medium">Sortino-Ratio</span>
+              <span className="font-medium flex items-center">
+                Sortino-Ratio
+                <InfoTooltip 
+                  title="Sortino-Ratio" 
+                  text="Misst die erzielte Rendite ausschließlich im Verhältnis zum tatsächlichen Abwärtsrisiko (schlechte Kurstage). Werte über 1.0 gelten als gut, über 1.8 als exzellent." 
+                />
+              </span>
               <ShieldCheck className="w-4 h-4 text-sky-400" />
             </div>
             <div className="text-xl font-bold font-mono text-white">
@@ -108,7 +115,13 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           {/* Expected Shortfall (CVaR 95%) */}
           <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span className="font-medium">Expected Shortfall (CVaR 95%)</span>
+              <span className="font-medium flex items-center">
+                CVaR 95% (Tail Risk)
+                <InfoTooltip 
+                  title="Conditional Value at Risk (95%)" 
+                  text="Gibt an, wie hoch dein Verlust durchschnittlich in den schlimmsten 5 % aller Marktfälle ausfällt. Dieser Stresstest schützt vor bösen Überraschungen bei Markt-Crashs." 
+                />
+              </span>
               <AlertTriangle className="w-4 h-4 text-rose-400" />
             </div>
             <div className="text-xl font-bold font-mono text-rose-400">
@@ -125,7 +138,13 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           {/* EWMA Volatilität & Beta */}
           <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span className="font-medium">Tagesnervosität (EWMA)</span>
+              <span className="font-medium flex items-center">
+                Volatilität & Beta
+                <InfoTooltip 
+                  title="EWMA Volatilität & Beta" 
+                  text="EWMA gewichtet die aktuellen letzten Tage stärker als alte Monate, um plötzliche Marktanomalien sofort zu erkennen. Beta zeigt das Schwankungsverhalten relativ zum Weltmarkt (MSCI World = 1.0)." 
+                />
+              </span>
               <Activity className="w-4 h-4 text-amber-400" />
             </div>
             <div className="text-xl font-bold font-mono text-white">

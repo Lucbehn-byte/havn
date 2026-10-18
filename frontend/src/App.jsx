@@ -375,6 +375,7 @@ export default function App() {
                 <FanChart 
                   paths={data.monte_carlo?.sample_paths} 
                   medianPath={data.monte_carlo?.median_path} 
+                  ticker={data.ticker}
                 />
 
                 {/* 7. Fundamentale Bewertung (KGV & Multiples) */}

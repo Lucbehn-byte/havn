@@ -1,7 +1,7 @@
 import React from 'react';
-import { GitBranch, TrendingUp } from 'lucide-react';
+import { GitBranch, TrendingUp, Download } from 'lucide-react';
 
-export default function FanChart({ paths = [], medianPath = [] }) {
+export default function FanChart({ paths = [], medianPath = [], ticker = 'Asset' }) {
   if (!paths || paths.length === 0) {
     return (
       <div className="h-60 flex items-center justify-center bg-slate-900/60 rounded-xl border border-slate-800 text-slate-500">
@@ -9,6 +9,34 @@ export default function FanChart({ paths = [], medianPath = [] }) {
       </div>
     );
   }
+
+  const exportCSV = () => {
+    try {
+      const rows = [];
+      const steps = medianPath.length;
+      const header = ['Schritt (Monat)', 'Median-Pfad (€)', ...paths.slice(0, 10).map((_, i) => `Stichprobe_${i + 1} (€)`)];
+      rows.push(header.join(';'));
+
+      for (let s = 0; s < steps; s++) {
+        const row = [
+          s + 1,
+          medianPath[s] ? medianPath[s].toFixed(2) : '',
+          ...paths.slice(0, 10).map(p => (p[s] ? p[s].toFixed(2) : ''))
+        ];
+        rows.push(row.join(';'));
+      }
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(rows.join('\n'));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', csvContent);
+      downloadAnchor.setAttribute('download', `havn_monte_carlo_${ticker}_pfade.csv`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    } catch (e) {
+      console.error('Fehler beim CSV-Export:', e);
+    }
+  };
 
   // Flaches Array aller Kurswerte zur Bestimmung von Min und Max
   const allValues = [...paths.flat(), ...medianPath];
@@ -36,16 +64,27 @@ export default function FanChart({ paths = [], medianPath = [] }) {
             <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-mono">5.000 Pfade (Merton Jump-Diffusion)</span>
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Graublaue Fächerpfade = mögliche Zukunftsszenarien inkl. Crash-Schocks. Gelbe Linie = Median-Erwartung.
+            Graublaue Fächerpfade = stochastische Pfade inkl. Schock-Szenarien. Gelbe Linie = Median-Erwartung.
           </p>
         </div>
-        <div className="flex items-center gap-4 text-xs">
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="w-3 h-0.5 bg-sky-500/40 rounded-full inline-block"></span> 40 Stichprobenpfade
-          </span>
-          <span className="flex items-center gap-1.5 text-amber-400 font-bold">
-            <span className="w-3 h-0.5 bg-amber-400 rounded-full inline-block"></span> Erwarteter Median
-          </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+            title="Simulationspfade als CSV-Tabelle exportieren"
+          >
+            <Download className="w-3.5 h-3.5 text-sky-400" />
+            <span>CSV Export</span>
+          </button>
+          <div className="hidden sm:flex items-center gap-4 text-xs pl-2 border-l border-slate-800">
+            <span className="flex items-center gap-1.5 text-slate-400">
+              <span className="w-3 h-0.5 bg-sky-500/40 rounded-full inline-block"></span> 40 Stichproben
+            </span>
+            <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+              <span className="w-3 h-0.5 bg-amber-400 rounded-full inline-block"></span> Median
+            </span>
+          </div>
         </div>
       </div>
 
