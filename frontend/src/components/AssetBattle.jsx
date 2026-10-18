@@ -76,7 +76,7 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
         {/* Auswahlschalter */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-sky-400 uppercase tracking-wide">Wertpapier 1 (Blau)</label>
+            <label className="text-xs font-bold text-sky-400 uppercase tracking-wide">Wertpapier 1</label>
             <select
               value={assetA}
               onChange={(e) => setAssetA(e.target.value)}
@@ -91,7 +91,7 @@ export default function AssetBattle({ experienceMode = 'beginner' }) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Wertpapier 2 (Lila)</label>
+            <label className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Wertpapier 2</label>
             <select
               value={assetB}
               onChange={(e) => setAssetB(e.target.value)}
