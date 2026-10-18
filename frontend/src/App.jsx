@@ -42,6 +42,7 @@ export default function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastAnalyzedParams, setLastAnalyzedParams] = useState(null);
 
   // Initial Presets & Timeframes laden
   useEffect(() => {
@@ -87,6 +88,14 @@ export default function App() {
       const result = await res.json();
       setData(result);
       setTicker(targetTicker);
+      setLastAnalyzedParams(JSON.stringify({
+        ticker: targetTicker,
+        timeframe,
+        invType,
+        sparplanFreq,
+        kapital: Number(kapital) || 100,
+        startkapital: Number(startkapital) || 0
+      }));
     } catch (err) {
       setError(err.message || 'Verbindung zum Backend fehlgeschlagen.');
     } finally {
@@ -150,7 +159,6 @@ export default function App() {
         {/* PARAMETER & STRATEGIE LEISTE */}
         <section className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
           <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-300 uppercase tracking-wider">
-            <SlidersHorizontal className="w-4 h-4 text-sky-400" />
             <span>Simulations-Parameter & Anlagestrategie</span>
           </div>
 
@@ -158,7 +166,7 @@ export default function App() {
             {/* Zeitraum */}
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                ⏳ Geplante Haltedauer:
+                Geplante Haltedauer
               </label>
               <select
                 value={timeframe}
@@ -173,9 +181,8 @@ export default function App() {
 
             {/* Strategie */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-sky-400" />
-                <span>Anlagestrategie</span>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                Anlagestrategie
               </label>
               <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 border border-slate-700/80 rounded-xl">
                 <button
@@ -244,26 +251,49 @@ export default function App() {
             )}
 
             {/* Start Button */}
-            <div className={invType === 'Sparplan' ? 'sm:col-span-2 lg:col-span-4 mt-2' : ''}>
-              <button
-                type="button"
-                onClick={() => runAnalysis()}
-                disabled={loading}
-                className="w-full h-11 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Berechne 5.000 Pfade...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 fill-white" />
-                    <span>Analyse starten</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {(() => {
+              const currentParams = JSON.stringify({
+                ticker,
+                timeframe,
+                invType,
+                sparplanFreq,
+                kapital: Number(kapital) || 100,
+                startkapital: Number(startkapital) || 0
+              });
+              const isUpToDate = !loading && lastAnalyzedParams !== null && lastAnalyzedParams === currentParams;
+
+              return (
+                <div className={invType === 'Sparplan' ? 'sm:col-span-2 lg:col-span-4 mt-2' : ''}>
+                  <button
+                    type="button"
+                    onClick={() => runAnalysis()}
+                    disabled={loading || isUpToDate}
+                    className={`w-full h-11 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all ${
+                      isUpToDate
+                        ? 'bg-slate-900 border border-sky-900/60 text-sky-400/80 shadow-none cursor-default'
+                        : 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 active:scale-[0.99] cursor-pointer'
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Berechne 5.000 Pfade...</span>
+                      </>
+                    ) : isUpToDate ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-sky-400" />
+                        <span>Analyse aktuell</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 fill-white" />
+                        <span>Analyse starten</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </section>
 

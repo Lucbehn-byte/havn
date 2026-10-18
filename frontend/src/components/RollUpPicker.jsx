@@ -44,11 +44,9 @@ export default function RollUpPicker({ value, onChange, label = 'Betrag (€)', 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-          <Sliders className="w-3.5 h-3.5 text-sky-400" />
-          <span>{label}</span>
+        <label className="text-xs font-bold text-slate-300">
+          {label}
         </label>
-        <span className="text-[10px] text-sky-400 font-mono font-medium">← Wischen / Tippen →</span>
       </div>
 
       {/* Interaktiver Wisch- & Scroll-Kanal */}
