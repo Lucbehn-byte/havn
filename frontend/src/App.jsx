@@ -26,44 +26,13 @@ export default function App() {
     return localStorage.getItem('havn_experience_mode') || 'beginner';
   });
 
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('havn_theme');
-    if (saved) return saved;
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      return 'light';
-    }
-    return 'dark';
-  });
-
+  // Ensure any leftover light classes from localStorage are removed
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-      root.setAttribute('data-theme', 'light');
-    } else {
-      root.classList.remove('light');
-      root.removeAttribute('data-theme');
-    }
-    localStorage.setItem('havn_theme', theme);
-  }, [theme]);
-
-  // Listener auf System-Einstellungen (z. B. wenn iPhone automatisch zwischen Tag und Nacht umschaltet)
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
-    const handleChange = (e) => {
-      const saved = localStorage.getItem('havn_theme');
-      if (!saved) {
-        setTheme(e.matches ? 'light' : 'dark');
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    document.documentElement.classList.remove('light');
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.removeItem('havn_theme');
   }, []);
 
-  const handleToggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-  };
   const [ticker, setTicker] = useState('EUNL.DE');
   const [timeframe, setTimeframe] = useState('1 Jahr (Jahres-Trend)');
   const [invType, setInvType] = useState('Einmalanlage');
@@ -157,19 +126,13 @@ export default function App() {
     : ["3 Tage (Kurzfrist-Impuls)", "10 Tage (Kurzfrist-Trend)", "8 Wochen (Mittelfrist-Swing)", "1 Jahr (Jahres-Trend)", "3 Jahre (Makro-Zyklus)", "5 Jahre (Vermögensaufbau)"];
 
   return (
-    <div className={`min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-white pb-20 lg:pb-0 transition-colors duration-300 ${
-      theme === 'light' 
-        ? 'bg-gradient-to-b from-[#FFF7ED] via-[#FFFBEB] to-[#FEF3C7] text-amber-950' 
-        : 'bg-[#070B14] text-slate-100'
-    }`}>
+    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0">
       <Navbar 
         activeTab={activeTab} 
         onSelectTab={setActiveTab} 
         onReset={() => runAnalysis('EUNL.DE')} 
         experienceMode={experienceMode}
         onToggleMode={handleToggleMode}
-        theme={theme}
-        onToggleTheme={handleToggleTheme}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">

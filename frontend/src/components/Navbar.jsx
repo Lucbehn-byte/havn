@@ -1,7 +1,7 @@
 import React from 'react';
-import { Anchor, CloudLightning, Compass, Swords, BookOpen, Sun, Moon } from 'lucide-react';
+import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react';
 
-export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode, theme = 'dark', onToggleTheme }) {
+export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode }) {
   const tabs = [
     { id: 'terminal', label: 'Hafen', icon: Anchor },
     { id: 'crisis', label: 'Sturm', icon: CloudLightning },
@@ -88,23 +88,6 @@ export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode
             </div>
           )}
 
-          {/* Dark / Light Mode Switcher (Sonne / Mond Schieberegler) */}
-          {onToggleTheme && (
-            <button
-              type="button"
-              onClick={onToggleTheme}
-              className="relative p-1 rounded-2xl liquid-glass-pill flex items-center gap-1 cursor-pointer transition-all active:scale-95"
-              title={theme === 'dark' ? 'Zu Light Mode wechseln' : 'Zu Dark Mode wechseln'}
-              aria-label="Theme umschalten"
-            >
-              <div className={`p-1.5 rounded-xl transition-all ${theme === 'light' ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30' : 'text-slate-400 hover:text-slate-200'}`}>
-                <Sun className="w-3.5 h-3.5" />
-              </div>
-              <div className={`p-1.5 rounded-xl transition-all ${theme === 'dark' ? 'liquid-glass-active text-sky-200' : 'text-slate-400 hover:text-slate-600'}`}>
-                <Moon className="w-3.5 h-3.5" />
-              </div>
-            </button>
-          )}
         </div>
       </div>
     </header>
