@@ -4,18 +4,18 @@ import RollUpPicker from './RollUpPicker';
 
 const GOALS = [
   {
-    id: 'first_10k',
-    title: 'Die ersten 10.000 €',
-    subtitle: 'Der psychologische Meilenstein',
-    years: 4,
-    targetAmount: 10000,
-    riskAllocation: '80% Welt-ETF / 20% Tagesgeld',
-    expectedAnnualReturn: 6.5,
-    desc: 'Der schwerste, aber wichtigste Schritt: Die ersten 10.000 € beweisen dir, dass Vermögensaufbau funktioniert. Ab hier beginnt dein Geld spürbar für dich zu arbeiten.'
+    id: 'safety_fund',
+    title: 'Finanzieller Schutzanker',
+    subtitle: 'Notgroschen & maximale Sicherheit',
+    years: 3,
+    targetAmount: 15000,
+    riskAllocation: '20% Welt-ETF / 80% Tagesgeld',
+    expectedAnnualReturn: 3.8,
+    desc: 'Kurzer Zeithorizont für Notfälle, Auto-Reparaturen oder berufliche Flexibilität. Höchste Priorität hat der Kapitalerhalt.'
   },
   {
     id: 'side_income',
-    title: '100 € monatliches Nebeneinkommen',
+    title: '100 € Nebeneinkommen',
     subtitle: 'Passiver Cashflow für Fixkosten',
     years: 7,
     targetAmount: 25000,
@@ -34,21 +34,21 @@ const GOALS = [
     desc: 'Solides Startkapital für den Haus- oder Wohnungskauf, um Nebenkosten zu decken und die günstigsten Zinskonditionen bei Banken zu sichern.'
   },
   {
-    id: 'financial_freedom',
-    title: 'Finanzielle Freiheit',
-    subtitle: 'Sorgenfreie Rente & Unabhängigkeit',
+    id: 'retirement',
+    title: 'Sorgenfreie Rente',
+    subtitle: 'Vermögensaufbau & Unabhängigkeit',
     years: 25,
     targetAmount: 350000,
     riskAllocation: '85% Welt-ETF / 15% Puffer',
     expectedAnnualReturn: 7.0,
-    desc: 'Der Zeithorizont, an dem der Zinseszins die volle Wucht entfaltet: Die Rendite übersteigt deine eigenen Einzahlungen um ein Vielfaches.'
+    desc: 'Der maximale Zeithorizont, an dem der Zinseszins die volle Wucht entfaltet: Die Rendite übersteigt deine eigenen Einzahlungen um ein Vielfaches.'
   }
 ];
 
 export default function GoalPlanner() {
-  const [selectedGoal, setSelectedGoal] = useState('first_10k');
-  const [targetCapital, setTargetCapital] = useState(10000);
-  const [years, setYears] = useState(4);
+  const [selectedGoal, setSelectedGoal] = useState('safety_fund');
+  const [targetCapital, setTargetCapital] = useState(15000);
+  const [years, setYears] = useState(3);
 
   const goal = GOALS.find(g => g.id === selectedGoal) || GOALS[0];
 
