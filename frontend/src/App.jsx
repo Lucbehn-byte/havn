@@ -122,7 +122,7 @@ export default function App() {
         {activeTab === 'crisis' && <CrisisSimulator />}
         {activeTab === 'goals' && <GoalPlanner />}
         {activeTab === 'battle' && <AssetBattle experienceMode={experienceMode} />}
-        {activeTab === 'academy' && <Academy />}
+        {activeTab === 'academy' && <Academy experienceMode={experienceMode} />}
 
         {activeTab === 'terminal' && (
           <div className="space-y-8 animate-fadeIn">
