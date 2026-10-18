@@ -19,8 +19,8 @@ body {
 }
 
 html.light body {
-  background-color: #FFFDF9;
-  color: #1C1917;
+  background-color: #FFF7ED;
+  color: #451A03;
 }
 
 /* Custom scrollbars */
@@ -40,13 +40,13 @@ html.light body {
 }
 
 html.light ::-webkit-scrollbar-track {
-  background: #FEF3C7;
+  background: #FFEDD5;
 }
 html.light ::-webkit-scrollbar-thumb {
-  background: #FCD34D;
+  background: #FDBA74;
 }
 html.light ::-webkit-scrollbar-thumb:hover {
-  background: #F59E0B;
+  background: #F97316;
 }
 
 /* Liquid Glass Effects (Dark Mode) */
@@ -82,123 +82,136 @@ html.light ::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* Liquid Glass Effects (Light Mode: Warm Honey & Amber Glass) */
+/* Liquid Glass Effects (Light Mode: Warm Sunset Honey & Amber Glass) */
 html.light .liquid-glass-header {
-  background: linear-gradient(135deg, rgba(255, 251, 245, 0.88) 0%, rgba(254, 243, 199, 0.75) 100%);
-  border-bottom: 1px solid rgba(245, 158, 11, 0.18);
-  box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.85) 0%, rgba(254, 237, 213, 0.75) 100%);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+  box-shadow: 0 10px 30px -5px rgba(234, 88, 12, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 }
 
 html.light .liquid-glass-pill {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 249, 238, 0.85) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  box-shadow: 0 4px 16px -2px rgba(217, 119, 6, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 237, 213, 0.7) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  box-shadow: 0 4px 16px -2px rgba(234, 88, 12, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 html.light .liquid-glass-active {
-  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 4px 18px rgba(234, 88, 12, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   color: #FFFFFF !important;
 }
 
 html.light .liquid-glass-mobile {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(254, 243, 199, 0.95) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  box-shadow: 0 16px 36px rgba(217, 119, 6, 0.12), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.92) 0%, rgba(254, 215, 170, 0.92) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  box-shadow: 0 16px 36px rgba(234, 88, 12, 0.15), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-/* Light Mode: Warm, Friendly, Inviting Cards */
+/* Light Mode: Warm, Glowing Sunset/Amber Kacheln mit Farbverlauf */
 html.light .bg-slate-900,
 html.light .bg-slate-900\/90,
 html.light .bg-slate-900\/80,
 html.light .bg-slate-900\/60 {
-  background-color: #FFFFFF !important;
-  border-color: rgba(245, 158, 11, 0.18) !important;
-  color: #1C1917 !important;
-  box-shadow: 0 10px 25px -4px rgba(217, 119, 6, 0.06), 0 4px 6px -2px rgba(217, 119, 6, 0.03) !important;
+  background: linear-gradient(145deg, #FFFFFF 0%, #FFF7ED 100%) !important;
+  border: 1px solid rgba(249, 115, 22, 0.22) !important;
+  color: #431407 !important;
+  box-shadow: 0 12px 28px -6px rgba(234, 88, 12, 0.08), 0 4px 8px -2px rgba(245, 158, 11, 0.04) !important;
 }
 
+/* Tieferliegende Innenkacheln & Eingabefelder mit weichem Pfirsich-/Wabenverlauf */
 html.light .bg-slate-950,
 html.light .bg-slate-950\/95,
 html.light .bg-slate-950\/90,
 html.light .bg-slate-950\/80,
 html.light .bg-slate-950\/70,
 html.light .bg-slate-950\/60 {
-  background-color: #FFFDF7 !important;
-  border-color: rgba(245, 158, 11, 0.22) !important;
+  background: linear-gradient(145deg, #FFFBEB 0%, #FFEDD5 100%) !important;
+  border: 1px solid rgba(249, 115, 22, 0.25) !important;
+  color: #451A03 !important;
 }
 
-/* Light Mode Typography: Warm Espresso & Slate */
+/* Typografie: Dunkles Kaffeebraun & Amber-Schwarz für perfekte Lesbarkeit */
 html.light .text-white {
-  color: #1C1917 !important;
+  color: #431407 !important;
 }
 
 html.light .text-slate-100 {
-  color: #292524 !important;
+  color: #451A03 !important;
 }
 
 html.light .text-slate-200 {
-  color: #44403C !important;
+  color: #7C2D12 !important;
 }
 
 html.light .text-slate-300 {
-  color: #57534E !important;
+  color: #9A3412 !important;
 }
 
 html.light .text-slate-400 {
-  color: #78716C !important;
+  color: #C2410C !important;
 }
 
 html.light .text-slate-500 {
-  color: #A8A29E !important;
+  color: #EA580C !important;
 }
 
+/* Rahmen mit warmem Orange-Glanz */
 html.light .border-slate-800,
 html.light .border-slate-800\/90,
 html.light .border-slate-800\/80,
 html.light .border-slate-800\/60,
 html.light .border-slate-700,
 html.light .border-slate-700\/80 {
-  border-color: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(249, 115, 22, 0.22) !important;
 }
 
-/* Light Mode Warm Accents: Transform Cold Sky Blues into Warm Amber & Orange */
+/* Highlights, Akzente & Symbole in lebendigem Orange/Gold */
 html.light .text-sky-400,
 html.light .text-sky-300 {
-  color: #D97706 !important;
-}
-
-html.light .text-indigo-400 {
   color: #EA580C !important;
 }
 
+html.light .text-indigo-400 {
+  color: #D97706 !important;
+}
+
 html.light .bg-sky-500 {
-  background-color: #EA580C !important;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
 }
 
 html.light .bg-sky-500\/10,
 html.light .bg-sky-500\/20,
 html.light .bg-indigo-500\/10 {
-  background-color: rgba(245, 158, 11, 0.12) !important;
+  background-color: rgba(249, 115, 22, 0.15) !important;
 }
 
 html.light .border-sky-500\/50,
 html.light .border-sky-800\/40 {
-  border-color: rgba(245, 158, 11, 0.35) !important;
+  border-color: rgba(249, 115, 22, 0.4) !important;
 }
 
-/* Friendly Buttons in Light Mode */
+/* Start Button in hellem Modus */
 html.light button.bg-gradient-to-r.from-sky-500 {
   background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 10px 20px -3px rgba(234, 88, 12, 0.35) !important;
+  box-shadow: 0 10px 25px -4px rgba(234, 88, 12, 0.4) !important;
 }
 
-html.light footer {
-  background-color: #FFFBEB !important;
-  border-color: rgba(245, 158, 11, 0.15) !important;
+/* Disabled Start Button in Light Mode */
+html.light button.bg-slate-900.border-sky-900\/60 {
+  background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%) !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+  color: #C2410C !important;
 }
+
+/* Footer mit sanftem Farbverlauf */
+html.light footer {
+  background: linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%) !important;
+  border-top: 1px solid rgba(249, 115, 22, 0.2) !important;
+}
+
 
 
 

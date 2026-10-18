@@ -158,7 +158,9 @@ export default function App() {
 
   return (
     <div className={`min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-white pb-20 lg:pb-0 transition-colors duration-300 ${
-      theme === 'light' ? 'bg-[#FFFDF9] text-stone-900' : 'bg-[#070B14] text-slate-100'
+      theme === 'light' 
+        ? 'bg-gradient-to-b from-[#FFF7ED] via-[#FFFBEB] to-[#FEF3C7] text-amber-950' 
+        : 'bg-[#070B14] text-slate-100'
     }`}>
       <Navbar 
         activeTab={activeTab} 
