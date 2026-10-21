@@ -54,23 +54,42 @@ def run_full_analysis(
     asset_info = get_asset_info(clean_ticker)
     log_returns = np.log(close_series / close_series.shift(1)).dropna()
 
-    # 3. Markt-Beta ermitteln (entweder aus fast_info oder vola-basiert schätzen)
+    # 3. Markt-Beta ermitteln (Fundierte Beta-Ermittlung mit Vasicek / Blume Bayesian Shrinkage)
     beta = 1.0
     try:
         t_obj = yf.Ticker(clean_ticker)
         raw_beta = None
-        if hasattr(t_obj, "fast_info") and hasattr(t_obj.fast_info, "beta"):
+        # yfinance speichert offizielles 5Y-Monats-Beta in .info
+        try:
+            if hasattr(t_obj, "info") and isinstance(t_obj.info, dict):
+                raw_beta = t_obj.info.get("beta")
+        except Exception:
+            pass
+            
+        if raw_beta is None and hasattr(t_obj, "fast_info") and hasattr(t_obj.fast_info, "beta"):
             raw_beta = t_obj.fast_info.beta
+
+        # Prüfen, ob es sich um einen bekannten breiten Welt-ETF handelt
+        is_broad_etf = any(sub in clean_ticker for sub in ["EUNL", "VWCE", "URTH", "ACWI", "SPY", "VOO", "SXR8"])
         
-        if raw_beta is not None and float(raw_beta) > 0.1:
-            beta = float(raw_beta)
+        if is_broad_etf:
+            beta = 1.00
+        elif raw_beta is not None and float(raw_beta) > 0.1:
+            # Vasicek / Blume Bayesian Shrinkage: 2/3 * raw + 1/3 * 1.0
+            beta = float(np.clip((2.0 / 3.0) * float(raw_beta) + (1.0 / 3.0) * 1.0, 0.40, 2.30))
         else:
-            # Schätzung über die Relation zur Referenz-Marktvolatilität (ca. 16.5% p.a.)
-            ann_vol = float(log_returns.std() * np.sqrt(252.0))
-            beta = float(np.clip(ann_vol / 0.165, 0.60, 2.30))
+            # Schätzung über die Relation der letzten 3 Jahre (756 Handelstage)
+            recent_3y = log_returns.iloc[-min(len(log_returns), 756):]
+            ann_vol_3y = float(recent_3y.std() * np.sqrt(252.0))
+            is_crypto = "BTC" in clean_ticker or "ETH" in clean_ticker or asset_info.get("typ") == "Kryptowährung"
+            corr = 0.45 if is_crypto else 0.70
+            raw_est_beta = corr * (ann_vol_3y / 0.165)
+            # Vasicek Shrinkage zum Marktmittelwert
+            beta = float(np.clip((2.0 / 3.0) * raw_est_beta + (1.0 / 3.0) * 1.0, 0.40, 2.30))
     except Exception:
-        ann_vol = float(log_returns.std() * np.sqrt(252.0)) if len(log_returns) > 20 else 0.18
-        beta = float(np.clip(ann_vol / 0.165, 0.60, 2.30))
+        recent_3y = log_returns.iloc[-min(len(log_returns), 756):]
+        ann_vol_3y = float(recent_3y.std() * np.sqrt(252.0)) if len(recent_3y) > 20 else 0.18
+        beta = float(np.clip((2.0 / 3.0) * (0.70 * ann_vol_3y / 0.165) + (1.0 / 3.0) * 1.0, 0.50, 2.20))
 
     # 4. Modell 6: Fundamentale Bewertung (vorab ausführen für Drift-Justierung)
     fund_res = analyze_fundamental_valuation(clean_ticker)
@@ -100,10 +119,17 @@ def run_full_analysis(
         beta=beta
     )
 
-    # 8. Modell 4: Empirische rollierende Renditen
-    rolling_res = calculate_rolling_returns(close_series, holding_days=tf_config["days"])
+    # 8. Modell 4: Empirische rollierende Renditen (Parallele Sparplan- / Einmalanlage-Prüfung)
+    rolling_res = calculate_rolling_returns(
+        close_series=close_series,
+        holding_days=tf_config["days"],
+        investment_type=investment_type,
+        sparplan_frequenz=sparplan_frequenz,
+        kapital=kapital,
+        startkapital=startkapital
+    )
 
-    # 9. Modell 5: Kausaler Backtest
+    # 9. Modell 5: Kausaler Backtest (Regime-basiertes Quantil-Backtesting)
     backtest_res = run_model_backtest(
         hist_score_series=chart_res["hist_score_series"],
         close_series=close_series,
