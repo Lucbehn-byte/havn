@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { CandlestickChart, LineChart, Sparkles, Layers, Info, ChevronDown, ChevronUp, Eye, EyeOff, Target } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { CandlestickChart, LineChart, Sparkles, Layers, Info, ChevronDown, ChevronUp, Eye, EyeOff, TrendingUp, TrendingDown, Clock, Calendar } from 'lucide-react';
 
 // Wissensdatenbank der Candlestick-Muster mit quantitativer Interpretation
 const PATTERN_DEFINITIONS = {
@@ -54,30 +54,82 @@ const PATTERN_DEFINITIONS = {
   }
 };
 
-export default function PriceChart({ history = [], ticker = '', chartModel = {} }) {
+const TIMEFRAME_OPTIONS = [
+  { id: 'heute', label: 'Heute', subtitle: 'Intraday 15M' },
+  { id: 'woche', label: 'Woche', subtitle: '5 Tage' },
+  { id: 'monat', label: 'Monat', subtitle: '22 Tage' },
+  { id: 'jahr', label: 'Jahr', subtitle: '1 Jahr' },
+  { id: '5jahre', label: '5 Jahre', subtitle: '5 Jahre' },
+  { id: 'max', label: 'Max', subtitle: 'Gesamt' },
+];
+
+export default function PriceChart({ history = [], todayHistory = [], ticker = '', chartModel = {} }) {
   const [chartType, setChartType] = useState('candles'); // 'candles' | 'line'
-  const [timeRange, setTimeRange] = useState('3M'); // '1M' | '3M' | '6M' | '1J' | 'ALL'
+  const [timeRange, setTimeRange] = useState('monat'); // 'heute' | 'woche' | 'monat' | 'jahr' | '5jahre' | 'max'
   const [showIndicators, setShowIndicators] = useState(true);
   const [showPatternsOnly, setShowPatternsOnly] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [selectedPatternDate, setSelectedPatternDate] = useState(null);
   const [showEducation, setShowEducation] = useState(false);
+  const [intradayData, setIntradayData] = useState(todayHistory || []);
+  const [loadingIntraday, setLoadingIntraday] = useState(false);
 
-  // Zeitfenster-Filterung
-  const filteredHistory = useMemo(() => {
+  // Sync todayHistory prop into local state
+  useEffect(() => {
+    if (todayHistory && todayHistory.length > 0) {
+      setIntradayData(todayHistory);
+    }
+  }, [todayHistory]);
+
+  // Fallback: On-demand intraday fetch falls nicht vorab geladen
+  useEffect(() => {
+    if (timeRange === 'heute' && (!intradayData || intradayData.length === 0) && ticker) {
+      setLoadingIntraday(true);
+      fetch(`/api/intraday/${ticker}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.today_history && data.today_history.length > 0) {
+            setIntradayData(data.today_history);
+          }
+        })
+        .catch(err => console.error("Intraday-Abruf fehlgeschlagen:", err))
+        .finally(() => setLoadingIntraday(false));
+    }
+  }, [timeRange, ticker, intradayData]);
+
+  // Datenfilterung je nach ausgewähltem Zeitfenster
+  const activeHistory = useMemo(() => {
+    if (timeRange === 'heute') {
+      if (intradayData && intradayData.length > 0) {
+        return intradayData;
+      }
+      // Falls Markt noch nicht geöffnet oder Wochenende: Letzte 26 Datenpunkte oder letzten Tag
+      return history.slice(-Math.min(26, history.length));
+    }
+
     if (!history || history.length === 0) return [];
-    let count = history.length;
-    if (timeRange === '1M') count = 22;
-    else if (timeRange === '3M') count = 65;
-    else if (timeRange === '6M') count = 130;
-    else if (timeRange === '1J') count = 252;
-    return history.slice(-Math.min(count, history.length));
-  }, [history, timeRange]);
+
+    const total = history.length;
+    if (timeRange === 'woche') {
+      return history.slice(-Math.min(5, total));
+    }
+    if (timeRange === 'monat') {
+      return history.slice(-Math.min(22, total));
+    }
+    if (timeRange === 'jahr') {
+      return history.slice(-Math.min(252, total));
+    }
+    if (timeRange === '5jahre') {
+      return history.slice(-Math.min(1260, total));
+    }
+    // 'max'
+    return history;
+  }, [history, intradayData, timeRange]);
 
   // Erkannte Muster im sichtbaren Zeitraum
   const visiblePatterns = useMemo(() => {
-    return filteredHistory.filter(d => Boolean(d.pattern));
-  }, [filteredHistory]);
+    return activeHistory.filter(d => Boolean(d.pattern));
+  }, [activeHistory]);
 
   const patternCounts = useMemo(() => {
     let bullish = 0, bearish = 0, neutral = 0;
@@ -89,17 +141,37 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
     return { bullish, bearish, neutral, total: visiblePatterns.length };
   }, [visiblePatterns]);
 
+  // Performance-Berechnung im gewählten Zeitraum
+  const performance = useMemo(() => {
+    if (!activeHistory || activeHistory.length < 2) return null;
+    const startVal = activeHistory[0].open ?? activeHistory[0].close;
+    const endVal = activeHistory[activeHistory.length - 1].close;
+    const diff = endVal - startVal;
+    const pct = startVal > 0 ? (diff / startVal) * 100 : 0;
+    const highs = activeHistory.map(d => d.high ?? d.close);
+    const lows = activeHistory.map(d => d.low ?? d.close);
+    return {
+      startVal,
+      endVal,
+      diff,
+      pct,
+      isPositive: diff >= 0,
+      periodHigh: Math.max(...highs),
+      periodLow: Math.min(...lows)
+    };
+  }, [activeHistory]);
+
   if (!history || history.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center bg-slate-900/60 rounded-xl border border-slate-800 text-slate-500">
+      <div className="h-64 flex items-center justify-center rounded-3xl backdrop-blur-xl bg-slate-900/60 border border-white/10 text-slate-400">
         Keine historischen Chartdaten verfügbar.
       </div>
     );
   }
 
   // Preisskala-Berechnung auf Basis der sichtbaren Kerzen (High & Low)
-  const allHighs = filteredHistory.map(d => d.high ?? d.close);
-  const allLows = filteredHistory.map(d => d.low ?? d.close);
+  const allHighs = activeHistory.map(d => d.high ?? d.close);
+  const allLows = activeHistory.map(d => d.low ?? d.close);
   const rawMin = Math.min(...allLows);
   const rawMax = Math.max(...allHighs);
   const paddingMargin = (rawMax - rawMin) * 0.05 || 1.0;
@@ -110,104 +182,117 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
   // SVG Dimensionen
   const width = 850;
   const height = 340;
-  const paddingLeft = 52;
+  const paddingLeft = 54;
   const paddingRight = 20;
-  const paddingTop = 28;
-  const paddingBottom = 32;
+  const paddingTop = 26;
+  const paddingBottom = 34;
 
   const plotWidth = width - paddingLeft - paddingRight;
   const plotHeight = height - paddingTop - paddingBottom;
 
-  const count = filteredHistory.length;
+  const count = activeHistory.length;
   const candleSlotWidth = plotWidth / Math.max(1, count);
-  const candleWidth = Math.max(2.5, Math.min(14, candleSlotWidth * 0.72));
+  const candleWidth = Math.max(1.8, Math.min(18, candleSlotWidth * 0.72));
 
   const getX = (i) => paddingLeft + (i + 0.5) * candleSlotWidth;
   const getY = (val) => paddingTop + plotHeight - ((val - minVal) / range) * plotHeight;
 
   // Pfade für Linien-Chart
-  const pricePath = filteredHistory.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.close)}`).join(' ');
+  const pricePath = activeHistory.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.close)}`).join(' ');
   const areaPath = `${pricePath} L ${getX(count - 1)} ${paddingTop + plotHeight} L ${getX(0)} ${paddingTop + plotHeight} Z`;
 
-  // GD50 Pfad
-  const ma50Path = filteredHistory
-    .map((d, i) => d.ma50 != null ? `${i === filteredHistory.findIndex(h => h.ma50 != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.ma50)}` : '')
-    .filter(Boolean)
-    .join(' ');
+  // GD50 Pfad (nur anzeigen wenn Zeitraum > Woche und Werte vorhanden)
+  const isIntradayOrWeek = timeRange === 'heute' || timeRange === 'woche';
+  const ma50Path = (!isIntradayOrWeek && showIndicators)
+    ? activeHistory.map((d, i) => d.ma50 != null ? `${i === activeHistory.findIndex(h => h.ma50 != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.ma50)}` : '').filter(Boolean).join(' ')
+    : '';
 
   // GD200 Pfad
-  const ma200Path = filteredHistory
-    .map((d, i) => d.ma200 != null ? `${i === filteredHistory.findIndex(h => h.ma200 != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.ma200)}` : '')
-    .filter(Boolean)
-    .join(' ');
+  const ma200Path = (!isIntradayOrWeek && showIndicators)
+    ? activeHistory.map((d, i) => d.ma200 != null ? `${i === activeHistory.findIndex(h => h.ma200 != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.ma200)}` : '').filter(Boolean).join(' ')
+    : '';
 
   // Donchian Channel Pfad (20 Tage Band)
-  const dcValid = filteredHistory.filter(d => d.dc_high != null && d.dc_low != null);
-  const hasDc = dcValid.length > 5;
+  const dcValid = activeHistory.filter(d => d.dc_high != null && d.dc_low != null);
+  const hasDc = !isIntradayOrWeek && showIndicators && dcValid.length > 5;
   const dcUpperPath = hasDc
-    ? filteredHistory.map((d, i) => d.dc_high != null ? `${i === filteredHistory.findIndex(h => h.dc_high != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.dc_high)}` : '').filter(Boolean).join(' ')
+    ? activeHistory.map((d, i) => d.dc_high != null ? `${i === activeHistory.findIndex(h => h.dc_high != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.dc_high)}` : '').filter(Boolean).join(' ')
     : '';
   const dcLowerPath = hasDc
-    ? filteredHistory.map((d, i) => d.dc_low != null ? `${i === filteredHistory.findIndex(h => h.dc_low != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.dc_low)}` : '').filter(Boolean).join(' ')
+    ? activeHistory.map((d, i) => d.dc_low != null ? `${i === activeHistory.findIndex(h => h.dc_low != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.dc_low)}` : '').filter(Boolean).join(' ')
     : '';
 
-  // Y-Achsen Ticks (5 gleichmäßige Stufen)
+  // Y-Achsen Ticks (5 Stufen)
   const yTicks = [0, 0.25, 0.5, 0.75, 1.0].map(ratio => {
     const val = minVal + ratio * range;
     const y = paddingTop + plotHeight - ratio * plotHeight;
     return { val, y };
   });
 
-  // X-Achsen Datum-Ticks
-  const dateStep = Math.max(1, Math.floor(count / 6));
+  // X-Achsen Datums-Ticks (angepasst an Zeitfenster)
+  const numDateLabels = timeRange === 'heute' ? 5 : timeRange === 'woche' ? count : 6;
+  const dateStep = Math.max(1, Math.floor(count / numDateLabels));
   const xTicks = [];
   for (let i = 0; i < count; i += dateStep) {
-    xTicks.push({ index: i, date: filteredHistory[i].date, x: getX(i) });
+    const item = activeHistory[i];
+    let label = item.date;
+    if (timeRange === 'heute') {
+      label = item.date; // HH:MM
+    } else if (timeRange === '5jahre' || timeRange === 'max') {
+      label = item.date.slice(0, 7); // YYYY-MM
+    } else {
+      label = item.date.slice(5); // MM-DD
+    }
+    xTicks.push({ index: i, date: label, x: getX(i) });
   }
 
   return (
-    <div className="relative bg-slate-900/95 rounded-2xl border border-slate-800 p-5 shadow-2xl backdrop-blur-sm space-y-5">
-      {/* 1. Header mit Steuerung & Toggles */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400">
-              {chartType === 'candles' ? (
-                <CandlestickChart className="w-5 h-5" />
-              ) : (
-                <LineChart className="w-5 h-5" />
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>{chartType === 'candles' ? 'Candlestick-Chart & Mustererkennung' : 'Realer Kursverlauf & Trendlinien'}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-sky-400 font-mono">
-                  {ticker}
-                </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
-                  Pro Modus
-                </span>
+    <div className="relative rounded-3xl p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-950/85 border border-white/[0.12] ring-1 ring-white/[0.05] overflow-hidden space-y-6">
+      
+      {/* Liquid Glass Ambient Backlights */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-500/12 blur-[100px] pointer-events-none"></div>
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-indigo-500/12 blur-[100px] pointer-events-none"></div>
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
+
+      {/* 1. Header mit Titel & Pro-Badge */}
+      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.02] border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] text-sky-400 shrink-0">
+            {chartType === 'candles' ? (
+              <CandlestickChart className="w-5 h-5" />
+            ) : (
+              <LineChart className="w-5 h-5" />
+            )}
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                Realer Kursverlauf & Chartanalyse
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {chartType === 'candles'
-                  ? 'Japanische Kerzen mit automatischem Erkennungsradar für Reversals & Trendwenden.'
-                  : 'Schlusskurs-Verlauf mit gleitenden Durchschnitten und Donchian-Kanälen.'}
-              </p>
+              <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-bold bg-white/[0.06] text-sky-300 border border-white/10 shadow-sm">
+                {ticker}
+              </span>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-gradient-to-r from-indigo-500/20 to-sky-500/20 text-indigo-200 border border-indigo-400/30 shadow-[0_0_12px_rgba(99,102,241,0.25)]">
+                Pro Modus
+              </span>
             </div>
+            <p className="text-xs text-slate-300 mt-1">
+              Japanische Candlesticks mit automatischer Mustererkennung & flexiblen Zeithorizonten.
+            </p>
           </div>
         </div>
 
-        {/* Rechte Steuerungsleiste: Chart-Typ, Zeitfenster, Overlays */}
+        {/* Rechte Kontroll-Leiste: Kerzen/Linie Umschalter & Indikatoren */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Chart-Typ Umschalter */}
-          <div className="inline-flex p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
+          {/* Liquid Glass Chart-Typ Umschalter */}
+          <div className="inline-flex p-1 rounded-2xl bg-slate-950/50 backdrop-blur-xl border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_8px_20px_rgba(0,0,0,0.4)]">
             <button
               type="button"
               onClick={() => setChartType('candles')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
                 chartType === 'candles'
-                  ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-gradient-to-b from-sky-400/25 via-sky-500/20 to-sky-600/30 text-sky-200 border border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.35),inset_0_1px_2px_rgba(255,255,255,0.4)]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               <CandlestickChart className="w-3.5 h-3.5" />
@@ -216,10 +301,10 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
             <button
               type="button"
               onClick={() => setChartType('line')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
                 chartType === 'line'
-                  ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-gradient-to-b from-sky-400/25 via-sky-500/20 to-sky-600/30 text-sky-200 border border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.35),inset_0_1px_2px_rgba(255,255,255,0.4)]'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               <LineChart className="w-3.5 h-3.5" />
@@ -227,53 +312,85 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
             </button>
           </div>
 
-          {/* Zoom / Zeitfenster Buttons */}
-          <div className="inline-flex p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
-            {['1M', '3M', '6M', '1J', 'ALL'].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setTimeRange(r)}
-                className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  timeRange === r
-                    ? 'bg-slate-800 text-sky-400 font-bold border border-slate-700'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {r === 'ALL' ? 'Alles' : r}
-              </button>
-            ))}
-          </div>
-
-          {/* Indikatoren Toggle */}
-          <button
-            type="button"
-            onClick={() => setShowIndicators(!showIndicators)}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border transition-all cursor-pointer ${
-              showIndicators
-                ? 'bg-slate-800 text-sky-300 border-sky-500/40'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
-            }`}
-            title="Gleitende Durchschnitte & Donchian-Bänder ein-/ausblenden"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Indikatoren</span>
-          </button>
+          {/* Indikatoren Toggle (GD50, GD200, Donchian) */}
+          {!isIntradayOrWeek && (
+            <button
+              type="button"
+              onClick={() => setShowIndicators(!showIndicators)}
+              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-2xl border backdrop-blur-xl transition-all duration-300 cursor-pointer ${
+                showIndicators
+                  ? 'bg-gradient-to-b from-white/[0.1] to-white/[0.03] text-sky-300 border-sky-400/40 shadow-[0_0_14px_rgba(56,189,248,0.25)]'
+                  : 'bg-slate-950/40 text-slate-400 border-white/[0.08] hover:text-white hover:bg-white/[0.05]'
+              }`}
+              title="Gleitende Durchschnitte & Donchian-Bänder ein-/ausblenden"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Indikatoren</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Legende */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+      {/* 2. Liquid Glass Zeithorizont-Wahlleiste (Heute, Woche, Monat, Jahr, 5 Jahre, Max) */}
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Liquid Glass Segmented Control */}
+        <div className="inline-flex flex-wrap p-1 rounded-2xl bg-slate-950/60 backdrop-blur-xl border border-white/[0.14] shadow-[inset_0_1px_2px_rgba(255,255,255,0.18),0_10px_25px_rgba(0,0,0,0.5)] gap-1">
+          {TIMEFRAME_OPTIONS.map((opt) => {
+            const isActive = timeRange === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setTimeRange(opt.id)}
+                className={`group relative px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-1.5 ${
+                  isActive
+                    ? 'text-white font-bold bg-gradient-to-b from-sky-400/30 via-sky-500/25 to-indigo-600/35 border border-sky-300/50 shadow-[0_0_18px_rgba(56,189,248,0.4),inset_0_1px_2px_rgba(255,255,255,0.5)] scale-[1.02]'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.08] border border-transparent'
+                }`}
+              >
+                <span>{opt.label}</span>
+                {opt.id === 'heute' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Liquid Glass Performance Ribbon für den gewählten Zeitraum */}
+        {performance && (
+          <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.1] shadow-sm text-xs">
+            <span className="text-slate-400 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span>{activeHistory[0]?.date} &rarr; {activeHistory[activeHistory.length - 1]?.date}:</span>
+            </span>
+            <div className={`flex items-center gap-1 font-bold font-mono ${
+              performance.isPositive ? 'text-emerald-400' : 'text-rose-400'
+            }`}>
+              {performance.isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+              <span>{performance.isPositive ? '+' : ''}{performance.diff.toFixed(2)} €</span>
+              <span className={`px-1.5 py-0.2 rounded-md font-mono text-[11px] ${
+                performance.isPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+              }`}>
+                {performance.isPositive ? '+' : ''}{performance.pct.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Liquid Glass Status- & Indikatoren-Leiste */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 text-xs p-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
-            <span className="w-2.5 h-3.5 bg-emerald-500 rounded-sm inline-block border border-emerald-400"></span>
+            <span className="w-2.5 h-3.5 bg-emerald-500 rounded-sm inline-block border border-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.3)]"></span>
             Steigend (Close &ge; Open)
           </span>
           <span className="flex items-center gap-1.5 text-rose-400 font-medium">
-            <span className="w-2.5 h-3.5 bg-rose-500 rounded-sm inline-block border border-rose-400"></span>
+            <span className="w-2.5 h-3.5 bg-rose-500 rounded-sm inline-block border border-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.3)]"></span>
             Fallend (Close &lt; Open)
           </span>
-          {showIndicators && (
+          {showIndicators && !isIntradayOrWeek && (
             <>
               <span className="flex items-center gap-1.5 text-amber-400 font-medium">
                 <span className="w-3 h-0.5 bg-amber-400 rounded-full inline-block"></span> GD50
@@ -292,287 +409,282 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
 
         {/* Schnellstatus erkannte Muster */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">Muster im Zoom:</span>
-          <span className="font-mono font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded-md border border-sky-800/50">
+          <span className="text-slate-400">Erkannte Muster:</span>
+          <span className="font-mono font-bold text-sky-300 bg-sky-950/60 px-2 py-0.5 rounded-lg border border-sky-500/30">
             {patternCounts.total}
           </span>
           {patternCounts.bullish > 0 && (
-            <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-800/50">
+            <span className="text-[11px] font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-lg border border-emerald-500/30">
               +{patternCounts.bullish} bullisch
             </span>
           )}
           {patternCounts.bearish > 0 && (
-            <span className="text-[11px] font-bold text-rose-400 bg-rose-950/50 px-1.5 py-0.5 rounded border border-rose-800/50">
+            <span className="text-[11px] font-bold text-rose-300 bg-rose-950/60 px-2 py-0.5 rounded-lg border border-rose-500/30">
               -{patternCounts.bearish} bärisch
             </span>
           )}
         </div>
       </div>
 
-      {/* 2. SVG Haupt-Chart */}
-      <div className="relative w-full aspect-[8/3.2] min-h-[300px] max-h-[420px]">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-full overflow-visible select-none"
-          onMouseLeave={() => setHoveredPoint(null)}
-        >
-          <defs>
-            <linearGradient id="priceLineGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.28" />
-              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.0" />
-            </linearGradient>
-            <linearGradient id="dcGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6366F1" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#6366F1" stopOpacity="0.02" />
-            </linearGradient>
-            {/* Glow Filter für Candlestick Muster */}
-            <filter id="bullishGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#10B981" floodOpacity="0.8" />
-            </filter>
-            <filter id="bearishGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#F43F5E" floodOpacity="0.8" />
-            </filter>
-          </defs>
+      {/* 4. SVG Haupt-Chart */}
+      <div className="relative z-10 w-full aspect-[8/3.2] min-h-[300px] max-h-[440px]">
+        {loadingIntraday ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-sky-400">
+            <Clock className="w-6 h-6 animate-spin" />
+            <span className="text-xs font-semibold">Lade Intraday-Kurse für {ticker}...</span>
+          </div>
+        ) : (
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="w-full h-full overflow-visible select-none"
+            onMouseLeave={() => setHoveredPoint(null)}
+          >
+            <defs>
+              <linearGradient id="liquidPriceLineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.32" />
+                <stop offset="60%" stopColor="#6366F1" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#38BDF8" stopOpacity="0.0" />
+              </linearGradient>
+              <filter id="liquidBullGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#10B981" floodOpacity="0.9" />
+              </filter>
+              <filter id="liquidBearGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3.5" floodColor="#F43F5E" floodOpacity="0.9" />
+              </filter>
+            </defs>
 
-          {/* Horizontale Gitterlinien & Preisbeschriftung */}
-          {yTicks.map(({ val, y }, idx) => (
-            <g key={idx}>
-              <line
-                x1={paddingLeft}
-                y1={y}
-                x2={width - paddingRight}
-                y2={y}
-                stroke="#1E293B"
-                strokeWidth="1"
-                strokeDasharray="3 3"
-              />
-              <text
-                x={paddingLeft - 8}
-                y={y + 3.5}
-                textAnchor="end"
-                fill="#64748B"
-                fontSize="10"
-                className="font-mono font-medium"
-              >
-                {val.toFixed(val >= 100 ? 1 : 2)}€
-              </text>
-            </g>
-          ))}
+            {/* Horizontale Gitterlinien & Preisbeschriftung */}
+            {yTicks.map(({ val, y }, idx) => (
+              <g key={idx}>
+                <line
+                  x1={paddingLeft}
+                  y1={y}
+                  x2={width - paddingRight}
+                  y2={y}
+                  stroke="rgba(255, 255, 255, 0.08)"
+                  strokeWidth="1"
+                  strokeDasharray="3 4"
+                />
+                <text
+                  x={paddingLeft - 10}
+                  y={y + 3.5}
+                  textAnchor="end"
+                  fill="#94A3B8"
+                  fontSize="10"
+                  className="font-mono font-medium"
+                >
+                  {val.toFixed(val >= 100 ? 1 : 2)}€
+                </text>
+              </g>
+            ))}
 
-          {/* Vertikale Datums-Ticks */}
-          {xTicks.map(({ date, x }, idx) => (
-            <g key={idx}>
-              <line
-                x1={x}
-                y1={paddingTop}
-                x2={x}
-                y2={paddingTop + plotHeight}
-                stroke="#1E293B"
-                strokeWidth="1"
-                strokeDasharray="2 4"
-                opacity="0.6"
-              />
-              <text
-                x={x}
-                y={paddingTop + plotHeight + 18}
-                textAnchor="middle"
-                fill="#64748B"
-                fontSize="9.5"
-                className="font-mono"
-              >
-                {date.slice(5)}
-              </text>
-            </g>
-          ))}
+            {/* Vertikale Datums-Ticks */}
+            {xTicks.map(({ date, x }, idx) => (
+              <g key={idx}>
+                <line
+                  x1={x}
+                  y1={paddingTop}
+                  x2={x}
+                  y2={paddingTop + plotHeight}
+                  stroke="rgba(255, 255, 255, 0.05)"
+                  strokeWidth="1"
+                  strokeDasharray="2 4"
+                />
+                <text
+                  x={x}
+                  y={paddingTop + plotHeight + 18}
+                  textAnchor="middle"
+                  fill="#94A3B8"
+                  fontSize="9.5"
+                  className="font-mono"
+                >
+                  {date}
+                </text>
+              </g>
+            ))}
 
-          {/* Donchian Channel Kanal-Bänder (wenn aktiviert) */}
-          {showIndicators && hasDc && dcUpperPath && (
-            <g opacity="0.75">
-              <path d={dcUpperPath} fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-              <path d={dcLowerPath} fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-            </g>
-          )}
+            {/* Donchian Channel Kanal-Bänder (wenn aktiviert) */}
+            {showIndicators && hasDc && dcUpperPath && (
+              <g opacity="0.8">
+                <path d={dcUpperPath} fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+                <path d={dcLowerPath} fill="none" stroke="#38BDF8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+              </g>
+            )}
 
-          {/* GD200 (Indigo) */}
-          {showIndicators && ma200Path && (
-            <path d={ma200Path} fill="none" stroke="#818CF8" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.85" />
-          )}
+            {/* GD200 (Indigo) */}
+            {showIndicators && ma200Path && (
+              <path d={ma200Path} fill="none" stroke="#818CF8" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.85" />
+            )}
 
-          {/* GD50 (Gelb) */}
-          {showIndicators && ma50Path && (
-            <path d={ma50Path} fill="none" stroke="#FACC15" strokeWidth="1.75" opacity="0.9" />
-          )}
+            {/* GD50 (Gelb) */}
+            {showIndicators && ma50Path && (
+              <path d={ma50Path} fill="none" stroke="#FACC15" strokeWidth="1.75" opacity="0.9" />
+            )}
 
-          {/* A: LINIEN-MODUS */}
-          {chartType === 'line' && (
-            <>
-              <path d={areaPath} fill="url(#priceLineGrad)" />
-              <path d={pricePath} fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </>
-          )}
+            {/* A: LINIEN-MODUS */}
+            {chartType === 'line' && (
+              <>
+                <path d={areaPath} fill="url(#liquidPriceLineGrad)" />
+                <path d={pricePath} fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </>
+            )}
 
-          {/* B: KERZEN-MODUS (Candlesticks) */}
-          {chartType === 'candles' && (
-            <g>
-              {filteredHistory.map((d, i) => {
-                const x = getX(i);
-                const openVal = d.open ?? d.close;
-                const highVal = d.high ?? Math.max(openVal, d.close);
-                const lowVal = d.low ?? Math.min(openVal, d.close);
-                const closeVal = d.close;
+            {/* B: KERZEN-MODUS (Candlesticks) */}
+            {chartType === 'candles' && (
+              <g>
+                {activeHistory.map((d, i) => {
+                  const x = getX(i);
+                  const openVal = d.open ?? d.close;
+                  const highVal = d.high ?? Math.max(openVal, d.close);
+                  const lowVal = d.low ?? Math.min(openVal, d.close);
+                  const closeVal = d.close;
 
-                const yHigh = getY(highVal);
-                const yLow = getY(lowVal);
-                const yOpen = getY(openVal);
-                const yClose = getY(closeVal);
+                  const yHigh = getY(highVal);
+                  const yLow = getY(lowVal);
+                  const yOpen = getY(openVal);
+                  const yClose = getY(closeVal);
 
-                const isBullish = closeVal >= openVal;
-                const bodyTop = Math.min(yOpen, yClose);
-                const bodyHeight = Math.max(2, Math.abs(yClose - yOpen));
+                  const isBullish = closeVal >= openVal;
+                  const bodyTop = Math.min(yOpen, yClose);
+                  const bodyHeight = Math.max(2, Math.abs(yClose - yOpen));
 
-                const candleFill = isBullish ? '#10B981' : '#F43F5E';
-                const candleStroke = isBullish ? '#059669' : '#E11D48';
+                  const candleFill = isBullish ? '#10B981' : '#F43F5E';
+                  const candleStroke = isBullish ? '#059669' : '#E11D48';
 
-                const isHighlighted = selectedPatternDate === d.date || hoveredPoint?.date === d.date;
+                  const isHighlighted = selectedPatternDate === d.date || hoveredPoint?.date === d.date;
 
-                return (
-                  <g
-                    key={d.date || i}
-                    className="transition-opacity duration-150"
-                    opacity={showPatternsOnly && !d.pattern ? 0.35 : 1}
-                  >
-                    {/* Docht & Lunte (High - Low) */}
-                    <line
-                      x1={x}
-                      y1={yHigh}
-                      x2={x}
-                      y2={yLow}
-                      stroke={candleFill}
-                      strokeWidth={isHighlighted ? 2.5 : Math.max(1, Math.min(1.8, candleWidth * 0.22))}
-                      strokeLinecap="round"
-                    />
+                  return (
+                    <g
+                      key={d.date || i}
+                      className="transition-opacity duration-150"
+                      opacity={showPatternsOnly && !d.pattern ? 0.35 : 1}
+                    >
+                      {/* Docht & Lunte (High - Low) */}
+                      <line
+                        x1={x}
+                        y1={yHigh}
+                        x2={x}
+                        y2={yLow}
+                        stroke={candleFill}
+                        strokeWidth={isHighlighted ? 2.5 : Math.max(1, Math.min(1.8, candleWidth * 0.22))}
+                        strokeLinecap="round"
+                      />
 
-                    {/* Kerzenkörper (Open - Close) */}
-                    <rect
-                      x={x - candleWidth / 2}
-                      y={bodyTop}
-                      width={candleWidth}
-                      height={bodyHeight}
-                      fill={candleFill}
-                      stroke={candleStroke}
-                      strokeWidth={isHighlighted ? 1.5 : 1}
-                      rx={1}
-                      className={isHighlighted ? 'filter brightness-125' : ''}
-                    />
+                      {/* Kerzenkörper (Open - Close) */}
+                      <rect
+                        x={x - candleWidth / 2}
+                        y={bodyTop}
+                        width={candleWidth}
+                        height={bodyHeight}
+                        fill={candleFill}
+                        stroke={candleStroke}
+                        strokeWidth={isHighlighted ? 1.5 : 1}
+                        rx={candleWidth > 4 ? 1 : 0}
+                        className={isHighlighted ? 'filter brightness-125 drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]' : ''}
+                      />
 
-                    {/* Candlestick-Muster Indikator Badge am Chart */}
-                    {d.pattern && (
-                      <g>
-                        {d.pattern_type === 'bullish' ? (
-                          // Bullisch: Pfeil / Punkt unterhalb der Lunte
-                          <g transform={`translate(${x}, ${Math.min(height - paddingBottom - 4, yLow + 9)})`}>
-                            <circle r={isHighlighted ? 4.5 : 3.5} fill="#10B981" filter="url(#bullishGlow)" />
-                            <polygon points="-3,2 3,2 0,-3" fill="#FFFFFF" />
-                          </g>
-                        ) : d.pattern_type === 'bearish' ? (
-                          // Bärisch: Pfeil / Punkt oberhalb des Dochts
-                          <g transform={`translate(${x}, ${Math.max(paddingTop + 6, yHigh - 9)})`}>
-                            <circle r={isHighlighted ? 4.5 : 3.5} fill="#F43F5E" filter="url(#bearishGlow)" />
-                            <polygon points="-3,-2 3,-2 0,3" fill="#FFFFFF" />
-                          </g>
-                        ) : (
-                          // Neutral / Doji: Diamant
-                          <g transform={`translate(${x}, ${Math.max(paddingTop + 6, yHigh - 9)})`}>
-                            <polygon points="0,-3.5 3.5,0 0,3.5 -3.5,0" fill="#38BDF8" />
-                          </g>
-                        )}
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-            </g>
-          )}
+                      {/* Candlestick-Muster Indikator Badge am Chart */}
+                      {d.pattern && (
+                        <g>
+                          {d.pattern_type === 'bullish' ? (
+                            <g transform={`translate(${x}, ${Math.min(height - paddingBottom - 4, yLow + 9)})`}>
+                              <circle r={isHighlighted ? 4.5 : 3.5} fill="#10B981" filter="url(#liquidBullGlow)" />
+                              <polygon points="-3,2 3,2 0,-3" fill="#FFFFFF" />
+                            </g>
+                          ) : d.pattern_type === 'bearish' ? (
+                            <g transform={`translate(${x}, ${Math.max(paddingTop + 6, yHigh - 9)})`}>
+                              <circle r={isHighlighted ? 4.5 : 3.5} fill="#F43F5E" filter="url(#liquidBearGlow)" />
+                              <polygon points="-3,-2 3,-2 0,3" fill="#FFFFFF" />
+                            </g>
+                          ) : (
+                            <g transform={`translate(${x}, ${Math.max(paddingTop + 6, yHigh - 9)})`}>
+                              <polygon points="0,-3.5 3.5,0 0,3.5 -3.5,0" fill="#38BDF8" />
+                            </g>
+                          )}
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+              </g>
+            )}
 
-          {/* Interaktive Trefferflächen für flüssiges Hovern */}
-          {filteredHistory.map((d, i) => {
-            const x = getX(i);
-            return (
-              <rect
-                key={i}
-                x={x - candleSlotWidth / 2}
-                y={paddingTop}
-                width={candleSlotWidth}
-                height={plotHeight}
-                fill="transparent"
-                className="cursor-crosshair"
-                onMouseEnter={() =>
-                  setHoveredPoint({
-                    ...d,
-                    index: i,
-                    x,
-                    y: getY(d.close),
-                    yHigh: getY(d.high ?? d.close),
-                    yLow: getY(d.low ?? d.close),
-                    open: d.open ?? d.close,
-                    high: d.high ?? d.close,
-                    low: d.low ?? d.close,
-                    close: d.close
-                  })
-                }
-              />
-            );
-          })}
+            {/* Interaktive Trefferflächen für flüssiges Hovern */}
+            {activeHistory.map((d, i) => {
+              const x = getX(i);
+              return (
+                <rect
+                  key={i}
+                  x={x - candleSlotWidth / 2}
+                  y={paddingTop}
+                  width={candleSlotWidth}
+                  height={plotHeight}
+                  fill="transparent"
+                  className="cursor-crosshair"
+                  onMouseEnter={() =>
+                    setHoveredPoint({
+                      ...d,
+                      index: i,
+                      x,
+                      y: getY(d.close),
+                      open: d.open ?? d.close,
+                      high: d.high ?? d.close,
+                      low: d.low ?? d.close,
+                      close: d.close
+                    })
+                  }
+                />
+              );
+            })}
 
-          {/* Aktives Fadenkreuz & Fokuspunkt */}
-          {hoveredPoint && (
-            <g pointerEvents="none">
-              {/* Vertikale Linie */}
-              <line
-                x1={hoveredPoint.x}
-                y1={paddingTop}
-                x2={hoveredPoint.x}
-                y2={paddingTop + plotHeight}
-                stroke="#94A3B8"
-                strokeWidth="1"
-                strokeDasharray="2 3"
-                opacity="0.8"
-              />
-              {/* Horizontale Kurslinie */}
-              <line
-                x1={paddingLeft}
-                y1={hoveredPoint.y}
-                x2={width - paddingRight}
-                y2={hoveredPoint.y}
-                stroke="#94A3B8"
-                strokeWidth="1"
-                strokeDasharray="2 3"
-                opacity="0.6"
-              />
-              {/* Leuchtender Punkt */}
-              <circle
-                cx={hoveredPoint.x}
-                cy={hoveredPoint.y}
-                r="5"
-                fill={hoveredPoint.close >= (hoveredPoint.open ?? hoveredPoint.close) ? '#10B981' : '#F43F5E'}
-                stroke="#0F172A"
-                strokeWidth="2"
-              />
-            </g>
-          )}
-        </svg>
+            {/* Aktives Fadenkreuz & Fokuspunkt */}
+            {hoveredPoint && (
+              <g pointerEvents="none">
+                <line
+                  x1={hoveredPoint.x}
+                  y1={paddingTop}
+                  x2={hoveredPoint.x}
+                  y2={paddingTop + plotHeight}
+                  stroke="#94A3B8"
+                  strokeWidth="1"
+                  strokeDasharray="2 3"
+                  opacity="0.8"
+                />
+                <line
+                  x1={paddingLeft}
+                  y1={hoveredPoint.y}
+                  x2={width - paddingRight}
+                  y2={hoveredPoint.y}
+                  stroke="#94A3B8"
+                  strokeWidth="1"
+                  strokeDasharray="2 3"
+                  opacity="0.6"
+                />
+                <circle
+                  cx={hoveredPoint.x}
+                  cy={hoveredPoint.y}
+                  r="5"
+                  fill={hoveredPoint.close >= (hoveredPoint.open ?? hoveredPoint.close) ? '#10B981' : '#F43F5E'}
+                  stroke="#0F172A"
+                  strokeWidth="2"
+                  className="filter drop-shadow-[0_0_8px_rgba(56,189,248,0.7)]"
+                />
+              </g>
+            )}
+          </svg>
+        )}
 
-        {/* 3. Interaktives Floating Tooltip */}
+        {/* 5. Liquid Glass Hover Tooltip */}
         {hoveredPoint && (
           <div
-            className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full bg-slate-950/95 border border-slate-700/80 rounded-xl p-3 text-xs shadow-2xl backdrop-blur-md min-w-[210px] space-y-2 animate-fadeIn"
+            className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full rounded-2xl p-3.5 text-xs backdrop-blur-2xl bg-slate-950/85 border border-white/20 shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.25)] ring-1 ring-sky-500/20 min-w-[220px] space-y-2 animate-fadeIn"
             style={{
               left: `${Math.min(88, Math.max(12, (hoveredPoint.x / width) * 100))}%`,
               top: `${Math.max(15, (hoveredPoint.y / height) * 100 - 8)}%`,
             }}
           >
-            <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-              <span className="text-slate-400 font-mono text-[11px] font-semibold">{hoveredPoint.date}</span>
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+              <span className="text-slate-300 font-mono text-[11px] font-semibold">{hoveredPoint.date}</span>
               <span className={`text-[11px] font-bold px-1.5 py-0.2 rounded font-mono ${
                 hoveredPoint.close >= hoveredPoint.open
                   ? 'bg-emerald-500/20 text-emerald-300'
@@ -592,8 +704,8 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
             </div>
 
             {/* Technische Durchschnitte */}
-            {(hoveredPoint.ma50 || hoveredPoint.ma200) && (
-              <div className="pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono">
+            {(hoveredPoint.ma50 || hoveredPoint.ma200) && !isIntradayOrWeek && (
+              <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
                 {hoveredPoint.ma50 && (
                   <span className="text-amber-400">GD50: {hoveredPoint.ma50.toFixed(2)}€</span>
                 )}
@@ -605,7 +717,7 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
 
             {/* Erkanntes Candlestick-Muster */}
             {hoveredPoint.pattern && (
-              <div className={`mt-1 pt-1.5 border-t border-slate-800 rounded-lg p-2 ${
+              <div className={`mt-1 pt-1.5 border-t border-white/10 rounded-xl p-2 ${
                 hoveredPoint.pattern_type === 'bullish'
                   ? 'bg-emerald-950/60 border-emerald-500/30 text-emerald-200'
                   : hoveredPoint.pattern_type === 'bearish'
@@ -628,16 +740,16 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
         )}
       </div>
 
-      {/* 4. Candlestick-Muster Radar & Signal-Erkennung (Inspector Card) */}
-      <div className="pt-3 border-t border-slate-800/80 space-y-3">
+      {/* 6. Candlestick-Muster Radar & Signal-Erkennung (Inspector Card) */}
+      <div className="relative z-10 pt-4 border-t border-white/[0.08] space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <h4 className="text-sm font-bold text-white">
+            <h4 className="text-sm font-bold text-white tracking-wide">
               Candlestick-Muster Radar & Signal-Erkennung
             </h4>
-            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-              {visiblePatterns.length} {visiblePatterns.length === 1 ? 'Muster' : 'Muster'} im Zoom
+            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-slate-300 border border-white/10">
+              {visiblePatterns.length} {visiblePatterns.length === 1 ? 'Muster' : 'Muster'}
             </span>
           </div>
 
@@ -645,31 +757,31 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
             <button
               type="button"
               onClick={() => setShowPatternsOnly(!showPatternsOnly)}
-              className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`text-xs px-2.5 py-1.5 rounded-xl border transition-all duration-300 cursor-pointer flex items-center gap-1.5 backdrop-blur-md ${
                 showPatternsOnly
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                  : 'bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-white hover:bg-white/[0.08]'
               }`}
             >
-              {showPatternsOnly ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              {showPatternsOnly ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               <span>{showPatternsOnly ? 'Alle Kerzen anzeigen' : 'Nur Muster hervorheben'}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowEducation(!showEducation)}
-              className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              className="text-xs text-sky-400 hover:text-sky-300 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
             >
-              <Info className="w-3 h-3" />
+              <Info className="w-3.5 h-3.5" />
               <span>{showEducation ? 'Legende verbergen' : 'Muster-Spickzettel'}</span>
-              {showEducation ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {showEducation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
 
         {/* Ausklappbare Kerzen-Wissensbox */}
         {showEducation && (
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-3 animate-fadeIn">
+          <div className="p-4 rounded-2xl bg-slate-950/60 backdrop-blur-xl border border-white/10 text-xs text-slate-300 space-y-3 animate-fadeIn">
             <div className="font-semibold text-white flex items-center gap-2">
               <span>💡 Wie fließen Candlesticks in die HAVN-Quant-Prognose ein?</span>
             </div>
@@ -680,7 +792,7 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
               {Object.entries(PATTERN_DEFINITIONS).map(([pKey, pDef]) => (
-                <div key={pKey} className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800/80 space-y-1">
+                <div key={pKey} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-white flex items-center gap-1.5">
                       <span>{pDef.icon}</span>
@@ -705,8 +817,8 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
 
         {/* Liste der im sichtbaren Zeitraum erkannten Muster */}
         {visiblePatterns.length === 0 ? (
-          <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800/80 text-center text-xs text-slate-400">
-            Im gewählten Zeitfenster ({timeRange}) wurden keine ausgeprägten Standard-Muster registriert. Die Kursbewegung verläuft regulär ohne signifikante Umkehrformationen.
+          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-slate-400">
+            Im gewählten Zeitfenster ({TIMEFRAME_OPTIONS.find(o => o.id === timeRange)?.label || timeRange}) wurden keine ausgeprägten Standard-Muster registriert. Die Kursbewegung verläuft regulär ohne signifikante Umkehrformationen.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -725,9 +837,9 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
                   key={idx}
                   onClick={() => {
                     setSelectedPatternDate(isSelected ? null : patItem.date);
-                    const pt = filteredHistory.find(d => d.date === patItem.date);
+                    const pt = activeHistory.find(d => d.date === patItem.date);
                     if (pt) {
-                      const ptIdx = filteredHistory.indexOf(pt);
+                      const ptIdx = activeHistory.indexOf(pt);
                       setHoveredPoint({
                         ...pt,
                         index: ptIdx,
@@ -740,10 +852,10 @@ export default function PriceChart({ history = [], ticker = '', chartModel = {} 
                       });
                     }
                   }}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-3 rounded-2xl border transition-all duration-300 cursor-pointer backdrop-blur-xl ${
                     isSelected
-                      ? 'bg-sky-950/60 border-sky-400 shadow-lg ring-1 ring-sky-400/50'
-                      : 'bg-slate-950/60 hover:bg-slate-900 border-slate-800 hover:border-slate-700'
+                      ? 'bg-sky-500/15 border-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)] ring-1 ring-sky-400/50'
+                      : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] hover:border-white/20'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">

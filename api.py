@@ -9,6 +9,7 @@ from pydantic import BaseModel
 import pandas as pd
 import numpy as np
 import os
+import yfinance as yf
 
 from config import PRESET_ASSETS, TIMEFRAMES
 from core.data_loader import search_ticker_candidates
@@ -70,25 +71,40 @@ def analyze_stock(req: AnalysisRequest):
         if "error" in res and res["error"]:
             raise HTTPException(status_code=400, detail=res["error"])
 
-        # Pandas DataFrame für JSON-Serialisierung aufbereiten (letzte 380 Tage)
+        # Pandas DataFrame für JSON-Serialisierung aufbereiten (Unterstützung für Woche, Monat, Jahr, 5 Jahre & Max)
         df_hist = res.pop("history_df", None)
         chart_history = []
         if df_hist is not None and not df_hist.empty:
-            plot_df = df_hist.iloc[-380:].copy() if len(df_hist) > 380 else df_hist.copy()
-            ma50 = plot_df['Close'].rolling(window=50).mean()
-            ma200 = plot_df['Close'].rolling(window=200).mean() if len(df_hist) >= 200 else pd.Series(index=plot_df.index)
-            dc_high = plot_df['High'].rolling(window=20).max()
-            dc_low = plot_df['Low'].rolling(window=20).min()
+            # 1. Technische Indikatoren über die gesamte Historie berechnen
+            ma50 = df_hist['Close'].rolling(window=50).mean()
+            ma200 = df_hist['Close'].rolling(window=200).mean() if len(df_hist) >= 200 else pd.Series(index=df_hist.index)
+            dc_high = df_hist['High'].rolling(window=20).max()
+            dc_low = df_hist['Low'].rolling(window=20).min()
 
             pat_series = res.get("chart_model", {}).get("pattern_series")
             pat_type_series = res.get("chart_model", {}).get("pattern_type_series")
 
-            for idx, row in plot_df.iterrows():
+            total_rows = len(df_hist)
+            # Bis zu 1600 Tage (über 6 Jahre tägliche Daten) unkomprimiert übernehmen
+            if total_rows <= 1600:
+                selected_indices = list(range(total_rows))
+            else:
+                # Letzte 1260 Tage (5 Jahre) mit voller täglicher Auflösung (step=1)
+                recent_indices = list(range(total_rows - 1260, total_rows))
+                # Ältere Historie gleichmäßig auf ca. 350 Stützpunkte verdichten
+                older_total = total_rows - 1260
+                older_step = max(2, older_total // 350)
+                older_indices = list(range(0, older_total, older_step))
+                selected_indices = older_indices + recent_indices
+
+            for i in selected_indices:
+                idx = df_hist.index[i]
+                row = df_hist.iloc[i]
                 date_str = idx.strftime("%Y-%m-%d") if hasattr(idx, 'strftime') else str(idx)
-                m50_val = float(ma50.loc[idx]) if (idx in ma50.index and not np.isnan(ma50.loc[idx])) else None
-                m200_val = float(ma200.loc[idx]) if (idx in ma200.index and not np.isnan(ma200.loc[idx])) else None
-                dch_val = float(dc_high.loc[idx]) if (idx in dc_high.index and not np.isnan(dc_high.loc[idx])) else None
-                dcl_val = float(dc_low.loc[idx]) if (idx in dc_low.index and not np.isnan(dc_low.loc[idx])) else None
+                m50_val = float(ma50.iloc[i]) if (not np.isnan(ma50.iloc[i])) else None
+                m200_val = float(ma200.iloc[i]) if (not np.isnan(ma200.iloc[i])) else None
+                dch_val = float(dc_high.iloc[i]) if (not np.isnan(dc_high.iloc[i])) else None
+                dcl_val = float(dc_low.iloc[i]) if (not np.isnan(dc_low.iloc[i])) else None
 
                 pat_val = str(pat_series.loc[idx]) if (pat_series is not None and idx in pat_series.index and pat_series.loc[idx] is not None and not pd.isna(pat_series.loc[idx])) else None
                 pat_type = str(pat_type_series.loc[idx]) if (pat_type_series is not None and idx in pat_type_series.index and pat_type_series.loc[idx] is not None and not pd.isna(pat_type_series.loc[idx])) else None
@@ -109,6 +125,34 @@ def analyze_stock(req: AnalysisRequest):
 
         res["chart_history"] = chart_history
 
+        # 2. Intraday-Daten für "Heute" (15-Minuten-Kerzen)
+        today_history = []
+        try:
+            t_obj = yf.Ticker(req.ticker)
+            df_today = t_obj.history(period="1d", interval="15m")
+            if df_today is None or df_today.empty:
+                df_today = t_obj.history(period="5d", interval="15m")
+                if not df_today.empty:
+                    last_date = df_today.index[-1].date()
+                    df_today = df_today[df_today.index.date == last_date]
+
+            if df_today is not None and not df_today.empty:
+                for idx, row in df_today.iterrows():
+                    time_str = idx.strftime("%H:%M") if hasattr(idx, 'strftime') else str(idx)
+                    full_date_str = idx.strftime("%Y-%m-%d %H:%M") if hasattr(idx, 'strftime') else str(idx)
+                    today_history.append({
+                        "date": time_str,
+                        "full_date": full_date_str,
+                        "open": round(float(row.get("Open", row["Close"])), 2),
+                        "high": round(float(row.get("High", row["Close"])), 2),
+                        "low": round(float(row.get("Low", row["Close"])), 2),
+                        "close": round(float(row["Close"]), 2),
+                    })
+        except Exception as e:
+            print(f"Hinweis: Intraday-Daten für {req.ticker} konnten nicht geladen werden: {e}")
+
+        res["today_history"] = today_history
+
         # Pandas Series vor JSON-Rückgabe entfernen
         if "chart_model" in res:
             res["chart_model"].pop("hist_score_series", None)
@@ -122,6 +166,35 @@ def analyze_stock(req: AnalysisRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Berechnungsfehler für '{req.ticker}': {str(e)}")
+
+@app.get("/api/intraday/{ticker}")
+def get_intraday(ticker: str):
+    clean = ticker.upper().strip()
+    try:
+        t_obj = yf.Ticker(clean)
+        df_today = t_obj.history(period="1d", interval="15m")
+        if df_today is None or df_today.empty:
+            df_today = t_obj.history(period="5d", interval="15m")
+            if not df_today.empty:
+                last_date = df_today.index[-1].date()
+                df_today = df_today[df_today.index.date == last_date]
+
+        result = []
+        if df_today is not None and not df_today.empty:
+            for idx, row in df_today.iterrows():
+                time_str = idx.strftime("%H:%M") if hasattr(idx, 'strftime') else str(idx)
+                full_date_str = idx.strftime("%Y-%m-%d %H:%M") if hasattr(idx, 'strftime') else str(idx)
+                result.append({
+                    "date": time_str,
+                    "full_date": full_date_str,
+                    "open": round(float(row.get("Open", row["Close"])), 2),
+                    "high": round(float(row.get("High", row["Close"])), 2),
+                    "low": round(float(row.get("Low", row["Close"])), 2),
+                    "close": round(float(row["Close"]), 2),
+                })
+        return {"ticker": clean, "today_history": result}
+    except Exception as e:
+        return {"ticker": clean, "today_history": [], "error": str(e)}
 
 
 from fastapi.responses import FileResponse
