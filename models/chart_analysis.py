@@ -249,6 +249,39 @@ def analyze_chart_technicals(df: pd.DataFrame, category: str = "mittel") -> dict
 
     indicators["Candlestick-Muster"] = current_candle_name
 
+    # Vollständige historische Muster-Klassifizierung für Visualisierung im Chart
+    pat_names = np.where(is_morning_star, "Morning Star",
+                np.where(is_evening_star, "Evening Star",
+                np.where(is_bull_engulf, "Bullish Engulfing",
+                np.where(is_bear_engulf, "Bearish Engulfing",
+                np.where(is_hammer, "Hammer / Pinbar",
+                np.where(is_shooting_star, "Shooting Star",
+                np.where(is_doji, "Doji", None)))))))
+
+    pat_types = np.where(is_morning_star | is_bull_engulf | is_hammer, "bullish",
+                np.where(is_evening_star | is_bear_engulf | is_shooting_star, "bearish",
+                np.where(is_doji, "neutral", None)))
+
+    s_names = pd.Series(pat_names, index=df.index)
+    s_types = pd.Series(pat_types, index=df.index)
+
+    recent_patterns = []
+    # Letzte 60 Handelstage für den Candlestick-Muster-Inspektor sammeln
+    last_60 = df.iloc[-min(60, len(df)):]
+    for idx_ts in last_60.index:
+        p_name = s_names.loc[idx_ts]
+        if p_name is not None and not pd.isna(p_name):
+            p_type = s_types.loc[idx_ts]
+            date_str = idx_ts.strftime("%Y-%m-%d") if hasattr(idx_ts, "strftime") else str(idx_ts)
+            recent_patterns.append({
+                "date": date_str,
+                "pattern": str(p_name),
+                "type": str(p_type),
+                "close": round(float(df.loc[idx_ts, "Close"]), 2),
+                "high": round(float(df.loc[idx_ts, "High"]), 2),
+                "low": round(float(df.loc[idx_ts, "Low"]), 2)
+            })
+
     # Gesamte historische Score-Zeitreihe für Backtesting zusammensetzen
     hist_score_series = pd.Series(
         donchian_score_s + trend_score_s + rsi_score_s + boll_score_s + candle_score_s,
@@ -274,5 +307,8 @@ def analyze_chart_technicals(df: pd.DataFrame, category: str = "mittel") -> dict
         "summary": summary,
         "signals": signals,
         "indicators": indicators,
-        "hist_score_series": hist_score_series
+        "hist_score_series": hist_score_series,
+        "pattern_series": s_names,
+        "pattern_type_series": s_types,
+        "recent_patterns": recent_patterns
     }

@@ -80,6 +80,9 @@ def analyze_stock(req: AnalysisRequest):
             dc_high = plot_df['High'].rolling(window=20).max()
             dc_low = plot_df['Low'].rolling(window=20).min()
 
+            pat_series = res.get("chart_model", {}).get("pattern_series")
+            pat_type_series = res.get("chart_model", {}).get("pattern_type_series")
+
             for idx, row in plot_df.iterrows():
                 date_str = idx.strftime("%Y-%m-%d") if hasattr(idx, 'strftime') else str(idx)
                 m50_val = float(ma50.loc[idx]) if (idx in ma50.index and not np.isnan(ma50.loc[idx])) else None
@@ -87,20 +90,30 @@ def analyze_stock(req: AnalysisRequest):
                 dch_val = float(dc_high.loc[idx]) if (idx in dc_high.index and not np.isnan(dc_high.loc[idx])) else None
                 dcl_val = float(dc_low.loc[idx]) if (idx in dc_low.index and not np.isnan(dc_low.loc[idx])) else None
 
+                pat_val = str(pat_series.loc[idx]) if (pat_series is not None and idx in pat_series.index and pat_series.loc[idx] is not None and not pd.isna(pat_series.loc[idx])) else None
+                pat_type = str(pat_type_series.loc[idx]) if (pat_type_series is not None and idx in pat_type_series.index and pat_type_series.loc[idx] is not None and not pd.isna(pat_type_series.loc[idx])) else None
+
                 chart_history.append({
                     "date": date_str,
+                    "open": round(float(row.get("Open", row["Close"])), 2),
+                    "high": round(float(row.get("High", row["Close"])), 2),
+                    "low": round(float(row.get("Low", row["Close"])), 2),
                     "close": round(float(row["Close"]), 2),
                     "ma50": round(m50_val, 2) if m50_val is not None else None,
                     "ma200": round(m200_val, 2) if m200_val is not None else None,
                     "dc_high": round(dch_val, 2) if dch_val is not None else None,
                     "dc_low": round(dcl_val, 2) if dcl_val is not None else None,
+                    "pattern": pat_val,
+                    "pattern_type": pat_type,
                 })
 
         res["chart_history"] = chart_history
 
-        # hist_score_series aus dem chart_model entfernen (ist pd.Series)
-        if "chart_model" in res and "hist_score_series" in res["chart_model"]:
+        # Pandas Series vor JSON-Rückgabe entfernen
+        if "chart_model" in res:
             res["chart_model"].pop("hist_score_series", None)
+            res["chart_model"].pop("pattern_series", None)
+            res["chart_model"].pop("pattern_type_series", None)
 
         return res
     except HTTPException:

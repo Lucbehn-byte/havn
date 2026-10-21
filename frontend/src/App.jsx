@@ -360,7 +360,7 @@ export default function App() {
                 <SignalBanner chartModel={data.chart_model} />
 
                 {/* 2. Realer Kursverlauf & Trendlinien (Letzte 1,5 Jahre) */}
-                <PriceChart history={data.chart_history} ticker={data.ticker} />
+                <PriceChart history={data.chart_history} ticker={data.ticker} chartModel={data.chart_model} />
 
                 {/* 3. Finanzmathematische Hochrechnung */}
                 <FinancialMetrics 
