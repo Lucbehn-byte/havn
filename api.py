@@ -153,6 +153,33 @@ def analyze_stock(req: AnalysisRequest):
 
         res["today_history"] = today_history
 
+        # 3. 1-Stunden-Kerzen für "Woche" (ca. 35-45 Kerzen für stimmige Proportionen)
+        week_history = []
+        try:
+            df_week = t_obj.history(period="5d", interval="1h")
+            if df_week is not None and not df_week.empty:
+                german_weekdays = {
+                    "Mon": "Mo", "Tue": "Di", "Wed": "Mi", "Thu": "Do", "Fri": "Fr", "Sat": "Sa", "Sun": "So"
+                }
+                for idx, row in df_week.iterrows():
+                    day_en = idx.strftime("%a") if hasattr(idx, 'strftime') else ""
+                    day_de = german_weekdays.get(day_en, day_en)
+                    time_str = idx.strftime("%H:%M") if hasattr(idx, 'strftime') else ""
+                    full_date_str = idx.strftime("%Y-%m-%d %H:%M") if hasattr(idx, 'strftime') else str(idx)
+                    short_label = f"{day_de} {time_str}".strip()
+                    week_history.append({
+                        "date": short_label,
+                        "full_date": full_date_str,
+                        "open": round(float(row.get("Open", row["Close"])), 2),
+                        "high": round(float(row.get("High", row["Close"])), 2),
+                        "low": round(float(row.get("Low", row["Close"])), 2),
+                        "close": round(float(row["Close"]), 2),
+                    })
+        except Exception as e:
+            print(f"Hinweis: Wochen-Stundendaten für {req.ticker} konnten nicht geladen werden: {e}")
+
+        res["week_history"] = week_history
+
         # Pandas Series vor JSON-Rückgabe entfernen
         if "chart_model" in res:
             res["chart_model"].pop("hist_score_series", None)
@@ -195,6 +222,35 @@ def get_intraday(ticker: str):
         return {"ticker": clean, "today_history": result}
     except Exception as e:
         return {"ticker": clean, "today_history": [], "error": str(e)}
+
+@app.get("/api/week/{ticker}")
+def get_week_data(ticker: str):
+    clean = ticker.upper().strip()
+    try:
+        t_obj = yf.Ticker(clean)
+        df_week = t_obj.history(period="5d", interval="1h")
+        result = []
+        if df_week is not None and not df_week.empty:
+            german_weekdays = {
+                "Mon": "Mo", "Tue": "Di", "Wed": "Mi", "Thu": "Do", "Fri": "Fr", "Sat": "Sa", "Sun": "So"
+            }
+            for idx, row in df_week.iterrows():
+                day_en = idx.strftime("%a") if hasattr(idx, 'strftime') else ""
+                day_de = german_weekdays.get(day_en, day_en)
+                time_str = idx.strftime("%H:%M") if hasattr(idx, 'strftime') else ""
+                full_date_str = idx.strftime("%Y-%m-%d %H:%M") if hasattr(idx, 'strftime') else str(idx)
+                short_label = f"{day_de} {time_str}".strip()
+                result.append({
+                    "date": short_label,
+                    "full_date": full_date_str,
+                    "open": round(float(row.get("Open", row["Close"])), 2),
+                    "high": round(float(row.get("High", row["Close"])), 2),
+                    "low": round(float(row.get("Low", row["Close"])), 2),
+                    "close": round(float(row["Close"]), 2),
+                })
+        return {"ticker": clean, "week_history": result}
+    except Exception as e:
+        return {"ticker": clean, "week_history": [], "error": str(e)}
 
 
 from fastapi.responses import FileResponse

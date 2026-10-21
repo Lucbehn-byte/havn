@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { CandlestickChart, LineChart, Sparkles, Layers, Info, ChevronDown, ChevronUp, Eye, EyeOff, TrendingUp, TrendingDown, Clock, Calendar } from 'lucide-react';
+import { CandlestickChart, LineChart, Sparkles, Layers, Info, ChevronDown, ChevronUp, Eye, EyeOff, TrendingUp, TrendingDown, Clock, Calendar, Gauge } from 'lucide-react';
 
 // Wissensdatenbank der Candlestick-Muster mit quantitativer Interpretation
 const PATTERN_DEFINITIONS = {
@@ -55,15 +55,128 @@ const PATTERN_DEFINITIONS = {
 };
 
 const TIMEFRAME_OPTIONS = [
-  { id: 'heute', label: 'Heute', subtitle: 'Intraday 15M' },
-  { id: 'woche', label: 'Woche', subtitle: '5 Tage' },
-  { id: 'monat', label: 'Monat', subtitle: '22 Tage' },
-  { id: 'jahr', label: 'Jahr', subtitle: '1 Jahr' },
-  { id: '5jahre', label: '5 Jahre', subtitle: '5 Jahre' },
-  { id: 'max', label: 'Max', subtitle: 'Gesamt' },
+  { id: 'heute', label: 'Heute', subtitle: '15-Min-Takt' },
+  { id: 'woche', label: 'Woche', subtitle: '1-Stunden-Takt' },
+  { id: 'monat', label: 'Monat', subtitle: 'Tages-Takt' },
+  { id: 'jahr', label: 'Jahr', subtitle: 'Wochen-Takt' },
+  { id: '5jahre', label: '5 Jahre', subtitle: 'Monats-Takt' },
+  { id: 'max', label: 'Max', subtitle: 'Quartals-Takt' },
 ];
 
-export default function PriceChart({ history = [], todayHistory = [], ticker = '', chartModel = {} }) {
+// Hilfsfunktionen für harmonische Kerzen-Aggregationen
+function aggregateWeekly(dailyData) {
+  const weeks = {};
+  dailyData.forEach(d => {
+    const dt = new Date(d.date);
+    const day = dt.getDay();
+    const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(dt.setDate(diff)).toISOString().slice(0, 10);
+    if (!weeks[monday]) {
+      weeks[monday] = {
+        date: d.date,
+        displayDate: `Woche ab ${monday}`,
+        open: d.open ?? d.close,
+        high: d.high ?? d.close,
+        low: d.low ?? d.close,
+        close: d.close,
+        ma50: d.ma50,
+        ma200: d.ma200,
+        pattern: d.pattern,
+        pattern_type: d.pattern_type
+      };
+    } else {
+      const w = weeks[monday];
+      w.high = Math.max(w.high, d.high ?? d.close);
+      w.low = Math.min(w.low, d.low ?? d.close);
+      w.close = d.close;
+      w.date = d.date;
+      w.ma50 = d.ma50 ?? w.ma50;
+      w.ma200 = d.ma200 ?? w.ma200;
+      if (d.pattern && !w.pattern) {
+        w.pattern = d.pattern;
+        w.pattern_type = d.pattern_type;
+      }
+    }
+  });
+  return Object.values(weeks);
+}
+
+function aggregateMonthly(dailyData) {
+  const months = {};
+  dailyData.forEach(d => {
+    const key = d.date.slice(0, 7);
+    if (!months[key]) {
+      months[key] = {
+        date: key,
+        displayDate: `Monat ${key}`,
+        open: d.open ?? d.close,
+        high: d.high ?? d.close,
+        low: d.low ?? d.close,
+        close: d.close,
+        ma50: d.ma50,
+        ma200: d.ma200,
+        pattern: d.pattern,
+        pattern_type: d.pattern_type
+      };
+    } else {
+      const m = months[key];
+      m.high = Math.max(m.high, d.high ?? d.close);
+      m.low = Math.min(m.low, d.low ?? d.close);
+      m.close = d.close;
+      m.ma50 = d.ma50 ?? m.ma50;
+      m.ma200 = d.ma200 ?? m.ma200;
+      if (d.pattern && !m.pattern) {
+        m.pattern = d.pattern;
+        m.pattern_type = d.pattern_type;
+      }
+    }
+  });
+  return Object.values(months);
+}
+
+function aggregateQuarterly(dailyData) {
+  const quarters = {};
+  dailyData.forEach(d => {
+    const year = d.date.slice(0, 4);
+    const m = parseInt(d.date.slice(5, 7), 10) || 1;
+    const q = Math.ceil(m / 3);
+    const key = `${year}-Q${q}`;
+    if (!quarters[key]) {
+      quarters[key] = {
+        date: key,
+        displayDate: `Q${q} ${year}`,
+        open: d.open ?? d.close,
+        high: d.high ?? d.close,
+        low: d.low ?? d.close,
+        close: d.close,
+        ma50: d.ma50,
+        ma200: d.ma200,
+        pattern: d.pattern,
+        pattern_type: d.pattern_type
+      };
+    } else {
+      const item = quarters[key];
+      item.high = Math.max(item.high, d.high ?? d.close);
+      item.low = Math.min(item.low, d.low ?? d.close);
+      item.close = d.close;
+      item.ma50 = d.ma50 ?? item.ma50;
+      item.ma200 = d.ma200 ?? item.ma200;
+      if (d.pattern && !item.pattern) {
+        item.pattern = d.pattern;
+        item.pattern_type = d.pattern_type;
+      }
+    }
+  });
+  return Object.values(quarters);
+}
+
+export default function PriceChart({ 
+  history = [], 
+  todayHistory = [], 
+  weekHistory = [], 
+  ticker = '', 
+  chartModel = {} 
+}) {
   const [chartType, setChartType] = useState('candles'); // 'candles' | 'line'
   const [timeRange, setTimeRange] = useState('monat'); // 'heute' | 'woche' | 'monat' | 'jahr' | '5jahre' | 'max'
   const [showIndicators, setShowIndicators] = useState(true);
@@ -71,17 +184,27 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [selectedPatternDate, setSelectedPatternDate] = useState(null);
   const [showEducation, setShowEducation] = useState(false);
+
+  // Intraday- und Wochendaten State
   const [intradayData, setIntradayData] = useState(todayHistory || []);
   const [loadingIntraday, setLoadingIntraday] = useState(false);
+  const [weekData, setWeekData] = useState(weekHistory || []);
+  const [loadingWeek, setLoadingWeek] = useState(false);
 
-  // Sync todayHistory prop into local state
+  // Synchronisation von Props in State
   useEffect(() => {
     if (todayHistory && todayHistory.length > 0) {
       setIntradayData(todayHistory);
     }
   }, [todayHistory]);
 
-  // Fallback: On-demand intraday fetch falls nicht vorab geladen
+  useEffect(() => {
+    if (weekHistory && weekHistory.length > 0) {
+      setWeekData(weekHistory);
+    }
+  }, [weekHistory]);
+
+  // Fallback: On-demand Intraday-Fetch für "Heute"
   useEffect(() => {
     if (timeRange === 'heute' && (!intradayData || intradayData.length === 0) && ticker) {
       setLoadingIntraday(true);
@@ -97,34 +220,102 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
     }
   }, [timeRange, ticker, intradayData]);
 
-  // Datenfilterung je nach ausgewähltem Zeitfenster
-  const activeHistory = useMemo(() => {
+  // Fallback: On-demand Wochen-Fetch (1-Stunden-Kerzen) für "Woche"
+  useEffect(() => {
+    if (timeRange === 'woche' && (!weekData || weekData.length === 0) && ticker) {
+      setLoadingWeek(true);
+      fetch(`/api/week/${ticker}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.week_history && data.week_history.length > 0) {
+            setWeekData(data.week_history);
+          }
+        })
+        .catch(err => console.error("Wochen-Abruf fehlgeschlagen:", err))
+        .finally(() => setLoadingWeek(false));
+    }
+  }, [timeRange, ticker, weekData]);
+
+  // Harmonische Datenaufbereitung: Stimmige Kerzenanzahl (25 bis 65 Kerzen) in jedem Horizont!
+  const { activeHistory, resolutionLabel } = useMemo(() => {
     if (timeRange === 'heute') {
-      if (intradayData && intradayData.length > 0) {
-        return intradayData;
-      }
-      // Falls Markt noch nicht geöffnet oder Wochenende: Letzte 26 Datenpunkte oder letzten Tag
-      return history.slice(-Math.min(26, history.length));
+      const d = (intradayData && intradayData.length > 0)
+        ? intradayData
+        : history.slice(-Math.min(26, history.length));
+      return { activeHistory: d, resolutionLabel: '15-Minuten-Kerzen' };
     }
 
-    if (!history || history.length === 0) return [];
+    if (timeRange === 'woche') {
+      if (weekData && weekData.length > 0) {
+        return { activeHistory: weekData, resolutionLabel: '1-Stunden-Kerzen' };
+      }
+      // Falls noch am Laden: 5 Tage
+      return { activeHistory: history.slice(-Math.min(5, history.length)), resolutionLabel: '1-Stunden-Kerzen' };
+    }
+
+    if (!history || history.length === 0) {
+      return { activeHistory: [], resolutionLabel: 'Tageskerzen' };
+    }
 
     const total = history.length;
-    if (timeRange === 'woche') {
-      return history.slice(-Math.min(5, total));
-    }
+
     if (timeRange === 'monat') {
-      return history.slice(-Math.min(22, total));
+      // 22 Handelstage = ca. 22 Kerzen
+      return { 
+        activeHistory: history.slice(-Math.min(22, total)), 
+        resolutionLabel: 'Tageskerzen (1 Monat)' 
+      };
     }
+
     if (timeRange === 'jahr') {
-      return history.slice(-Math.min(252, total));
+      const yearSlice = history.slice(-Math.min(252, total));
+      if (chartType === 'candles') {
+        // In Kerzen-Ansicht: 52 Wochenkerzen für perfekte Lesbarkeit
+        const aggregated = aggregateWeekly(yearSlice);
+        return { 
+          activeHistory: aggregated, 
+          resolutionLabel: 'Wochenkerzen (52 Wochen)' 
+        };
+      }
+      // Im Linien-Modus: Alle 252 Tagespunkte für feinen Verlauf
+      return { 
+        activeHistory: yearSlice, 
+        resolutionLabel: 'Tägliche Schlusskurse (252 Tage)' 
+      };
     }
+
     if (timeRange === '5jahre') {
-      return history.slice(-Math.min(1260, total));
+      const fiveYearSlice = history.slice(-Math.min(1260, total));
+      if (chartType === 'candles') {
+        // In Kerzen-Ansicht: 60 Monatskerzen
+        const aggregated = aggregateMonthly(fiveYearSlice);
+        return { 
+          activeHistory: aggregated, 
+          resolutionLabel: 'Monatskerzen (60 Monate)' 
+        };
+      }
+      // Im Linien-Modus: Volle tägliche Auflösung
+      return { 
+        activeHistory: fiveYearSlice, 
+        resolutionLabel: 'Tägliche Schlusskurse (5 Jahre)' 
+      };
     }
+
     // 'max'
-    return history;
-  }, [history, intradayData, timeRange]);
+    if (chartType === 'candles') {
+      // In Kerzen-Ansicht: Quartalskerzen (~60-100 Kerzen)
+      const aggregated = aggregateQuarterly(history);
+      return { 
+        activeHistory: aggregated, 
+        resolutionLabel: 'Quartalskerzen (Gesamthistorie)' 
+      };
+    }
+    // Im Linien-Modus: Gesamte Historie
+    return { 
+      activeHistory: history, 
+      resolutionLabel: 'Gesamter Kursverlauf' 
+    };
+  }, [timeRange, intradayData, weekData, history, chartType]);
 
   // Erkannte Muster im sichtbaren Zeitraum
   const visiblePatterns = useMemo(() => {
@@ -192,7 +383,8 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
 
   const count = activeHistory.length;
   const candleSlotWidth = plotWidth / Math.max(1, count);
-  const candleWidth = Math.max(1.8, Math.min(18, candleSlotWidth * 0.72));
+  // Stimmige Kerzenbreite: Zwischen 3.5px und 18px (nie zu dünn, nie zu dick!)
+  const candleWidth = Math.max(3.5, Math.min(18, candleSlotWidth * 0.70));
 
   const getX = (i) => paddingLeft + (i + 0.5) * candleSlotWidth;
   const getY = (val) => paddingTop + plotHeight - ((val - minVal) / range) * plotHeight;
@@ -201,7 +393,7 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
   const pricePath = activeHistory.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.close)}`).join(' ');
   const areaPath = `${pricePath} L ${getX(count - 1)} ${paddingTop + plotHeight} L ${getX(0)} ${paddingTop + plotHeight} Z`;
 
-  // GD50 Pfad (nur anzeigen wenn Zeitraum > Woche und Werte vorhanden)
+  // GD50 Pfad (nur anzeigen wenn sinnvolle Tageswerte vorliegen)
   const isIntradayOrWeek = timeRange === 'heute' || timeRange === 'woche';
   const ma50Path = (!isIntradayOrWeek && showIndicators)
     ? activeHistory.map((d, i) => d.ma50 != null ? `${i === activeHistory.findIndex(h => h.ma50 != null) ? 'M' : 'L'} ${getX(i)} ${getY(d.ma50)}` : '').filter(Boolean).join(' ')
@@ -229,8 +421,8 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
     return { val, y };
   });
 
-  // X-Achsen Datums-Ticks (angepasst an Zeitfenster)
-  const numDateLabels = timeRange === 'heute' ? 5 : timeRange === 'woche' ? count : 6;
+  // X-Achsen Datums-Ticks (harmonisch formatiert)
+  const numDateLabels = timeRange === 'heute' ? 5 : timeRange === 'woche' ? 5 : 6;
   const dateStep = Math.max(1, Math.floor(count / numDateLabels));
   const xTicks = [];
   for (let i = 0; i < count; i += dateStep) {
@@ -238,13 +430,17 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
     let label = item.date;
     if (timeRange === 'heute') {
       label = item.date; // HH:MM
+    } else if (timeRange === 'woche') {
+      label = item.date.slice(0, 2); // Wochentag z. B. Mo, Di, Mi, Do, Fr
     } else if (timeRange === '5jahre' || timeRange === 'max') {
-      label = item.date.slice(0, 7); // YYYY-MM
+      label = item.date.slice(0, 7); // YYYY-MM oder YYYY-Q
     } else {
       label = item.date.slice(5); // MM-DD
     }
     xTicks.push({ index: i, date: label, x: getX(i) });
   }
+
+  const isLoading = loadingIntraday || loadingWeek;
 
   return (
     <div className="relative rounded-3xl p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-950/85 border border-white/[0.12] ring-1 ring-white/[0.05] overflow-hidden space-y-6">
@@ -276,8 +472,12 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
                 Pro Modus
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-1">
-              Japanische Candlesticks mit automatischer Mustererkennung & flexiblen Zeithorizonten.
+            <p className="text-xs text-slate-300 mt-1 flex items-center gap-2">
+              <span>Japanische Candlesticks mit harmonisch abgestimmter Kerzengröße.</span>
+              <span className="hidden sm:inline-flex items-center gap-1 font-mono font-bold text-[11px] text-sky-400 bg-sky-950/60 px-2 py-0.2 rounded-md border border-sky-500/30">
+                <Gauge className="w-3 h-3" />
+                {resolutionLabel} ({count} Kerzen)
+              </span>
             </p>
           </div>
         </div>
@@ -428,10 +628,10 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
 
       {/* 4. SVG Haupt-Chart */}
       <div className="relative z-10 w-full aspect-[8/3.2] min-h-[300px] max-h-[440px]">
-        {loadingIntraday ? (
+        {isLoading ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-sky-400">
             <Clock className="w-6 h-6 animate-spin" />
-            <span className="text-xs font-semibold">Lade Intraday-Kurse für {ticker}...</span>
+            <span className="text-xs font-semibold">Lade {timeRange === 'heute' ? 'Intraday-Kurse' : 'Wochen-Stundenkurse'} für {ticker}...</span>
           </div>
         ) : (
           <svg
@@ -529,7 +729,7 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
               </>
             )}
 
-            {/* B: KERZEN-MODUS (Candlesticks) */}
+            {/* B: KERZEN-MODUS (Candlesticks mit stimmigen Proportionen) */}
             {chartType === 'candles' && (
               <g>
                 {activeHistory.map((d, i) => {
@@ -630,7 +830,8 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
                       open: d.open ?? d.close,
                       high: d.high ?? d.close,
                       low: d.low ?? d.close,
-                      close: d.close
+                      close: d.close,
+                      displayDate: d.displayDate || d.full_date || d.date
                     })
                   }
                 />
@@ -684,7 +885,9 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
             }}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
-              <span className="text-slate-300 font-mono text-[11px] font-semibold">{hoveredPoint.date}</span>
+              <span className="text-slate-300 font-mono text-[11px] font-semibold">
+                {hoveredPoint.displayDate || hoveredPoint.date}
+              </span>
               <span className={`text-[11px] font-bold px-1.5 py-0.2 rounded font-mono ${
                 hoveredPoint.close >= hoveredPoint.open
                   ? 'bg-emerald-500/20 text-emerald-300'
@@ -848,7 +1051,8 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
                         open: pt.open ?? pt.close,
                         high: pt.high ?? pt.close,
                         low: pt.low ?? pt.close,
-                        close: pt.close
+                        close: pt.close,
+                        displayDate: pt.displayDate || pt.full_date || pt.date
                       });
                     }
                   }}
@@ -859,7 +1063,7 @@ export default function PriceChart({ history = [], todayHistory = [], ticker = '
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-mono text-[11px] text-slate-400">{patItem.date}</span>
+                    <span className="font-mono text-[11px] text-slate-400">{patItem.displayDate || patItem.date}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                       patItem.pattern_type === 'bullish'
                         ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
