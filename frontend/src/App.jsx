@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import SearchBar from './components/SearchBar';
+import FavoritesBar, { getStoredFavorites, saveStoredFavorites } from './components/FavoritesBar';
+import ExecutiveSummary from './components/ExecutiveSummary';
+import ShareModal from './components/ShareModal';
 import SignalBanner from './components/SignalBanner';
 import PriceChart from './components/PriceChart';
 import FinancialMetrics from './components/FinancialMetrics';
@@ -16,7 +19,7 @@ import AssetBattle from './components/AssetBattle';
 import Academy from './components/Academy';
 import BeginnerView from './components/BeginnerView';
 import MobileNav from './components/MobileNav';
-import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords } from 'lucide-react';
 
 const API_BASE = '';
 
@@ -26,7 +29,7 @@ export default function App() {
     return localStorage.getItem('havn_experience_mode') || 'beginner';
   });
 
-  // Ensure any leftover light classes from localStorage are removed
+  // Theme-Bereinigung
   useEffect(() => {
     document.documentElement.classList.remove('light');
     document.documentElement.removeAttribute('data-theme');
@@ -39,6 +42,26 @@ export default function App() {
   const [sparplanFreq, setSparplanFreq] = useState('monatlich');
   const [kapital, setKapital] = useState(1000);
   const [startkapital, setStartkapital] = useState(0);
+
+  // Watchlist & Favoriten
+  const [favorites, setFavorites] = useState(() => getStoredFavorites());
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  const handleToggleFavorite = (favTicker, favName) => {
+    const sym = favTicker.toUpperCase();
+    let updated;
+    if (favorites.some(f => f.symbol.toUpperCase() === sym)) {
+      updated = favorites.filter(f => f.symbol.toUpperCase() !== sym);
+    } else {
+      updated = [...favorites, { symbol: favTicker, name: favName || favTicker, category: 'Favorit' }];
+    }
+    setFavorites(updated);
+    saveStoredFavorites(updated);
+  };
+
+  const isCurrentFavorite = favorites.some(
+    f => f.symbol.toUpperCase() === ticker.toUpperCase()
+  );
 
   const handleToggleMode = (newMode) => {
     setExperienceMode(newMode);
@@ -121,6 +144,73 @@ export default function App() {
     runAnalysis(selectedSymbol);
   };
 
+  // Modul 1: Live Scaling der Berechnungen beim Schieben des Sliders (60 FPS Echtzeit-Feedback)
+  const displayData = useMemo(() => {
+    if (!data) return null;
+    const baseKapital = Number(data.kapital_input) || 100;
+    const currentKapital = Number(kapital) || 100;
+    const baseStart = Number(data.startkapital_input) || 0;
+    const currentStart = Number(startkapital) || 0;
+
+    // Wenn Werte identisch sind, Original zurückgeben
+    if (baseKapital === currentKapital && baseStart === currentStart) {
+      return data;
+    }
+
+    // Proportionale Skalierung der Euro-Werte
+    let scale = 1.0;
+    if (invType === 'Einmalanlage') {
+      scale = currentKapital / (baseKapital || 1);
+    } else {
+      if (baseStart === 0 && currentStart === 0) {
+        scale = currentKapital / (baseKapital || 1);
+      } else {
+        const totalBase = baseStart + baseKapital * 12;
+        const totalCurrent = currentStart + currentKapital * 12;
+        scale = totalCurrent / (totalBase || 1);
+      }
+    }
+
+    const mc = data.monte_carlo;
+    if (!mc) return data;
+
+    const scaledMonteCarlo = {
+      ...mc,
+      eingezahltes_kapital: invType === 'Einmalanlage' ? currentKapital : (mc.eingezahltes_kapital * scale),
+      erwarteter_endwert: mc.erwarteter_endwert * scale,
+      erwarteter_gewinn: mc.erwarteter_gewinn * scale,
+      pessimistisch_endwert: (mc.pessimistisch_endwert || 0) * scale,
+      optimistisch_endwert: (mc.optimistisch_endwert || 0) * scale,
+      cvar_95_euro: (mc.cvar_95_euro || 0) * scale,
+    };
+
+    return {
+      ...data,
+      kapital_input: currentKapital,
+      startkapital_input: currentStart,
+      monte_carlo: scaledMonteCarlo
+    };
+  }, [data, kapital, startkapital, invType]);
+
+  // Debounced Auto-Sync im Hintergrund (500ms nach dem letzten Schieben)
+  useEffect(() => {
+    if (!data || loading) return;
+    const timer = setTimeout(() => {
+      const currentParams = JSON.stringify({
+        ticker,
+        timeframe,
+        invType,
+        sparplanFreq,
+        kapital: Number(kapital) || 100,
+        startkapital: Number(startkapital) || 0
+      });
+      if (lastAnalyzedParams && lastAnalyzedParams !== currentParams) {
+        runAnalysis();
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [kapital, startkapital, timeframe, invType, sparplanFreq]);
+
   const timeframeKeys = Object.keys(timeframes).length > 0 
     ? Object.keys(timeframes)
     : ["3 Tage (Kurzfrist-Impuls)", "10 Tage (Kurzfrist-Trend)", "8 Wochen (Mittelfrist-Swing)", "1 Jahr (Jahres-Trend)", "3 Jahre (Makro-Zyklus)", "5 Jahre (Vermögensaufbau)"];
@@ -138,13 +228,19 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {activeTab === 'crisis' && <CrisisSimulator />}
         {activeTab === 'goals' && <GoalPlanner />}
-        {activeTab === 'battle' && <AssetBattle experienceMode={experienceMode} />}
+        {activeTab === 'battle' && (
+          <AssetBattle 
+            experienceMode={experienceMode} 
+            initialAssetA={ticker}
+            onAnalyzeAsset={handleSelectAsset} 
+          />
+        )}
         {activeTab === 'academy' && <Academy experienceMode={experienceMode} />}
 
         {activeTab === 'terminal' && (
           <div className="space-y-8 animate-fadeIn">
         
-        {/* HERO & SUCHE */}
+        {/* HERO, SUCHE & FAVORITEN-LEISTE */}
         <section className="space-y-4">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
@@ -162,11 +258,20 @@ export default function App() {
               currentTicker={ticker}
             />
           </div>
+
+          {/* Modul 4: Watchlist & Favoriten */}
+          <FavoritesBar
+            currentTicker={ticker}
+            onSelectAsset={handleSelectAsset}
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
+          />
         </section>
 
         {/* PARAMETER & STRATEGIE LEISTE */}
-        <section className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <section className="relative rounded-3xl p-6 shadow-2xl backdrop-blur-2xl bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-950/85 border border-white/[0.12] overflow-hidden">
           <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <SlidersHorizontal className="w-4 h-4 text-sky-400" />
             <span>Simulations-Parameter & Anlagestrategie</span>
           </div>
 
@@ -179,7 +284,7 @@ export default function App() {
               <select
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
               >
                 {timeframeKeys.map((k) => (
                   <option key={k} value={k}>{k}</option>
@@ -192,13 +297,13 @@ export default function App() {
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
                 Anlagestrategie
               </label>
-              <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 border border-slate-700/80 rounded-xl">
+              <div className="grid grid-cols-2 gap-1.5 bg-slate-950/80 p-1 border border-white/10 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setInvType('Einmalanlage')}
-                  className={`text-xs py-1.5 rounded-lg font-semibold transition-all ${
+                  className={`text-xs py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                     invType === 'Einmalanlage' 
-                      ? 'bg-sky-500 text-white shadow-md' 
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md' 
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -207,9 +312,9 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setInvType('Sparplan')}
-                  className={`text-xs py-1.5 rounded-lg font-semibold transition-all ${
+                  className={`text-xs py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                     invType === 'Sparplan' 
-                      ? 'bg-sky-500 text-white shadow-md' 
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md' 
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -218,11 +323,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* Kapital / Sparrate & Geldeinsatz mit Roll-Up Picker */}
+            {/* Modul 1: Live-Slider für Kapital / Sparrate */}
             {invType === 'Einmalanlage' ? (
-              <div>
+              <div className="sm:col-span-2">
                 <RollUpPicker
-                  label="Geldeinsatz"
+                  label="Geldeinsatz (Einmalanlage)"
                   value={kapital}
                   onChange={setKapital}
                 />
@@ -231,7 +336,7 @@ export default function App() {
               <>
                 <div>
                   <RollUpPicker
-                    label="Geldeinsatz (Startkapital)"
+                    label="Startkapital"
                     value={startkapital}
                     onChange={setStartkapital}
                     presets={[0, 100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
@@ -248,7 +353,7 @@ export default function App() {
                     <select
                       value={sparplanFreq}
                       onChange={(e) => setSparplanFreq(e.target.value)}
-                      className="bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none"
+                      className="bg-slate-950/80 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none cursor-pointer"
                     >
                       <option value="monatlich">monatlich</option>
                       <option value="wöchentlich">wöchentlich</option>
@@ -258,7 +363,7 @@ export default function App() {
               </>
             )}
 
-            {/* Start Button */}
+            {/* Manueller Aktualisieren Button (falls gewünscht) */}
             {(() => {
               const currentParams = JSON.stringify({
                 ticker,
@@ -271,31 +376,31 @@ export default function App() {
               const isUpToDate = !loading && lastAnalyzedParams !== null && lastAnalyzedParams === currentParams;
 
               return (
-                <div className={invType === 'Sparplan' ? 'sm:col-span-2 lg:col-span-4 mt-2' : ''}>
+                <div className={invType === 'Sparplan' ? 'sm:col-span-2 lg:col-span-4 mt-1' : 'sm:col-span-2 lg:col-span-4 mt-1'}>
                   <button
                     type="button"
                     onClick={() => runAnalysis()}
                     disabled={loading || isUpToDate}
-                    className={`w-full h-11 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all ${
+                    className={`w-full h-11 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       isUpToDate
-                        ? 'bg-slate-900 border border-sky-900/60 text-sky-400/80 shadow-none cursor-default'
-                        : 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 active:scale-[0.99] cursor-pointer'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/20 active:scale-[0.99]'
                     }`}
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Berechne 5.000 Pfade...</span>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Berechne Quant-Modelle...</span>
                       </>
                     ) : isUpToDate ? (
                       <>
-                        <CheckCircle2 className="w-4 h-4 text-sky-400" />
-                        <span>Analyse aktuell</span>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>Simulation synchronisiert</span>
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4 fill-white" />
-                        <span>Analyse starten</span>
+                        <span>Simulation jetzt aktualisieren</span>
                       </>
                     )}
                   </button>
@@ -316,40 +421,84 @@ export default function App() {
         )}
 
         {/* HAUPT-ANALYSEBEREICH */}
-        {data && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Header: Wertpapiername & aktueller Kurs */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+        {displayData && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Header: Wertpapiername, Kurs, Favoriten-Stern & Teilen-Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-900/70 backdrop-blur-xl border border-white/[0.12] shadow-xl">
               <div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="text-xl md:text-2xl font-black text-white">
-                    {data.asset_info?.name || data.ticker}
+                    {displayData.asset_info?.name || displayData.ticker}
                   </h2>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-sky-400 font-mono font-bold">
-                    {data.ticker}
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-sky-400 font-mono font-bold border border-white/10">
+                    {displayData.ticker}
                   </span>
+
+                  {/* Favoriten-Stern Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFavorite(displayData.ticker, displayData.asset_info?.name)}
+                    className={`p-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-1 text-xs font-semibold ${
+                      isCurrentFavorite
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                        : 'bg-white/[0.04] text-slate-400 hover:text-amber-400 border-white/10 hover:bg-white/[0.08]'
+                    }`}
+                    title={isCurrentFavorite ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${isCurrentFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+                    <span className="hidden sm:inline">{isCurrentFavorite ? 'Gemerkt' : 'Merken'}</span>
+                  </button>
                 </div>
+
                 <p className="text-xs text-slate-400 mt-1">
-                  Typ: <span className="text-slate-300">{data.asset_info?.typ || 'Wertpapier'}</span> • ISIN: <span className="font-mono text-slate-300">{data.asset_info?.isin || '–'}</span>
+                  Typ: <span className="text-slate-300 font-medium">{displayData.asset_info?.typ || 'Wertpapier'}</span> • ISIN: <span className="font-mono text-slate-300">{displayData.asset_info?.isin || '–'}</span>
                 </p>
               </div>
 
-              <div className="flex items-center gap-6">
+              {/* Kurs & Aktions-Buttons (Teilen & Duell) */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                 <div>
                   <div className="text-[10px] text-slate-400 font-medium uppercase">Aktueller Kurs</div>
-                  <div className="text-2xl font-black text-white font-mono">{data.current_price?.toFixed(2)} €</div>
+                  <div className="text-2xl font-black text-white font-mono">{displayData.current_price?.toFixed(2)} €</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-slate-400 font-medium uppercase">Markt-Beta</div>
-                  <div className="text-2xl font-black text-sky-400 font-mono">{data.beta?.toFixed(2)}</div>
+                  <div className="text-2xl font-black text-sky-400 font-mono">{displayData.beta?.toFixed(2)}</div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Modul 6: Teilen-Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShareModalOpen(true)}
+                    className="p-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sky-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
+                    title="Analyse-Report teilen"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span className="hidden md:inline">Teilen</span>
+                  </button>
+
+                  {/* Modul 3: Duell-Shortcut */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('battle')}
+                    className="p-2.5 rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
+                    title="Im Duell mit anderem Asset vergleichen"
+                  >
+                    <Swords className="w-4 h-4 text-indigo-400" />
+                    <span className="hidden md:inline">Duell</span>
+                  </button>
                 </div>
               </div>
             </div>
 
+            {/* Modul 2: Das 3-Sekunden-Fazit (Executive Summary) */}
+            <ExecutiveSummary data={displayData} invType={invType} />
+
             {/* MODUS-ABHÄNGIGE ANSICHT: EINSTEIGER vs. PRO */}
             {experienceMode === 'beginner' ? (
               <BeginnerView
-                data={data}
+                data={displayData}
                 invType={invType}
                 sparplanFreq={sparplanFreq}
                 onSwitchToPro={() => handleToggleMode('pro')}
@@ -357,50 +506,50 @@ export default function App() {
             ) : (
               <div className="space-y-8 animate-fadeIn">
                 {/* 1. Signal & Trend-Banner */}
-                <SignalBanner chartModel={data.chart_model} />
+                <SignalBanner chartModel={displayData.chart_model} />
 
-                {/* 2. Realer Kursverlauf & Trendlinien (Heute, Woche, Monat, Jahr, 5 Jahre, Max) */}
+                {/* 2. Realer Kursverlauf & Trendlinien (Liquid Glass & Harmonische Candlesticks) */}
                 <PriceChart 
-                  history={data.chart_history} 
-                  todayHistory={data.today_history} 
-                  weekHistory={data.week_history} 
-                  ticker={data.ticker} 
-                  chartModel={data.chart_model} 
+                  history={displayData.chart_history} 
+                  todayHistory={displayData.today_history} 
+                  weekHistory={displayData.week_history} 
+                  ticker={displayData.ticker} 
+                  chartModel={displayData.chart_model} 
                 />
 
-                {/* 3. Finanzmathematische Hochrechnung */}
+                {/* 3. Finanzmathematische Hochrechnung (mit Live-Slider-Werten) */}
                 <FinancialMetrics 
-                  monteCarlo={data.monte_carlo}
-                  invType={data.investment_type}
-                  sparplanFreq={data.sparplan_frequenz}
+                  monteCarlo={displayData.monte_carlo}
+                  invType={displayData.investment_type}
+                  sparplanFreq={displayData.sparplan_frequenz}
                 />
 
                 {/* 4. Risikoprofil & Wahrscheinlichkeiten */}
                 <RiskProfile
-                  monteCarlo={data.monte_carlo}
-                  rollingReturns={data.rolling_returns}
-                  beta={data.beta}
+                  monteCarlo={displayData.monte_carlo}
+                  rollingReturns={displayData.rolling_returns}
+                  beta={displayData.beta}
                 />
 
                 {/* 5. Historischer Krisen- & Stresstest */}
-                <CrisisStressTest crisisModel={data.crisis_model} />
+                <CrisisStressTest crisisModel={displayData.crisis_model} />
 
                 {/* 6. Simulationsfächer (Merton Jump-Diffusion) */}
                 <FanChart 
-                  paths={data.monte_carlo?.sample_paths} 
-                  medianPath={data.monte_carlo?.median_path} 
-                  ticker={data.ticker}
+                  paths={displayData.monte_carlo?.sample_paths} 
+                  medianPath={displayData.monte_carlo?.median_path} 
+                  ticker={displayData.ticker}
                 />
 
                 {/* 7. Fundamentale Bewertung (KGV & Multiples) */}
-                <FundamentalCards fundamental={data.fundamental} />
+                <FundamentalCards fundamental={displayData.fundamental} />
 
                 {/* 8. Broker-Leitfaden */}
                 <BrokerGuide
-                  assetInfo={data.asset_info}
-                  invType={data.investment_type}
-                  sparplanFreq={data.sparplan_frequenz}
-                  kapital={data.kapital_input}
+                  assetInfo={displayData.asset_info}
+                  invType={displayData.investment_type}
+                  sparplanFreq={displayData.sparplan_frequenz}
+                  kapital={displayData.kapital_input}
                 />
               </div>
             )}
@@ -409,6 +558,16 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Modul 6: Teilen-Modal */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        data={displayData}
+        invType={invType}
+        kapital={kapital}
+        timeframe={timeframe}
+      />
 
       {/* Floating Mobile Navigation Bar */}
       <MobileNav activeTab={activeTab} onSelectTab={setActiveTab} />
