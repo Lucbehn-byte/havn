@@ -51,10 +51,24 @@ def analyze_chart_technicals(df: pd.DataFrame, category: str = "mittel") -> dict
     mean_vol_ratio = (atr_14 / df['Close']).rolling(window=20).mean().iloc[-1]
     is_volatile_regime = bool(volatility_ratio > (mean_vol_ratio if not np.isnan(mean_vol_ratio) else 0.02))
 
-    # Gewichtung nach Marktregime: In unruhigen Phasen zählen Trendkanäle mehr als Oszillatoren
-    w_donchian = 0.30 if is_volatile_regime else 0.15
-    w_oscillator = 0.10 if is_volatile_regime else 0.25
-    w_trend = 0.25 if is_volatile_regime else 0.15
+    # Gewichtung nach Marktregime und Zeithorizont
+    # Bei 'kurz' (3T / 10T): Candlestick-Muster und Oszillatoren zählen stark (55-60%)
+    # Bei 'lang' (3J / 5J): Trendkanäle & Durchschnitte dominieren, Candlesticks haben 0% Einfluss
+    if category == "kurz":
+        w_candle = 0.25
+        w_donchian = 0.20 if is_volatile_regime else 0.15
+        w_oscillator = 0.15 if is_volatile_regime else 0.30
+        w_trend = 0.15
+    elif category == "mittel":
+        w_candle = 0.10
+        w_donchian = 0.25 if is_volatile_regime else 0.15
+        w_oscillator = 0.15 if is_volatile_regime else 0.25
+        w_trend = 0.25 if is_volatile_regime else 0.15
+    else:  # lang
+        w_candle = 0.00
+        w_donchian = 0.30 if is_volatile_regime else 0.20
+        w_oscillator = 0.10 if is_volatile_regime else 0.15
+        w_trend = 0.30 if is_volatile_regime else 0.20
 
     score = 0.0
     signals = []
@@ -178,9 +192,66 @@ def analyze_chart_technicals(df: pd.DataFrame, category: str = "mittel") -> dict
         boll_score_s = np.where(close_series < lower_b_s, 0.05,
                        np.where(close_series > upper_b_s, -0.05, 0.0))
 
+    # 5. Candlestick Price-Action (Reversals & Richtungsübernahme)
+    o = df['Open']
+    h = df['High']
+    l = df['Low']
+    c_s = df['Close']
+    body = c_s - o
+    body_abs = np.abs(body)
+    hl = h - l + 1e-9
+    upper_wick = h - np.maximum(o, c_s)
+    lower_wick = np.minimum(o, c_s) - l
+
+    is_hammer = (lower_wick >= 1.8 * body_abs) & (upper_wick <= 0.35 * hl) & (c_s >= (l + 0.55 * hl))
+    is_shooting_star = (upper_wick >= 1.8 * body_abs) & (lower_wick <= 0.35 * hl) & (c_s <= (l + 0.45 * hl))
+    is_bull_engulf = (body.shift(1) < 0) & (body > 0) & (o <= c_s.shift(1) * 1.002) & (c_s >= o.shift(1) * 0.998) & (body_abs >= body_abs.shift(1))
+    is_bear_engulf = (body.shift(1) > 0) & (body < 0) & (o >= c_s.shift(1) * 0.998) & (c_s <= o.shift(1) * 1.002) & (body_abs >= body_abs.shift(1))
+    is_doji = (body_abs / hl <= 0.08)
+    is_morning_star = (body.shift(2) < -0.005 * c_s.shift(2)) & (body_abs.shift(1) < 0.5 * body_abs.shift(2)) & (body > 0) & (c_s >= (o.shift(2) + c_s.shift(2)) / 2)
+    is_evening_star = (body.shift(2) > 0.005 * c_s.shift(2)) & (body_abs.shift(1) < 0.5 * body_abs.shift(2)) & (body < 0) & (c_s <= (o.shift(2) + c_s.shift(2)) / 2)
+
+    candle_score_s = pd.Series(0.0, index=df.index)
+    if w_candle > 0:
+        raw_c = np.where(is_morning_star, w_candle * 1.2,
+                np.where(is_evening_star, -w_candle * 1.2,
+                np.where(is_bull_engulf, w_candle,
+                np.where(is_bear_engulf, -w_candle,
+                np.where(is_hammer, w_candle * 0.85,
+                np.where(is_shooting_star, -w_candle * 0.85, 0.0))))))
+        candle_score_s = pd.Series(raw_c, index=df.index)
+        latest_c_score = float(candle_score_s.iloc[-1])
+        score += latest_c_score
+
+    # Ausweisung des aktuellen Candlestick-Musters
+    current_candle_name = "Neutrale Standardkerze"
+    if bool(is_morning_star.iloc[-1]):
+        current_candle_name = "Morning Star (Bullisches 3-Kerzen-Reversal)"
+        signals.append("🕯️ Candlestick: Morning Star – Klassische Bodenbildung mit hoher statistischer Rebound-Quote.")
+    elif bool(is_evening_star.iloc[-1]):
+        current_candle_name = "Evening Star (Bärisches Erschöpfungsmuster)"
+        signals.append("🕯️ Candlestick: Evening Star – 3-Tage-Topformation signalisiert Erschöpfung der Käuferseite.")
+    elif bool(is_bull_engulf.iloc[-1]):
+        current_candle_name = "Bullish Engulfing (Kaufimpuls)"
+        signals.append("🕯️ Candlestick: Bullish Engulfing – Aktuelle Kerze umschließt den Vortag vollständig. Käufer haben das Ruder übernommen.")
+    elif bool(is_bear_engulf.iloc[-1]):
+        current_candle_name = "Bearish Engulfing (Verkaufsdruck)"
+        signals.append("🕯️ Candlestick: Bearish Engulfing – Verkäufer haben die Vortagesgewinne komplett absorbiert.")
+    elif bool(is_hammer.iloc[-1]):
+        current_candle_name = "Hammer / Pinbar (Kaufnachfrage am Tief)"
+        signals.append("🕯️ Candlestick: Hammer / Bullish Pinbar – Lange Lunte nach unten zeigt starke Nachfrage am Tagestief.")
+    elif bool(is_shooting_star.iloc[-1]):
+        current_candle_name = "Shooting Star (Verkauf am Tageshoch)"
+        signals.append("🕯️ Candlestick: Shooting Star – Hohe Kurse wurden am Tageshoch abverkauft.")
+    elif bool(is_doji.iloc[-1]):
+        current_candle_name = "Doji (Markt-Gleichgewicht)"
+        signals.append("🕯️ Candlestick: Doji – Käufer und Verkäufer halten sich die Waage. Häufig Vorbote einer Richtungsentscheidung.")
+
+    indicators["Candlestick-Muster"] = current_candle_name
+
     # Gesamte historische Score-Zeitreihe für Backtesting zusammensetzen
     hist_score_series = pd.Series(
-        donchian_score_s + trend_score_s + rsi_score_s + boll_score_s,
+        donchian_score_s + trend_score_s + rsi_score_s + boll_score_s + candle_score_s,
         index=df.index
     ).clip(-1.0, 1.0)
 
@@ -189,7 +260,7 @@ def analyze_chart_technicals(df: pd.DataFrame, category: str = "mittel") -> dict
 
     if norm_score > 15:
         regime = "Bullisch (Kaufsignale überwiegen)"
-        summary = "Das Modell erkennt einen soliden Aufwärtstrend. Wichtige Chartmarken liegen unter dem Kurs und stützen die Entwicklung."
+        summary = "Das Modell erkennt einen soliden Aufwärtstrend. Wichtige Chartmarken und Kerzenformationen stützen die Entwicklung."
     elif norm_score < -15:
         regime = "Bärisch (Vorsicht angebracht)"
         summary = "Das Modell registriert erhöhten Verkaufsdruck oder einen intakten Abwärtstrend. Einstiege sollten defensiv gestaffelt werden."
