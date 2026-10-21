@@ -130,19 +130,36 @@ def run_monte_carlo_simulation(
     # Martingal-Kompensator für Jumps: k = E[e^X - 1]
     k_comp = float(np.exp(mu_j + 0.5 * sigma_j**2) - 1.0)
 
-    # 4. Simulation von 5.000 Pfaden
+    # 4. Simulation von 5.000 Pfaden mit stochastischem Leverage-Effekt (Asymmetrische Pfadvola)
     Z = np.random.standard_normal((holding_days, num_simulations))
     N_jumps = np.random.poisson(lam * dt, size=(holding_days, num_simulations))
     J_shocks = np.random.normal(mu_j, sigma_j, size=(holding_days, num_simulations))
 
-    # Ito-Drift-Kompensation: (mu - 0.5*sigma^2 - lam*k)
-    daily_drift = (mu - 0.5 * sigma**2 - lam * k_comp) * dt
-    daily_diffusion = sigma * np.sqrt(dt) * Z + (N_jumps * J_shocks)
-    daily_returns = np.exp(daily_drift + daily_diffusion)
+    # GJR-GARCH Parameter für asymmetrischen Leverage-Effekt:
+    # Bei negativen Renditen (Verlusttagen) steigt die Volatilität des Pfades dynamisch an
+    alpha_g = 0.04
+    beta_g = 0.88
+    gamma_g = 0.08  # Hebelkomponente für Abwärtspanik
+    omega_g = 1.0 - alpha_g - beta_g - 0.5 * gamma_g
 
     price_paths = np.zeros((holding_days + 1, num_simulations))
     price_paths[0] = current_price
-    price_paths[1:] = current_price * np.cumprod(daily_returns, axis=0)
+    var_mult = np.ones(num_simulations)
+
+    for t in range(holding_days):
+        # Pfadspezifische Tagesvolatilität
+        sig_t = sigma * np.sqrt(var_mult)
+
+        # Drift- & Diffusionsschritt mit Ito- & Martingal-Kompensation
+        drift_t = (mu - 0.5 * sig_t**2 - lam * k_comp) * dt
+        diffusion_t = sig_t * np.sqrt(dt) * Z[t] + (N_jumps[t] * J_shocks[t])
+
+        price_paths[t + 1] = price_paths[t] * np.exp(drift_t + diffusion_t)
+
+        # Dynamisches Varianz-Update für den nächsten Tag (Leverage-Feedback)
+        neg_shock = (Z[t] < 0.0).astype(float)
+        var_mult = omega_g + (alpha_g + gamma_g * neg_shock) * (Z[t]**2) + beta_g * var_mult
+        var_mult = np.clip(var_mult, 0.25, 4.0)
 
     # 5. Portfolio-Auswertung
     if investment_type == "Einmalanlage":

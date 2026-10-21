@@ -27,7 +27,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           <span>Stochastisches Risikoprofil & Wahrscheinlichkeiten</span>
         </h3>
         <p className="text-xs text-slate-400 mt-0.5">
-          Verteilung aus 5.000 Pfaden mit Merton Jump-Diffusion & empirischer Auswertung.
+          Verteilung aus 5.000 Pfaden mit dynamischem Leverage-Effekt, Merton Jump-Diffusion & empirischer Auswertung.
         </p>
       </div>
 
@@ -151,10 +151,10 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
               {ewmaVol.toFixed(1)}% <span className="text-xs text-slate-400 font-normal">p.a.</span>
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
-              10J-Schnitt: {histVol.toFixed(1)}% • Beta: <span className="text-sky-400 font-bold">{beta.toFixed(2)}</span>
+              3J-Baseline: {histVol.toFixed(1)}% • Beta: <span className="text-sky-400 font-bold">{beta.toFixed(2)}</span>
             </div>
             <p className="text-[10px] text-slate-400 mt-1">
-              Tagesaktuelle Marktunruhe vs. Langzeittrend.
+              Tagesaktuelle Marktunruhe vs. institutionelle 3J-Baseline.
             </p>
           </div>
         </div>

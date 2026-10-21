@@ -27,6 +27,9 @@ def test_single_asset(ticker: str, timeframe: str, inv_type: str, kapital: float
     print(f"✅ Modell 4 (Rollierende Rendite Win-Rate): {res['rolling_returns']['win_rate_pct']}% ({res['rolling_returns']['summary']})")
     print(f"✅ Modell 5 (Backtest-Status): {res['backtest']['status_text']}")
     print(f"✅ Modell 6 (Bewertung): {res['fundamental']['valuation_status']} (Drift-Adj: {res['fundamental']['drift_adjustment']*100:+.2f}% p.a.)")
+    if res['fundamental'].get('analyst_consensus'):
+        cons = res['fundamental']['analyst_consensus']
+        print(f"   🏛️ Wall-Street Konsens: {cons['recommendation']} ({cons['opinions_count']} Analysten) | Kursziel: {cons['target_median_price']} € (Upside: {cons['upside_pct']}%) | Fwd EPS-Wachstum: {cons['forward_eps_growth_pct']}%")
     return True, res
 
 if __name__ == "__main__":
@@ -38,6 +41,8 @@ if __name__ == "__main__":
     assert 0.85 <= res_aapl['beta'] <= 1.35, f"AAPL Beta unplausibel: {res_aapl['beta']}"
     assert res_aapl['monte_carlo']['prob_up'] >= 60.0, f"AAPL 1Y Gewinnwahrscheinlichkeit unplausibel niedrig: {res_aapl['monte_carlo']['prob_up']}%"
     assert res_aapl['backtest']['hit_rate_pct'] is not None, "AAPL Backtest liefert keine Hit-Rate"
+    assert res_aapl['fundamental']['analyst_consensus'] is not None, "AAPL muss Analystenkonsens besitzen"
+    assert res_aapl['fundamental']['analyst_consensus']['opinions_count'] >= 20, "AAPL muss mindestens 20 Analystenstimmen haben"
     
     # Test 2: Sparplan in einen Welt-ETF (iShares MSCI World EUNL.DE)
     ok2, res_eunl = test_single_asset("EUNL.DE", "3 Jahre (Makro-Zyklus)", "Sparplan", 50.0)
@@ -46,11 +51,19 @@ if __name__ == "__main__":
     assert res_eunl['monte_carlo']['prob_up'] >= 85.0, f"EUNL.DE 3Y Sparplan Gewinnwahrscheinlichkeit unplausibel: {res_eunl['monte_carlo']['prob_up']}%"
     assert res_eunl['rolling_returns']['win_rate_pct'] >= 90.0, f"EUNL.DE Rollierende Rendite unplausibel: {res_eunl['rolling_returns']['win_rate_pct']}%"
     assert res_eunl['backtest']['hit_rate_pct'] is not None, "EUNL.DE Backtest liefert keine Hit-Rate"
+    assert res_eunl['fundamental']['analyst_consensus'] is None, "ETF darf keinen Einzelaktien-Analystenkonsens besitzen"
 
     # Test 3: US-Tech-Riese NVDA
     ok3, res_nvda = test_single_asset("NVDA", "1 Jahr (Jahres-Trend)", "Einmalanlage", 1000.0)
     assert ok3, "NVDA Test fehlgeschlagen"
     assert 1.50 <= res_nvda['beta'] <= 2.20, f"NVDA Beta unplausibel: {res_nvda['beta']}"
+    assert res_nvda['fundamental']['analyst_consensus'] is not None, "NVDA muss Analystenkonsens besitzen"
+    assert res_nvda['fundamental']['analyst_consensus']['forward_eps_growth_pct'] is not None, "NVDA muss Forward-EPS-Wachstum besitzen"
+
+    # Test 4: DAX-Schwergewicht SAP.DE
+    ok4, res_sap = test_single_asset("SAP.DE", "1 Jahr (Jahres-Trend)", "Einmalanlage", 1000.0)
+    assert ok4, "SAP.DE Test fehlgeschlagen"
+    assert res_sap['fundamental']['analyst_consensus'] is not None, "SAP.DE muss Analystenkonsens besitzen"
 
     print("\n🎉 ALLE INSTITUTIONELLEN QUANT-VERIFIKATIONEN ERFOLGREICH BESTANDEN!")
 

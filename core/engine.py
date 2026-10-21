@@ -92,7 +92,11 @@ def run_full_analysis(
         beta = float(np.clip((2.0 / 3.0) * (0.70 * ann_vol_3y / 0.165) + (1.0 / 3.0) * 1.0, 0.50, 2.20))
 
     # 4. Modell 6: Fundamentale Bewertung (vorab ausführen für Drift-Justierung)
-    fund_res = analyze_fundamental_valuation(clean_ticker)
+    fund_res = analyze_fundamental_valuation(
+        ticker_symbol=clean_ticker,
+        current_price=current_price,
+        holding_days=tf_config["days"]
+    )
     val_drift_adj = fund_res.get("drift_adjustment", 0.0)
 
     # 5. Modell 1: Technische Chartanalyse
