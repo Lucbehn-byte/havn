@@ -278,16 +278,10 @@ export default function App() {
         <section className="space-y-4">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-              {isBasic ? (
-                <>Verstehe jede <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Aktie</span></>
-              ) : (
-                <>Sicherheit beim <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Investieren</span></>
-              )}
+              Sicherheit beim <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Investieren</span>
             </h1>
             <p className="text-sm md:text-base text-slate-400">
-              {isBasic
-                ? 'Was du erwarten kannst, wie stark es wackeln kann und ob jetzt ein guter Zeitpunkt ist – klar auf den Punkt.'
-                : 'Monte-Carlo-Projektionen, Krisen-Stresstests, Markttechnik und Bewertung – vollständig und transparent.'}
+              Mathematische Wahrscheinlichkeiten, Krisen-Stresstests und Risikoprofile vor deinem ersten Trade.
             </p>
           </div>
 
