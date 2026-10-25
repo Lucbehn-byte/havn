@@ -114,7 +114,7 @@ export default function InstallPrompt({ forceShow = false, onCloseManual }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'HAVN — Quant Investment & Risikosteuerung',
+          title: 'HAVN — Dein sicherer Hafen für Aktien & ETFs',
           text: 'Dein sicherer Hafen für quantitative Vermögensanalysen.',
           url: window.location.href,
         });
