@@ -20,11 +20,11 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-40 w-full liquid-glass-header transition-all">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 relative">
         {/* Logo */}
         <div 
           onClick={() => { onSelectTab('terminal'); if (onReset) onReset(); }}
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 z-10"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl overflow-hidden shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform bg-slate-900/40 p-0.5 border border-white/10 shrink-0">
             <img src="/apple-touch-icon.png" alt="HAVN Logo" className="w-full h-full object-cover rounded-xl" />
@@ -44,8 +44,8 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Desktop Navigation Tabs */}
-        <nav className="hidden lg:flex items-center gap-1.5 liquid-glass-pill p-1.5 rounded-2xl">
+        {/* Desktop Navigation Tabs - Felsenfest zentriert, verschiebt sich niemals */}
+        <nav className="hidden lg:flex items-center gap-1.5 liquid-glass-pill p-1.5 rounded-2xl absolute left-1/2 -translate-x-1/2 z-10 pointer-events-auto">
           {tabs.map((t) => {
             const Icon = t.icon;
             const isActive = activeTab === t.id;
@@ -67,10 +67,10 @@ export default function Navbar({
         </nav>
 
         {/* Rechte Controls: Modus Switcher & Status */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Basic / Pro Umschalter: Im Hafen ('terminal'), Duell ('battle') und Logbuch ('academy') sichtbar */}
-          {onToggleMode && (activeTab === 'terminal' || activeTab === 'battle' || activeTab === 'academy') && (
-            <div className="liquid-glass-pill p-1 rounded-2xl flex items-center animate-fadeIn">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 z-10">
+          {/* Basic / Pro Umschalter: Konsistent auf allen Reitern verfügbar */}
+          {onToggleMode && (
+            <div className="liquid-glass-pill p-1 rounded-2xl flex items-center">
               <button
                 type="button"
                 onClick={() => onToggleMode('beginner')}
