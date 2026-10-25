@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap, CloudLightning, ShieldAlert, Sparkles, Calendar, Layers } from 'lucide-react';
 import RollUpPicker from './RollUpPicker';
 import HISTORICAL_CRISIS_DATA from '../data/historical_crisis_data.json';
@@ -44,8 +44,17 @@ const CRISIS_EVENTS = [
   }
 ];
 
-export default function CrisisSimulator() {
-  const [selectedAssetId, setSelectedAssetId] = useState('EUNL.DE');
+export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
+  const [selectedAssetId, setSelectedAssetId] = useState(() => {
+    return ASSET_OPTIONS.some((a) => a.id === initialAsset) ? initialAsset : 'EUNL.DE';
+  });
+
+  useEffect(() => {
+    if (initialAsset && ASSET_OPTIONS.some((a) => a.id === initialAsset)) {
+      setSelectedAssetId(initialAsset);
+    }
+  }, [initialAsset]);
+
   const [selectedEventId, setSelectedEventId] = useState('corona_shock');
   const [kapital, setKapital] = useState(1000);
   const [sparrate, setSparrate] = useState(150);

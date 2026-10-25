@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Sparkles, Copy, Check, ArrowRight, Calculator, ChevronDown,
   Coins, Waves, Compass, SunMedium, CloudRain, Target, ShieldCheck,
-  TrendingUp, Activity, Tag, Users, RotateCcw, Hourglass,
+  TrendingUp, Activity, Tag, Users, RotateCcw, Hourglass, CloudLightning,
 } from 'lucide-react';
 import SimpleAreaChart from './SimpleAreaChart';
 import { getInsights, formatEuro, scoreTone, TONE } from '../utils/insights';
@@ -114,7 +114,7 @@ function Pill({ tone = 'sky', children }) {
 /* Basic-Ansicht                                                       */
 /* ------------------------------------------------------------------ */
 
-export default function BeginnerView({ data, invType, onSwitchToPro }) {
+export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateToCrisis }) {
   const [copied, setCopied] = useState(false);
   const ins = getInsights(data, invType);
   if (!data || !ins) return null;
@@ -249,68 +249,69 @@ export default function BeginnerView({ data, invType, onSwitchToPro }) {
           />
         </QuestionCard>
 
-        {/* --- Frage 2: Risiko --- */}
-        <QuestionCard icon={Waves} step={2} question="Wie stark kann es wackeln?" accent="bg-amber-400/10 border-amber-400/25 text-amber-300">
-          <div className="relative z-10">
-            <div className="text-[11px] text-slate-400">Größter Einbruch in der Geschichte</div>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-rose-300 font-mono tracking-tight">−{ins.maxDd.toFixed(0)} %</span>
-              <Pill tone={ins.swing.tone}>Schwankung: {ins.swing.label}</Pill>
-            </div>
-            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              Entspricht bei deinem Einsatz zeitweise etwa <strong className="text-slate-200">−{formatEuro(scenarios.invested * ins.maxDd / 100)}</strong> auf dem Papier. Das Wertpapier {ins.marketCompare}.
-            </p>
-          </div>
-
-          {ins.crises.length > 0 && (
-            <div className="space-y-2 relative z-10">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">So lief es in echten Krisen</div>
-              {ins.crises.slice(0, 3).map((c) => (
-                <div key={c.name} className="glass-inset rounded-2xl p-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-200 truncate pr-2">
-                      {c.name} <span className="text-slate-500 font-normal">{c.year}</span>
-                    </span>
-                    <span className="font-mono font-bold text-rose-300">{c.drop.toFixed(0)} %</span>
-                  </div>
-                  <div className="relative h-1.5 mt-2 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-rose-400 to-pink-300 animate-growX" style={{ width: `${Math.min(100, Math.abs(c.drop))}%` }} />
-                  </div>
-                  <div className="mt-1.5 text-[10.5px] flex items-center gap-1">
-                    {c.recovered ? (
-                      <span className="text-emerald-300 inline-flex items-center gap-1"><Check className="w-3 h-3" /> Verlust noch in der Krise wieder aufgeholt</span>
-                    ) : (
-                      <span className="text-amber-300 inline-flex items-center gap-1"><Hourglass className="w-3 h-3" /> Erholung brauchte länger</span>
-                    )}
-                    {c.synthetic && <span className="text-slate-500 ml-1">· geschätzt</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {ins.winRate != null && (
-            <div className="glass-inset rounded-2xl p-3 flex items-start gap-2.5 relative z-10">
-              <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Wer in der Vergangenheit <strong className="text-white">{ins.horizon}</strong> durchgehalten hat, lag in{' '}
-                <strong className="text-emerald-300">{ins.winRate.toFixed(0)} %</strong> der Fälle im Plus.
+        {/* --- Frage 2: Weiterleitung zu Sturm --- */}
+        <QuestionCard icon={CloudLightning} step={2} question="Wie stark kann es wackeln?" accent="bg-amber-400/10 border-amber-400/25 text-amber-300">
+          <div className="relative z-10 flex flex-col justify-between h-full space-y-4">
+            <div>
+              <div className="text-[11px] text-slate-400">Historischer Maximal-Rückschlag</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-rose-300 font-mono tracking-tight">−{ins.maxDd.toFixed(0)} %</span>
+                <Pill tone={ins.swing.tone}>Schwankung: {ins.swing.label}</Pill>
+              </div>
+              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                Entspricht bei deinem Einsatz zeitweise etwa <strong className="text-slate-200">−{formatEuro(scenarios.invested * ins.maxDd / 100)}</strong> auf dem Papier. Das Wertpapier {ins.marketCompare}.
               </p>
             </div>
-          )}
 
-          <MathDetails
-            rows={[
-              ['Max. Drawdown (gesamt)', `−${ins.maxDd.toFixed(1)} %`],
-              ['Volatilität (aktuell, EWMA)', `${ins.vol.toFixed(1)} % p.a.`],
-              ['Volatilität (historisch)', `${ins.histVol.toFixed(1)} % p.a.`],
-              ['Markt-Beta', ins.beta.toFixed(2)],
-              ['CVaR 95 %', `${(mc.cvar_95_pct ?? 0).toFixed(1)} %`],
-              ['Sortino-Ratio', ins.sortino.toFixed(2)],
-              ['Rollierende Zeitfenster', (data.rolling_returns?.num_periods ?? 0).toLocaleString('de-DE')],
-            ]}
-            note="Drawdown = Abstand vom letzten Hoch zum Tiefpunkt. Die Gewinnquote prüft jeden möglichen Einstiegstag der Vergangenheit."
-          />
+            {/* Weiterleitungs-Box zu "Sturm" */}
+            <div
+              onClick={onNavigateToCrisis}
+              className="group glass-inset hover:border-amber-400/40 rounded-2xl p-4 transition-all duration-300 cursor-pointer space-y-3 shadow-lg relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
+
+              <div className="flex items-start justify-between gap-2 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-300 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-amber-500/25 transition-all">
+                    <CloudLightning className="w-5 h-5 text-amber-300" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white group-hover:text-amber-200 transition-colors">
+                      Sturm-Simulation
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Interaktiver Crash-Stresstest
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-7 h-7 rounded-lg glass-chip flex items-center justify-center text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all">
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-300 leading-relaxed relative z-10">
+                Erlebe Monat für Monat, wie sich historische Börsencrashs (wie <strong>Corona 2020</strong>, der <strong>Zinsschock 2022</strong> oder die <strong>Finanzkrise 2008</strong>) auf dein investiertes Geld ausgewirkt hätten.
+              </p>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onNavigateToCrisis) onNavigateToCrisis();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500/80 to-yellow-500/80 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer active:scale-[0.98] relative z-10"
+              >
+                <CloudLightning className="w-3.5 h-3.5 fill-slate-950" />
+                <span>Jetzt zu „Sturm“ wechseln</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed text-center">
+              Im Sturm-Simulator siehst du auch, wie ein Sparplan Krisen durch den Cost-Average-Effekt automatisch abfedert.
+            </p>
+          </div>
         </QuestionCard>
 
         {/* --- Frage 3: Timing --- */}

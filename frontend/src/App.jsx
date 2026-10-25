@@ -257,7 +257,7 @@ export default function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {activeTab === 'crisis' && <CrisisSimulator />}
+        {activeTab === 'crisis' && <CrisisSimulator initialAsset={ticker} />}
         {activeTab === 'goals' && <GoalPlanner />}
         {activeTab === 'battle' && (
           <AssetBattle 
@@ -575,6 +575,10 @@ export default function App() {
                 invType={invType}
                 sparplanFreq={sparplanFreq}
                 onSwitchToPro={() => handleToggleMode('pro')}
+                onNavigateToCrisis={() => {
+                  setActiveTab('crisis');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
               />
             ) : (
               <div className="space-y-8 animate-fadeIn">
