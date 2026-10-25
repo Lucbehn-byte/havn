@@ -87,7 +87,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
   }
 
   return (
-    <div className="relative rounded-3xl p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/85 via-slate-900/60 to-slate-950/90 border border-white/[0.12] overflow-hidden space-y-4">
+    <div className="relative rounded-3xl p-5 sm:p-6 glass overflow-hidden space-y-4">
       {/* Liquid Glass Highlight */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
@@ -112,7 +112,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
         </div>
 
         <div className="self-start sm:self-center">
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-950/70 border border-white/10 text-slate-300 shadow-inner">
+          <span className="text-xs font-semibold px-3 py-1 rounded-full glass-inset text-slate-300 shadow-inner">
             Fokus: <strong className="text-white">{invType}</strong>
           </span>
         </div>
@@ -121,7 +121,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
       {/* 3 Visuelle Ampel-Säulen */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
         {/* Säule 1: Sparplan-Eignung */}
-        <div className="p-4 rounded-2xl bg-slate-950/50 backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all space-y-2">
+        <div className="p-4 rounded-2xl glass-inset hover:border-white/20 transition-all space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-emerald-400" />
@@ -141,7 +141,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
         </div>
 
         {/* Säule 2: Timing-Risiko (Einmalkauf) */}
-        <div className="p-4 rounded-2xl bg-slate-950/50 backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all space-y-2">
+        <div className="p-4 rounded-2xl glass-inset hover:border-white/20 transition-all space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Compass className={`w-3.5 h-3.5 ${timingType === 'success' ? 'text-emerald-400' : timingType === 'danger' ? 'text-rose-400' : 'text-amber-400'}`} />
@@ -167,7 +167,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
         </div>
 
         {/* Säule 3: Krisen-Resilienz */}
-        <div className="p-4 rounded-2xl bg-slate-950/50 backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all space-y-2">
+        <div className="p-4 rounded-2xl glass-inset hover:border-white/20 transition-all space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />

@@ -4,7 +4,7 @@ import { GitBranch, TrendingUp, Download } from 'lucide-react';
 export default function FanChart({ paths = [], medianPath = [], ticker = 'Asset' }) {
   if (!paths || paths.length === 0) {
     return (
-      <div className="h-60 flex items-center justify-center bg-slate-900/60 rounded-xl border border-slate-800 text-slate-500">
+      <div className="h-60 flex items-center justify-center glass-inset rounded-xl text-slate-500">
         Keine Simulationspfade verfügbar.
       </div>
     );

@@ -354,7 +354,7 @@ export default function PriceChart({
 
   if (!history || history.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center rounded-3xl backdrop-blur-xl bg-slate-900/60 border border-white/10 text-slate-400">
+      <div className="h-64 flex items-center justify-center rounded-3xl backdrop-blur-xl glass-inset text-slate-400">
         Keine historischen Chartdaten verfügbar.
       </div>
     );
@@ -443,7 +443,7 @@ export default function PriceChart({
   const isLoading = loadingIntraday || loadingWeek;
 
   return (
-    <div className="relative rounded-3xl p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-950/85 border border-white/[0.12] ring-1 ring-white/[0.05] overflow-hidden space-y-6">
+    <div className="relative rounded-3xl p-5 sm:p-7 glass overflow-hidden space-y-6">
       
       {/* Liquid Glass Ambient Backlights */}
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-500/12 blur-[100px] pointer-events-none"></div>

@@ -8,7 +8,7 @@ export default function CrisisStressTest({ crisisModel = {} }) {
   const crisisList = Object.entries(results);
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+    <div className="glass rounded-2xl p-5 shadow-xl space-y-4">
       <div>
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
           <ShieldAlert className="w-5 h-5 text-sky-400" />
@@ -20,7 +20,7 @@ export default function CrisisStressTest({ crisisModel = {} }) {
       </div>
 
       {summary && (
-        <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-xs text-slate-300 leading-relaxed font-medium">
+        <div className="glass-inset rounded-xl p-3 text-xs text-slate-300 leading-relaxed font-medium">
           <span className="font-bold text-slate-200">Gesamteinschätzung: </span>
           {summary}
         </div>
@@ -38,7 +38,7 @@ export default function CrisisStressTest({ crisisModel = {} }) {
           return (
             <div
               key={idx}
-              className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between space-y-3"
+              className="glass-inset rounded-xl p-3.5 flex flex-col justify-between space-y-3"
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-1">

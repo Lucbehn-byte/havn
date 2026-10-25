@@ -20,7 +20,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
   const formatEuro = (val) => `${val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
+    <div className="glass rounded-2xl p-5 shadow-xl space-y-5">
       <div>
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
           <Activity className="w-5 h-5 text-indigo-400" />
@@ -34,7 +34,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
       {/* 3 Wahrscheinlichkeitsbalken */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Gewinn-Wahrscheinlichkeit */}
-        <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+        <div className="glass-inset rounded-xl p-3.5 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -49,7 +49,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
         </div>
 
         {/* Seitwärts */}
-        <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+        <div className="glass-inset rounded-xl p-3.5 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-amber-400 flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5" />
@@ -64,7 +64,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
         </div>
 
         {/* Verlust-Risiko */}
-        <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+        <div className="glass-inset rounded-xl p-3.5 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-rose-400 flex items-center gap-1.5">
               <TrendingDown className="w-3.5 h-3.5" />
@@ -87,7 +87,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Sortino */}
-          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
+          <div className="glass-inset rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
               <span className="font-medium flex items-center">
                 Sortino-Ratio
@@ -113,7 +113,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           </div>
 
           {/* Expected Shortfall (CVaR 95%) */}
-          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
+          <div className="glass-inset rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
               <span className="font-medium flex items-center">
                 CVaR 95% (Tail Risk)
@@ -136,7 +136,7 @@ export default function RiskProfile({ monteCarlo = {}, rollingReturns = {}, beta
           </div>
 
           {/* EWMA Volatilität & Beta */}
-          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
+          <div className="glass-inset rounded-xl p-3">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
               <span className="font-medium flex items-center">
                 Volatilität & Beta

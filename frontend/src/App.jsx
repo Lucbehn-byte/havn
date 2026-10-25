@@ -19,9 +19,30 @@ import AssetBattle from './components/AssetBattle';
 import Academy from './components/Academy';
 import BeginnerView from './components/BeginnerView';
 import MobileNav from './components/MobileNav';
+import InfoTooltip from './components/InfoTooltip';
+import { ProSection, ProNav } from './components/ProSection';
+import { getInsights, formatEuro, TONE } from './utils/insights';
 import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords } from 'lucide-react';
 
 const API_BASE = '';
+
+// Basic-Modus: nur langfristige Haltedauern mit verständlichen Namen
+const BASIC_TIMEFRAMES = [
+  { key: '1 Jahr (Jahres-Trend)', label: '1 Jahr' },
+  { key: '3 Jahre (Makro-Zyklus)', label: '3 Jahre' },
+  { key: '5 Jahre (Vermögensaufbau)', label: '5 Jahre', hint: 'empfohlen' },
+];
+
+const PRO_SECTIONS = [
+  { id: 'pro-signal', label: 'Signal' },
+  { id: 'pro-chart', label: 'Chart & Muster' },
+  { id: 'pro-projektion', label: 'Projektion' },
+  { id: 'pro-risiko', label: 'Risiko' },
+  { id: 'pro-krisen', label: 'Stresstest' },
+  { id: 'pro-simulation', label: 'Simulation' },
+  { id: 'pro-bewertung', label: 'Bewertung' },
+  { id: 'pro-umsetzung', label: 'Umsetzung' },
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('terminal');
@@ -66,6 +87,10 @@ export default function App() {
   const handleToggleMode = (newMode) => {
     setExperienceMode(newMode);
     localStorage.setItem('havn_experience_mode', newMode);
+    if (newMode === 'beginner' && !BASIC_TIMEFRAMES.some(t => t.key === timeframe)) {
+      setTimeframe('1 Jahr (Jahres-Trend)');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const [presets, setPresets] = useState({});
@@ -215,8 +240,14 @@ export default function App() {
     ? Object.keys(timeframes)
     : ["3 Tage (Kurzfrist-Impuls)", "10 Tage (Kurzfrist-Trend)", "8 Wochen (Mittelfrist-Swing)", "1 Jahr (Jahres-Trend)", "3 Jahre (Makro-Zyklus)", "5 Jahre (Vermögensaufbau)"];
 
+  const isBasic = experienceMode === 'beginner';
+  const insights = useMemo(() => (displayData ? getInsights(displayData, invType) : null), [displayData, invType]);
+
   return (
-    <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0">
+    <div className="min-h-screen text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0">
+      {/* Liquid-Glass Ambient-Hintergrund (macht die Glas-Transparenz sichtbar) */}
+      <div className="havn-ambient" aria-hidden="true"><span /><span /></div>
+
       <Navbar 
         activeTab={activeTab} 
         onSelectTab={setActiveTab} 
@@ -244,10 +275,16 @@ export default function App() {
         <section className="space-y-4">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-              Sicherheit beim <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Investieren</span>
+              {isBasic ? (
+                <>Verstehe jede <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Aktie</span></>
+              ) : (
+                <>Sicherheit beim <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Investieren</span></>
+              )}
             </h1>
             <p className="text-sm md:text-base text-slate-400">
-              Mathematische Wahrscheinlichkeiten, Krisen-Stresstests und Risikoprofile vor deinem ersten Trade.
+              {isBasic
+                ? 'Was du erwarten kannst, wie stark es wackeln kann und ob jetzt ein guter Zeitpunkt ist – klar auf den Punkt.'
+                : 'Monte-Carlo-Projektionen, Krisen-Stresstests, Markttechnik und Bewertung – vollständig und transparent.'}
             </p>
           </div>
 
@@ -269,27 +306,47 @@ export default function App() {
         </section>
 
         {/* PARAMETER & STRATEGIE LEISTE */}
-        <section className="relative rounded-3xl p-6 shadow-2xl backdrop-blur-2xl bg-gradient-to-b from-slate-900/80 via-slate-900/60 to-slate-950/85 border border-white/[0.12] overflow-hidden">
-          <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-300 uppercase tracking-wider">
+        <section className="relative rounded-3xl p-6 glass overflow-hidden">
+          <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-300 uppercase tracking-wider relative z-10">
             <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-            <span>Simulations-Parameter & Anlagestrategie</span>
+            <span>{isBasic ? 'Deine Anlage' : 'Simulations-Parameter & Anlagestrategie'}</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end relative z-10">
             {/* Zeitraum */}
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Geplante Haltedauer
+                {isBasic ? 'Wie lange willst du anlegen?' : 'Geplante Haltedauer'}
               </label>
-              <select
-                value={timeframe}
-                onChange={(e) => setTimeframe(e.target.value)}
-                className="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
-              >
-                {timeframeKeys.map((k) => (
-                  <option key={k} value={k}>{k}</option>
-                ))}
-              </select>
+              {isBasic ? (
+                <div className="grid grid-cols-3 gap-1 glass-input p-1 rounded-xl">
+                  {BASIC_TIMEFRAMES.map((t) => (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setTimeframe(t.key)}
+                      className={`relative text-xs py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                        timeframe === t.key ? 'liquid-glass-active text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {t.label}
+                      {t.hint && timeframe !== t.key && (
+                        <span className="absolute -top-2 -right-1 text-[8px] font-black uppercase px-1 rounded bg-emerald-400/90 text-slate-900">★</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <select
+                  value={timeframe}
+                  onChange={(e) => setTimeframe(e.target.value)}
+                  className="w-full glass-input rounded-xl px-3 py-2.5 text-sm text-white cursor-pointer"
+                >
+                  {timeframeKeys.map((k) => (
+                    <option key={k} value={k}>{k}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Strategie */}
@@ -353,7 +410,7 @@ export default function App() {
                     <select
                       value={sparplanFreq}
                       onChange={(e) => setSparplanFreq(e.target.value)}
-                      className="bg-slate-950/80 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none cursor-pointer"
+                      className="glass-input rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none cursor-pointer"
                     >
                       <option value="monatlich">monatlich</option>
                       <option value="wöchentlich">wöchentlich</option>
@@ -424,7 +481,7 @@ export default function App() {
         {displayData && (
           <div className="space-y-6 animate-fadeIn">
             {/* Header: Wertpapiername, Kurs, Favoriten-Stern & Teilen-Button */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-900/70 backdrop-blur-xl border border-white/[0.12] shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl glass shadow-xl">
               <div>
                 <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="text-xl md:text-2xl font-black text-white">
@@ -456,22 +513,41 @@ export default function App() {
               </div>
 
               {/* Kurs & Aktions-Buttons (Teilen & Duell) */}
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 relative z-10">
                 <div>
                   <div className="text-[10px] text-slate-400 font-medium uppercase">Aktueller Kurs</div>
                   <div className="text-2xl font-black text-white font-mono">{displayData.current_price?.toFixed(2)} €</div>
                 </div>
-                <div>
-                  <div className="text-[10px] text-slate-400 font-medium uppercase">Markt-Beta</div>
-                  <div className="text-2xl font-black text-sky-400 font-mono">{displayData.beta?.toFixed(2)}</div>
-                </div>
+
+                {isBasic ? (
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
+                      Schwankung
+                      <InfoTooltip title="Schwankungsintensität" text={`Gibt an, wie stark dieses Wertpapier im Vergleich zum Weltmarkt ausschlägt. ${insights?.marketCompare || ''}.`} />
+                    </div>
+                    <div className="mt-1">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-bold ${TONE[insights?.swing?.tone || 'sky'].soft}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${TONE[insights?.swing?.tone || 'sky'].dot}`} />
+                        {insights?.swing?.label || 'Moderat'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
+                      Markt-Beta
+                      <InfoTooltip title="Markt-Beta (Vasicek Shrinkage)" text="Sensitivität gegenüber dem Weltmarkt (MSCI World = 1.0). Ein Beta von 1.2 bedeutet 20 % stärkere Marktschwankungen." />
+                    </div>
+                    <div className="text-2xl font-black text-sky-400 font-mono">{displayData.beta?.toFixed(2)}</div>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2">
                   {/* Modul 6: Teilen-Button */}
                   <button
                     type="button"
                     onClick={() => setShareModalOpen(true)}
-                    className="p-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sky-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
+                    className="p-2.5 rounded-2xl glass-chip hover:bg-white/10 text-sky-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
                     title="Analyse-Report teilen"
                   >
                     <Share2 className="w-4 h-4" />
@@ -492,11 +568,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Modul 2: Das 3-Sekunden-Fazit (Executive Summary) */}
-            <ExecutiveSummary data={displayData} invType={invType} />
-
             {/* MODUS-ABHÄNGIGE ANSICHT: EINSTEIGER vs. PRO */}
-            {experienceMode === 'beginner' ? (
+            {isBasic ? (
               <BeginnerView
                 data={displayData}
                 invType={invType}
@@ -505,52 +578,114 @@ export default function App() {
               />
             ) : (
               <div className="space-y-8 animate-fadeIn">
+                {/* 3-Sekunden-Fazit für den schnellen Überblick im Pro-Modus */}
+                <ExecutiveSummary data={displayData} invType={invType} />
+
+                {/* Sticky Kapitelnavigation für schnelles Springen */}
+                <ProNav sections={PRO_SECTIONS} />
+
                 {/* 1. Signal & Trend-Banner */}
-                <SignalBanner chartModel={displayData.chart_model} />
+                <ProSection
+                  id="pro-signal"
+                  number={1}
+                  title="Signal & Trend-Modell"
+                  takeaway={insights ? `${insights.trend.text} Gesamtscore: ${displayData.chart_model?.score > 0 ? '+' : ''}${displayData.chart_model?.score ?? 0} %.` : ''}
+                >
+                  <SignalBanner chartModel={displayData.chart_model} />
+                </ProSection>
 
                 {/* 2. Realer Kursverlauf & Trendlinien (Liquid Glass & Harmonische Candlesticks) */}
-                <PriceChart 
-                  history={displayData.chart_history} 
-                  todayHistory={displayData.today_history} 
-                  weekHistory={displayData.week_history} 
-                  ticker={displayData.ticker} 
-                  chartModel={displayData.chart_model} 
-                />
+                <ProSection
+                  id="pro-chart"
+                  number={2}
+                  title="Kursverlauf & Technische Muster"
+                  takeaway="Realer Kursverlauf mit Donchian-Kanälen, GD50/200 und harmonisierter Candlestick-Mustererkennung."
+                >
+                  <PriceChart 
+                    history={displayData.chart_history} 
+                    todayHistory={displayData.today_history} 
+                    weekHistory={displayData.week_history} 
+                    ticker={displayData.ticker} 
+                    chartModel={displayData.chart_model} 
+                  />
+                </ProSection>
 
                 {/* 3. Finanzmathematische Hochrechnung (mit Live-Slider-Werten) */}
-                <FinancialMetrics 
-                  monteCarlo={displayData.monte_carlo}
-                  invType={displayData.investment_type}
-                  sparplanFreq={displayData.sparplan_frequenz}
-                />
+                <ProSection
+                  id="pro-projektion"
+                  number={3}
+                  title="Kapital-Projektion"
+                  takeaway={insights ? `Erwarteter Endwert nach ${insights.horizon}: ${formatEuro(insights.scenarios.normal)} (erwartete Rendite +${(displayData.monte_carlo?.expected_return_pct ?? 0).toFixed(1)} %).` : ''}
+                >
+                  <FinancialMetrics 
+                    monteCarlo={displayData.monte_carlo}
+                    invType={displayData.investment_type}
+                    sparplanFreq={displayData.sparplan_frequenz}
+                  />
+                </ProSection>
 
                 {/* 4. Risikoprofil & Wahrscheinlichkeiten */}
-                <RiskProfile
-                  monteCarlo={displayData.monte_carlo}
-                  rollingReturns={displayData.rolling_returns}
-                  beta={displayData.beta}
-                />
+                <ProSection
+                  id="pro-risiko"
+                  number={4}
+                  title="Stochastisches Risikoprofil"
+                  takeaway={insights ? `Gewinnquote: ${insights.winRate != null ? `${insights.winRate.toFixed(0)} %` : `${insights.probUp.toFixed(0)} %`} · Sortino-Ratio: ${insights.sortino.toFixed(2)} (Rendite relativ zum Abwärtsrisiko).` : ''}
+                >
+                  <RiskProfile
+                    monteCarlo={displayData.monte_carlo}
+                    rollingReturns={displayData.rolling_returns}
+                    beta={displayData.beta}
+                  />
+                </ProSection>
 
                 {/* 5. Historischer Krisen- & Stresstest */}
-                <CrisisStressTest crisisModel={displayData.crisis_model} />
+                <ProSection
+                  id="pro-krisen"
+                  number={5}
+                  title="Krisen- & Stresstest"
+                  takeaway={insights ? `Maximaler historischer Drawdown: −${insights.maxDd.toFixed(1)} %. ${displayData.crisis_model?.summary || ''}` : ''}
+                >
+                  <CrisisStressTest crisisModel={displayData.crisis_model} />
+                </ProSection>
 
                 {/* 6. Simulationsfächer (Merton Jump-Diffusion) */}
-                <FanChart 
-                  paths={displayData.monte_carlo?.sample_paths} 
-                  medianPath={displayData.monte_carlo?.median_path} 
-                  ticker={displayData.ticker}
-                />
+                <ProSection
+                  id="pro-simulation"
+                  number={6}
+                  title="Merton Jump-Diffusion Fächer"
+                  takeaway="5.000 Pfade mit Poisson-Sprungprozess zur realistischen Modellierung plötzlicher Kurssprünge."
+                >
+                  <FanChart 
+                    paths={displayData.monte_carlo?.sample_paths} 
+                    medianPath={displayData.monte_carlo?.median_path} 
+                    ticker={displayData.ticker}
+                  />
+                </ProSection>
 
                 {/* 7. Fundamentale Bewertung (KGV & Multiples) */}
-                <FundamentalCards fundamental={displayData.fundamental} />
+                <ProSection
+                  id="pro-bewertung"
+                  number={7}
+                  title="Fundamentale Bewertung"
+                  takeaway={insights ? (insights.isEtf ? 'Breit gestreuter Index-Fonds – keine Einzelunternehmens-Bewertung nötig.' : `${displayData.fundamental?.valuation_status || 'Bewertung'}: ${displayData.fundamental?.summary || ''}`) : ''}
+                >
+                  <FundamentalCards fundamental={displayData.fundamental} />
+                </ProSection>
 
                 {/* 8. Broker-Leitfaden */}
-                <BrokerGuide
-                  assetInfo={displayData.asset_info}
-                  invType={displayData.investment_type}
-                  sparplanFreq={displayData.sparplan_frequenz}
-                  kapital={displayData.kapital_input}
-                />
+                <ProSection
+                  id="pro-umsetzung"
+                  number={8}
+                  title="Order-Leitfaden"
+                  takeaway="Konkrete Kennnummern (WKN/ISIN) und Sparplan-Schritte für deutsche Broker."
+                >
+                  <BrokerGuide
+                    assetInfo={displayData.asset_info}
+                    invType={displayData.investment_type}
+                    sparplanFreq={displayData.sparplan_frequenz}
+                    kapital={displayData.kapital_input}
+                  />
+                </ProSection>
               </div>
             )}
           </div>

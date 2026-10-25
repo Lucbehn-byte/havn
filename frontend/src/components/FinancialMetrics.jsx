@@ -29,7 +29,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
       {/* 3 Hauptkacheln */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Eingezahlt */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
+        <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
               Eingezahltes Kapital
@@ -49,7 +49,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         </div>
 
         {/* Gewinn */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
+        <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
               Erwarteter Reingewinn
@@ -71,7 +71,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         </div>
 
         {/* Endwert */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
+        <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
               Voraussichtlicher Endwert
@@ -92,13 +92,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
       </div>
 
       {/* Möglicher Korridor */}
-      <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
+      <div className="glass-inset rounded-2xl p-4">
         <div className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-sky-400" />
           <span>Realistischer Korridor (Worst-Case bis Best-Case):</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3 flex items-center gap-3">
+          <div className="glass-inset rounded-xl p-3 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 shrink-0">
               <CloudRain className="w-4 h-4" />
             </div>
@@ -118,7 +118,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
             </div>
           </div>
 
-          <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3 flex items-center gap-3">
+          <div className="glass-inset rounded-xl p-3 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
               <SunMedium className="w-4 h-4" />
             </div>

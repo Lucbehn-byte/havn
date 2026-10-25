@@ -32,7 +32,7 @@ export default function SignalBanner({ chartModel = {} }) {
     <div className={`rounded-2xl border bg-gradient-to-r p-5 shadow-xl transition-all ${bannerBg}`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 shadow-md shrink-0">
+          <div className="p-3 rounded-xl glass-chip shadow-md shrink-0">
             {icon}
           </div>
           <div>
@@ -40,7 +40,7 @@ export default function SignalBanner({ chartModel = {} }) {
               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${badgeBg}`}>
                 {label}
               </span>
-              <span className="text-xs font-mono font-bold bg-slate-900/80 px-2 py-0.5 rounded-md border border-slate-700">
+              <span className="text-xs font-mono font-bold glass-chip px-2 py-0.5 rounded-md">
                 Score: {score > 0 ? `+${score}` : score}%
               </span>
             </div>
@@ -53,7 +53,7 @@ export default function SignalBanner({ chartModel = {} }) {
         {signals.length > 0 && (
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="self-start md:self-center shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors"
+            className="self-start md:self-center shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl glass-chip hover:bg-white/10 text-slate-200 transition-colors"
           >
             <span>{showDetails ? 'Details schließen' : 'Warum dieser Score?'}</span>
             {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -64,7 +64,7 @@ export default function SignalBanner({ chartModel = {} }) {
       {showDetails && signals.length > 0 && (
         <div className="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
           {signals.map((sig, i) => (
-            <div key={i} className="flex items-start gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+            <div key={i} className="flex items-start gap-2 glass-inset p-2.5 rounded-xl">
               <span className="text-sky-400 font-bold">•</span>
               <span>{sig}</span>
             </div>

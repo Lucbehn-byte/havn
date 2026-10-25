@@ -17,7 +17,7 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
   const wkn = assetInfo.wkn || '–';
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+    <div className="glass rounded-2xl p-5 shadow-xl space-y-4">
       <div className="flex items-center gap-3">
         <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
           <Smartphone className="w-5 h-5" />
@@ -32,19 +32,19 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         {/* Kennnummern zum Kopieren */}
-        <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 space-y-3">
+        <div className="glass-inset rounded-xl p-4 space-y-3">
           <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <Search className="w-3.5 h-3.5 text-sky-400" />
             <span>Kennnummern für deine Broker-Suche:</span>
           </div>
           
           <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <div className="flex items-center justify-between p-2 rounded-lg glass">
               <span className="text-slate-400 font-medium">Wertpapiername:</span>
               <span className="font-bold text-white truncate max-w-[200px]">{name}</span>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <div className="flex items-center justify-between p-2 rounded-lg glass">
               <span className="text-slate-400 font-medium">ISIN:</span>
               <div className="flex items-center gap-2 font-mono font-bold text-sky-400">
                 <span>{isin}</span>
@@ -58,7 +58,7 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <div className="flex items-center justify-between p-2 rounded-lg glass">
               <span className="text-slate-400 font-medium">WKN:</span>
               <div className="flex items-center gap-2 font-mono font-bold text-slate-200">
                 <span>{wkn}</span>
@@ -72,7 +72,7 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
+            <div className="flex items-center justify-between p-2 rounded-lg glass">
               <span className="text-slate-400 font-medium">Symbol / Ticker:</span>
               <span className="font-mono font-bold text-slate-300">{ticker}</span>
             </div>
@@ -80,7 +80,7 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
         </div>
 
         {/* 3 Goldene Regeln für Einsteiger */}
-        <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 space-y-2.5 text-xs">
+        <div className="glass-inset rounded-xl p-4 space-y-2.5 text-xs">
           <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5 text-emerald-400" /> Die 3 goldenen Einsteiger-Regeln:
           </div>

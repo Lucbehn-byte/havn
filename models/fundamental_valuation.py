@@ -101,7 +101,21 @@ def analyze_fundamental_valuation(
     if profit_margin is not None:
         metrics["Gewinnmarge"] = f"{profit_margin * 100:.1f}%"
     if div_yield is not None:
-        metrics["Dividendenrendite"] = f"{div_yield * 100:.2f}%" if div_yield < 1 else f"{div_yield:.2f}%"
+        # yfinance liefert 'dividendYield' je nach Version als Bruch (0.0031) oder bereits in Prozent (0.31).
+        # Robusteste Quelle: Dividende pro Aktie / aktueller Kurs.
+        div_pct = None
+        try:
+            rate = info.get("dividendRate") if isinstance(info, dict) else None
+            px = (info.get("currentPrice") or info.get("regularMarketPrice")) if isinstance(info, dict) else None
+            if rate and px:
+                div_pct = float(rate) / float(px) * 100.0
+            elif isinstance(info, dict) and info.get("trailingAnnualDividendYield"):
+                div_pct = float(info.get("trailingAnnualDividendYield")) * 100.0
+        except Exception:
+            div_pct = None
+        if div_pct is None:
+            div_pct = float(div_yield) if div_yield >= 0.2 else float(div_yield) * 100.0
+        metrics["Dividendenrendite"] = f"{div_pct:.2f}%"
 
     # Wall-Street Konsens & Forward-EPS auswerten
     analyst_consensus = None

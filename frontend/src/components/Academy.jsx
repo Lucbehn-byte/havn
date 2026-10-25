@@ -113,7 +113,7 @@ export default function Academy({ experienceMode = 'beginner' }) {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Intro Header */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+      <div className="glass rounded-3xl p-6 shadow-2xl relative overflow-hidden">
         <div className={`absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none ${isPro ? 'bg-indigo-500/10' : 'bg-emerald-500/10'}`}></div>
         <div className="flex items-center gap-3 mb-2">
           <div className={`p-2.5 rounded-xl border ${
@@ -150,7 +150,7 @@ export default function Academy({ experienceMode = 'beginner' }) {
           return (
             <div 
               key={idx}
-              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3 flex flex-col justify-between hover:border-slate-700/80 transition-all"
+              className="glass rounded-3xl p-6 shadow-xl space-y-3 flex flex-col justify-between hover:border-slate-700/80 transition-all"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">

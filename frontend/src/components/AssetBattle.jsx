@@ -71,7 +71,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Intro Header im Liquid Glass Design */}
-      <div className="relative rounded-3xl p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/85 via-slate-900/60 to-slate-950/90 border border-white/[0.12] overflow-hidden">
+      <div className="relative rounded-3xl p-6 sm:p-7 glass overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
 
@@ -94,7 +94,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs px-3 py-1.5 rounded-xl bg-slate-950/60 border border-white/10 text-slate-300 font-mono font-bold">
+            <span className="text-xs px-3 py-1.5 rounded-xl glass-inset text-slate-300 font-mono font-bold">
               Stand: <span className="text-sky-400">{scoreA}</span> : <span className="text-indigo-400">{scoreB}</span>
             </span>
           </div>
@@ -141,20 +141,20 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
       </div>
 
       {/* Duell-Vergleichs-Tabelle im Liquid Glass Stil */}
-      <div className="relative rounded-3xl p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl bg-gradient-to-b from-slate-900/85 via-slate-900/60 to-slate-950/90 border border-white/[0.12] space-y-5">
+      <div className="relative rounded-3xl p-6 sm:p-7 glass space-y-5">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-400" />
             <span>Direkter Runden-Vergleich</span>
           </h3>
-          <span className="text-xs px-3 py-1.5 rounded-full bg-slate-950/60 border border-white/10 text-slate-300 font-mono font-bold">
+          <span className="text-xs px-3 py-1.5 rounded-full glass-inset text-slate-300 font-mono font-bold">
             {totalRounds} Quant-Disziplinen
           </span>
         </div>
 
         <div className="space-y-2.5">
           {/* Kriterium 1: 5-Jahres-Rendite */}
-          <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+          <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
             <div className={`text-base sm:text-lg font-mono font-black ${dataA.return5Y >= dataB.return5Y ? 'text-sky-400' : 'text-slate-500'}`}>
               +{dataA.return5Y}% {dataA.return5Y >= dataB.return5Y ? '🏆' : ''}
             </div>
@@ -168,7 +168,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           </div>
 
           {/* Kriterium 2: Sortino-Ratio */}
-          <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+          <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
             <div className={`text-base sm:text-lg font-mono font-black ${dataA.sortino >= dataB.sortino ? 'text-sky-400' : 'text-slate-500'}`}>
               {dataA.sortino.toFixed(2)} {dataA.sortino >= dataB.sortino ? '🏆' : ''}
             </div>
@@ -182,7 +182,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           </div>
 
           {/* Kriterium 3: Maximaler Drawdown */}
-          <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+          <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
             <div className={`text-base sm:text-lg font-mono font-black ${dataA.maxDd >= dataB.maxDd ? 'text-emerald-400' : 'text-slate-500'}`}>
               {dataA.maxDd}% {dataA.maxDd >= dataB.maxDd ? '🏆' : ''}
             </div>
@@ -196,7 +196,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           </div>
 
           {/* Kriterium 4: Gewinn-Wahrscheinlichkeit */}
-          <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+          <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
             <div className={`text-base sm:text-lg font-mono font-black ${dataA.winRate >= dataB.winRate ? 'text-sky-400' : 'text-slate-500'}`}>
               {dataA.winRate}% {dataA.winRate >= dataB.winRate ? '🏆' : ''}
             </div>
@@ -213,7 +213,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           {experienceMode === 'pro' && (
             <>
               {/* Pro 1: Sharpe Ratio */}
-              <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+              <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
                 <div className={`text-base sm:text-lg font-mono font-black ${dataA.sharpe >= dataB.sharpe ? 'text-sky-400' : 'text-slate-500'}`}>
                   {dataA.sharpe.toFixed(2)} {dataA.sharpe >= dataB.sharpe ? '🏆' : ''}
                 </div>
@@ -227,7 +227,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
               </div>
 
               {/* Pro 2: Volatilität */}
-              <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+              <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
                 <div className={`text-base sm:text-lg font-mono font-black ${dataA.vol <= dataB.vol ? 'text-emerald-400' : 'text-slate-500'}`}>
                   {dataA.vol}% {dataA.vol <= dataB.vol ? '🏆' : ''}
                 </div>
@@ -241,7 +241,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
               </div>
 
               {/* Pro 3: Markt-Beta */}
-              <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+              <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
                 <div className={`text-base sm:text-lg font-mono font-black ${dataA.beta <= dataB.beta ? 'text-sky-400' : 'text-slate-500'}`}>
                   {dataA.beta.toFixed(2)} {dataA.beta <= dataB.beta ? '🏆' : ''}
                 </div>
@@ -255,7 +255,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
               </div>
 
               {/* Pro 4: CVaR 95% */}
-              <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+              <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
                 <div className={`text-base sm:text-lg font-mono font-black ${dataA.cvar >= dataB.cvar ? 'text-emerald-400' : 'text-slate-500'}`}>
                   {dataA.cvar}% {dataA.cvar >= dataB.cvar ? '🏆' : ''}
                 </div>
@@ -269,7 +269,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
               </div>
 
               {/* Pro 5: Diversifikation & Gebühren */}
-              <div className="bg-slate-950/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between">
+              <div className="glass-inset rounded-2xl p-4 flex items-center justify-between">
                 <div className="text-left font-mono">
                   <div className="text-xs font-black text-sky-400">{dataA.ter > 0 ? `${dataA.ter}% TER` : 'Keine TER'}</div>
                   <div className="text-[10px] text-slate-400">{dataA.diversification}</div>

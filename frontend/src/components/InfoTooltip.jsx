@@ -36,7 +36,7 @@ export default function InfoTooltip({ title, text, align = 'center' }) {
 
       {open && (
         <span 
-          className={`absolute bottom-full mb-2 z-50 w-64 p-3 rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl backdrop-blur-xl text-left pointer-events-none animate-fadeIn ${
+          className={`absolute bottom-full mb-2 z-50 w-64 p-3 rounded-2xl glass-strong text-left pointer-events-none animate-fadeIn ${
             align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
           }`}
         >

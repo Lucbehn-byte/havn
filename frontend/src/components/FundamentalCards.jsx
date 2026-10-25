@@ -12,7 +12,7 @@ export default function FundamentalCards({ fundamental = {} }) {
   const metricEntries = Object.entries(metrics);
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+    <div className="glass rounded-2xl p-5 shadow-xl space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function FundamentalCards({ fundamental = {} }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
             {/* Median Kursziel */}
             {consensus.target_median_price && (
-              <div className="bg-slate-950/70 border border-slate-800/80 rounded-lg p-2.5">
+              <div className="glass-inset rounded-lg p-2.5">
                 <div className="text-[10px] text-slate-400 flex items-center gap-1">
                   <Target className="w-3 h-3 text-sky-400" />
                   <span>Median-Kursziel</span>
@@ -65,7 +65,7 @@ export default function FundamentalCards({ fundamental = {} }) {
             )}
 
             {/* Analystenanzahl */}
-            <div className="bg-slate-950/70 border border-slate-800/80 rounded-lg p-2.5">
+            <div className="glass-inset rounded-lg p-2.5">
               <div className="text-[10px] text-slate-400 flex items-center gap-1">
                 <Users className="w-3 h-3 text-indigo-400" />
                 <span>Analysten-Stimmen</span>
@@ -80,7 +80,7 @@ export default function FundamentalCards({ fundamental = {} }) {
 
             {/* Forward-EPS Wachstum */}
             {consensus.forward_eps_growth_pct != null && (
-              <div className="bg-slate-950/70 border border-slate-800/80 rounded-lg p-2.5">
+              <div className="glass-inset rounded-lg p-2.5">
                 <div className="text-[10px] text-slate-400 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-emerald-400" />
                   <span>Gewinnwachstum (EPS)</span>
@@ -95,7 +95,7 @@ export default function FundamentalCards({ fundamental = {} }) {
             )}
 
             {/* KGV-Mean-Reversion Status */}
-            <div className="bg-slate-950/70 border border-slate-800/80 rounded-lg p-2.5">
+            <div className="glass-inset rounded-lg p-2.5">
               <div className="text-[10px] text-slate-400 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-amber-400" />
                 <span>KGV-Mean-Reversion</span>
@@ -115,7 +115,7 @@ export default function FundamentalCards({ fundamental = {} }) {
       {metricEntries.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {metricEntries.map(([k, v], idx) => (
-            <div key={idx} className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
+            <div key={idx} className="glass-inset rounded-xl p-3">
               <div className="text-[10px] text-slate-400 font-medium truncate">{k}</div>
               <div className="text-sm font-bold text-white font-mono mt-1 truncate">{v}</div>
             </div>

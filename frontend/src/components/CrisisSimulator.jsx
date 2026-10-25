@@ -121,7 +121,7 @@ export default function CrisisSimulator() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Intro & Konfigurations-Leiste */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-6">
+      <div className="glass rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -191,7 +191,7 @@ export default function CrisisSimulator() {
 
       {/* Regler Kacheln (Roll-Up Picker) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
+        <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
             label={`Geldeinsatz (Startkapital bei Krisenbeginn)`}
             value={kapital}
@@ -199,7 +199,7 @@ export default function CrisisSimulator() {
             presets={[100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
           />
         </div>
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
+        <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
             label="Monatliche Sparrate während & nach dem Crash"
             value={sparrate}
@@ -210,7 +210,7 @@ export default function CrisisSimulator() {
       </div>
 
       {/* Ergebnis Auswertung */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+      <div className="glass rounded-3xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
@@ -225,7 +225,7 @@ export default function CrisisSimulator() {
 
         {/* 2 Hauptkacheln: Reale Kursveränderung & Sparplan-Endwert */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
+          <div className="glass-inset rounded-2xl p-4">
             <span className="text-xs text-slate-400">Reale Kursentwicklung ({event.title})</span>
             <div className="text-2xl font-black font-mono text-white mt-1 flex items-baseline gap-2">
               <span>{priceChange3Y >= 0 ? `+${priceChange3Y}%` : `${priceChange3Y}%`}</span>
@@ -236,7 +236,7 @@ export default function CrisisSimulator() {
             </span>
           </div>
 
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
+          <div className="glass-inset rounded-2xl p-4">
             <span className="text-xs text-slate-400">Dein Depotwert nach 3 Jahren (mit Sparplan)</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               {endDepotValue.toLocaleString('de-DE')} €
@@ -248,7 +248,7 @@ export default function CrisisSimulator() {
         </div>
 
         {/* GROSSFORMATIGER HISTORISCHER ECHTDATEN-GRAPH */}
-        <div className="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-6 space-y-4 shadow-inner">
+        <div className="glass-inset rounded-3xl p-6 space-y-4 shadow-inner">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export default function CrisisSimulator() {
             </div>
             
             {/* Ansichts-Filter */}
-            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 p-1 rounded-2xl self-start sm:self-auto">
+            <div className="flex items-center gap-1.5 glass p-1 rounded-2xl self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => setViewMode('both')}
@@ -304,7 +304,7 @@ export default function CrisisSimulator() {
             <span className="px-3 py-1 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-300 font-bold flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> Realer Aktienkurs (€)
             </span>
-            <span className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 font-bold flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-lg glass text-slate-400 font-bold flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 bg-slate-500"></span> Eingezahltes Kapital
             </span>
           </div>

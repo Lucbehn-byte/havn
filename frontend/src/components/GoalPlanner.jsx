@@ -73,7 +73,7 @@ export default function GoalPlanner() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Intro Header */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+      <div className="glass rounded-3xl p-6 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
@@ -119,7 +119,7 @@ export default function GoalPlanner() {
 
       {/* Regler Kacheln mit realistischen Stufen */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
+        <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
             label="Wunsch-Zielvermögen"
             value={targetCapital}
@@ -128,7 +128,7 @@ export default function GoalPlanner() {
             presets={[5000, 10000, 15000, 20000, 25000, 35000, 50000, 60000, 80000, 100000, 150000, 200000, 250000, 350000, 500000, 750000, 1000000]}
           />
         </div>
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
+        <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
             label="Zeit bis zum Ziel"
             value={years}
@@ -140,7 +140,7 @@ export default function GoalPlanner() {
       </div>
 
       {/* Ergebnis-Cockpit */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+      <div className="glass rounded-3xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Compass className="w-5 h-5 text-indigo-400" />
@@ -162,7 +162,7 @@ export default function GoalPlanner() {
           </div>
 
           {/* Eigene Einzahlungen */}
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
+          <div className="glass-inset rounded-2xl p-4">
             <span className="text-xs text-slate-400">Eigene Einzahlungen</span>
             <div className="text-2xl font-black font-mono text-slate-200 mt-1">
               {totalEigenkapital.toLocaleString('de-DE')} €
@@ -171,7 +171,7 @@ export default function GoalPlanner() {
           </div>
 
           {/* Zinseszins Geschenk */}
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
+          <div className="glass-inset rounded-2xl p-4">
             <span className="text-xs text-emerald-400 font-bold">Zinseszins-Ertrag</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               +{zinsgewinn.toLocaleString('de-DE')} €
@@ -183,7 +183,7 @@ export default function GoalPlanner() {
         </div>
 
         {/* Empfohlene HAVN-Strategie */}
-        <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 leading-relaxed space-y-2">
+        <div className="p-4 rounded-2xl glass-inset text-xs text-slate-300 leading-relaxed space-y-2">
           <div className="font-bold text-white flex items-center gap-1.5 uppercase tracking-wide">
             <Award className="w-4 h-4 text-sky-400" /> Die professionelle Umsetzung:
           </div>
