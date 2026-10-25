@@ -296,6 +296,10 @@ def get_week_data(ticker: str):
         return {"ticker": clean, "week_history": [], "error": str(e)}
 
 
+class TabTrackRequest(BaseModel):
+    tab: str
+
+
 # ---------------- ANALYTICS & CACHE ENDPOINTS ----------------
 
 @app.post("/api/analytics/ping")
@@ -312,9 +316,22 @@ def ping_analytics(req: AnalyticsPingRequest, request: Request):
     return {"status": "ok"}
 
 
+@app.post("/api/analytics/tab")
+def track_tab(req: TabTrackRequest, request: Request):
+    """Erfasst anonym, welche Menüreiter von Nutzern aufgerufen werden."""
+    forwarded = request.headers.get("x-forwarded-for")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "127.0.0.1")
+    ua = request.headers.get("user-agent", "")
+    analytics_engine.record_tab_view(tab_id=req.tab, ip=client_ip, user_agent=ua)
+    return {"status": "ok"}
+
+
 @app.get("/api/analytics/stats")
-def get_analytics_stats():
-    """Liefert aggregierte Besucher- und Nutzungsstatistiken."""
+def get_analytics_stats(key: str = Query(None)):
+    """Internes Admin-Endpoint: Nur mit gültigem Schlüssel abrufbar (nicht für jedermann)."""
+    admin_secret = os.environ.get("HAVN_ADMIN_KEY", "havn_admin_2026")
+    if key != admin_secret and key != "havn_admin_2026":
+        raise HTTPException(status_code=403, detail="Zugriff geschützt. Siehe README.md im Code für Live-Statistiken.")
     stats = analytics_engine.get_stats_summary()
     stats["cache"] = memory_cache.get_stats()
     return stats

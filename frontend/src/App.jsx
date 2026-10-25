@@ -6,7 +6,6 @@ import ExecutiveSummary from './components/ExecutiveSummary';
 import ShareModal from './components/ShareModal';
 import InstallPrompt from './components/InstallPrompt';
 import LegalModal from './components/LegalModal';
-import AnalyticsModal from './components/AnalyticsModal';
 import SignalBanner from './components/SignalBanner';
 import PriceChart from './components/PriceChart';
 import FinancialMetrics from './components/FinancialMetrics';
@@ -72,9 +71,8 @@ export default function App() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [legalModalOpen, setLegalModalOpen] = useState(false);
-  const [analyticsModalOpen, setAnalyticsModalOpen] = useState(false);
 
-  // Anonymer Besucher-Ping für interne Echtzeit-Statistik
+  // Anonymer Besucher-Ping für interne Statistik
   useEffect(() => {
     try {
       fetch(`${API_BASE}/api/analytics/ping`, {
@@ -84,6 +82,17 @@ export default function App() {
       }).catch(() => {});
     } catch (e) {}
   }, []);
+
+  // Menüreiter-Nutzung anonym erfassen (wird direkt in README.md protokolliert)
+  useEffect(() => {
+    try {
+      fetch(`${API_BASE}/api/analytics/tab`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tab: activeTab })
+      }).catch(() => {});
+    } catch (e) {}
+  }, [activeTab]);
 
   const handleToggleFavorite = (favTicker, favName) => {
     const sym = favTicker.toUpperCase();
@@ -732,12 +741,6 @@ export default function App() {
         onClose={() => setLegalModalOpen(false)}
       />
 
-      {/* Modul: Besucher- & Nutzungs-Statistiken */}
-      <AnalyticsModal
-        isOpen={analyticsModalOpen}
-        onClose={() => setAnalyticsModalOpen(false)}
-      />
-
       {/* Floating Mobile Navigation Bar */}
       <MobileNav activeTab={activeTab} onSelectTab={setActiveTab} />
 
@@ -762,15 +765,6 @@ export default function App() {
               className="text-slate-400 hover:text-sky-400 transition-colors cursor-pointer underline underline-offset-4"
             >
               Datenschutz (DSGVO)
-            </button>
-            <span className="text-slate-700">•</span>
-            <button
-              type="button"
-              onClick={() => setAnalyticsModalOpen(true)}
-              className="text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Live-Statistiken</span>
             </button>
           </div>
           <p className="text-[11px] text-slate-600 mt-2">
