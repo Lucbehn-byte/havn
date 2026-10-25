@@ -110,8 +110,8 @@ export default function LegalModal({ isOpen, onClose }) {
                     <strong>Diensteanbieter:</strong><br />
                     HAVN Systems & Quant Technologies<br />
                     Betreiber: Luc Behn<br />
-                    E-Mail: <span className="text-sky-400 font-mono">kontakt@havn.app</span><br />
-                    Internet: <span className="text-sky-400 font-mono">https://havn.app</span>
+                    E-Mail: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
+                    Internet: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
 
@@ -119,7 +119,7 @@ export default function LegalModal({ isOpen, onClose }) {
                   <h4 className="text-sm font-black text-white mb-1">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h4>
                   <p>
                     Luc Behn<br />
-                    Kontakt via E-Mail: <span className="text-sky-400 font-mono">kontakt@havn.app</span>
+                    Kontakt via E-Mail: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>
                   </p>
                 </div>
 
@@ -146,8 +146,8 @@ export default function LegalModal({ isOpen, onClose }) {
                     <strong>Provider & Operator:</strong><br />
                     HAVN Systems & Quant Technologies<br />
                     Representative: Luc Behn<br />
-                    Contact: <span className="text-sky-400 font-mono">kontakt@havn.app</span><br />
-                    Website: <span className="text-sky-400 font-mono">https://havn.app</span>
+                    Contact: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
+                    Website: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
 
@@ -261,7 +261,7 @@ export default function LegalModal({ isOpen, onClose }) {
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">4. Deine Rechte</h4>
                   <p>
-                    Dir stehen nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung zu. Da wir keine Klardaten speichern, kontaktiere uns bei Fragen gern jederzeit unter <span className="text-sky-400 font-mono">kontakt@havn.app</span>.
+                    Dir stehen nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung zu. Da wir keine Klardaten speichern, kontaktiere uns bei Fragen gern jederzeit unter <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
                   </p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function LegalModal({ isOpen, onClose }) {
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">3. Contact</h4>
                   <p>
-                    For any privacy inquiries under GDPR or CCPA, reach out directly to <span className="text-sky-400 font-mono">kontakt@havn.app</span>.
+                    For any privacy inquiries under GDPR or CCPA, reach out directly to <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
                   </p>
                 </div>
               </div>
