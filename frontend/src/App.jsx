@@ -5,6 +5,8 @@ import FavoritesBar, { getStoredFavorites, saveStoredFavorites } from './compone
 import ExecutiveSummary from './components/ExecutiveSummary';
 import ShareModal from './components/ShareModal';
 import InstallPrompt from './components/InstallPrompt';
+import LegalModal from './components/LegalModal';
+import AnalyticsModal from './components/AnalyticsModal';
 import SignalBanner from './components/SignalBanner';
 import PriceChart from './components/PriceChart';
 import FinancialMetrics from './components/FinancialMetrics';
@@ -69,6 +71,19 @@ export default function App() {
   const [favorites, setFavorites] = useState(() => getStoredFavorites());
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [analyticsModalOpen, setAnalyticsModalOpen] = useState(false);
+
+  // Anonymer Besucher-Ping für interne Echtzeit-Statistik
+  useEffect(() => {
+    try {
+      fetch(`${API_BASE}/api/analytics/ping`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: window.location.pathname, referrer: document.referrer || '' })
+      }).catch(() => {});
+    } catch (e) {}
+  }, []);
 
   const handleToggleFavorite = (favTicker, favName) => {
     const sym = favTicker.toUpperCase();
@@ -711,15 +726,53 @@ export default function App() {
         onCloseManual={() => setShowInstallModal(false)} 
       />
 
+      {/* Modul: Rechtliches & Datenschutz */}
+      <LegalModal
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+      />
+
+      {/* Modul: Besucher- & Nutzungs-Statistiken */}
+      <AnalyticsModal
+        isOpen={analyticsModalOpen}
+        onClose={() => setAnalyticsModalOpen(false)}
+      />
+
       {/* Floating Mobile Navigation Bar */}
       <MobileNav activeTab={activeTab} onSelectTab={setActiveTab} />
 
       {/* FOOTER & RECHTLICHER HINWEIS */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500 space-y-2 mt-12 mb-16 lg:mb-0">
-        <div className="max-w-4xl mx-auto px-4">
+      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500 space-y-3 mt-12 mb-16 lg:mb-0">
+        <div className="max-w-4xl mx-auto px-4 space-y-3">
           <p>
             <strong className="text-slate-300">HAVN</strong> — Dein sicherer Hafen für fundierte Investment-Entscheidungen. Entwickelt mit modernem Tailwind CSS & stochastischer Finanzmathematik.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setLegalModalOpen(true)}
+              className="text-slate-400 hover:text-sky-400 transition-colors cursor-pointer underline underline-offset-4"
+            >
+              Impressum & Rechtliches
+            </button>
+            <span className="text-slate-700">•</span>
+            <button
+              type="button"
+              onClick={() => setLegalModalOpen(true)}
+              className="text-slate-400 hover:text-sky-400 transition-colors cursor-pointer underline underline-offset-4"
+            >
+              Datenschutz (DSGVO)
+            </button>
+            <span className="text-slate-700">•</span>
+            <button
+              type="button"
+              onClick={() => setAnalyticsModalOpen(true)}
+              className="text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live-Statistiken</span>
+            </button>
+          </div>
           <p className="text-[11px] text-slate-600 mt-2">
             <strong className="text-slate-400">Rechtlicher Hinweis:</strong> HAVN stellt keine Anlageberatung im Sinne des WpHG dar. Alle Berechnungen basieren auf historischen Wahrscheinlichkeitsmodellen und Simulationen. Wertpapiere unterliegen Marktschwankungen bis hin zum Totalverlustrisiko. Investitionen erfolgen eigenverantwortlich über deinen Broker.
           </p>

@@ -1,10 +1,12 @@
 """
 FastAPI Backend für die HAVN Tailwind-Webanwendung.
 Stellt die quantitativen Berechnungen und Daten als REST-API zur Verfügung.
+Inklusive 15-Minuten In-Memory Caching und DSGVO-konformer Besucher-Analytics.
 """
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import pandas as pd
 import numpy as np
@@ -14,8 +16,10 @@ import yfinance as yf
 from config import PRESET_ASSETS, TIMEFRAMES
 from core.data_loader import search_ticker_candidates
 from core.engine import run_full_analysis
+from utils.cache import memory_cache
+from utils.analytics import analytics_engine
 
-app = FastAPI(title="HAVN API", version="1.0.0")
+app = FastAPI(title="HAVN API", version="1.1.0")
 
 # CORS aktivieren, damit das Tailwind/React-Frontend darauf zugreifen kann
 app.add_middleware(
@@ -36,6 +40,11 @@ class AnalysisRequest(BaseModel):
     startkapital: float = 0.0
 
 
+class AnalyticsPingRequest(BaseModel):
+    path: str = "/"
+    referrer: str = ""
+
+
 @app.get("/api/presets")
 def get_presets():
     """Liefert alle vordefinierten Einsteiger-Investments."""
@@ -50,17 +59,34 @@ def get_timeframes():
 
 @app.get("/api/search")
 def search_stocks(q: str = Query(..., min_length=1)):
-    """Sucht nach Aktien und ETFs anhand von Name, Ticker oder WKN."""
+    """Sucht nach Aktien und ETFs anhand von Name, Ticker oder WKN (mit 5-Min Cache)."""
+    cache_key = f"search_{q.strip().lower()}"
+    cached = memory_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     candidates = search_ticker_candidates(q, max_results=6)
+    memory_cache.set(cache_key, candidates, ttl_seconds=300)
+    analytics_engine.record_search(q)
     return candidates
 
 
 @app.post("/api/analyze")
 def analyze_stock(req: AnalysisRequest):
-    """Führt die ganzheitliche Quant-Analyse über alle 6 Modelle durch."""
+    """
+    Führt die ganzheitliche Quant-Analyse über alle 6 Modelle durch.
+    Ergebnisse werden für 15 Minuten (900s) im Memory-Cache gehalten.
+    """
+    clean_ticker = req.ticker.upper().strip()
+    cache_key = f"analyze_{clean_ticker}_{req.timeframe}_{req.investment_type}_{req.sparplan_frequenz}_{req.kapital}_{req.startkapital}"
+    cached_result = memory_cache.get(cache_key)
+    if cached_result is not None:
+        analytics_engine.record_ticker_analysis(clean_ticker)
+        return cached_result
+
     try:
         res = run_full_analysis(
-            ticker_symbol=req.ticker,
+            ticker_symbol=clean_ticker,
             timeframe_label=req.timeframe,
             investment_type=req.investment_type,
             sparplan_frequenz=req.sparplan_frequenz,
@@ -71,7 +97,7 @@ def analyze_stock(req: AnalysisRequest):
         if "error" in res and res["error"]:
             raise HTTPException(status_code=400, detail=res["error"])
 
-        # Pandas DataFrame für JSON-Serialisierung aufbereiten (Unterstützung für Woche, Monat, Jahr, 5 Jahre & Max)
+        # Pandas DataFrame für JSON-Serialisierung aufbereiten
         df_hist = res.pop("history_df", None)
         chart_history = []
         if df_hist is not None and not df_hist.empty:
@@ -85,13 +111,10 @@ def analyze_stock(req: AnalysisRequest):
             pat_type_series = res.get("chart_model", {}).get("pattern_type_series")
 
             total_rows = len(df_hist)
-            # Bis zu 1600 Tage (über 6 Jahre tägliche Daten) unkomprimiert übernehmen
             if total_rows <= 1600:
                 selected_indices = list(range(total_rows))
             else:
-                # Letzte 1260 Tage (5 Jahre) mit voller täglicher Auflösung (step=1)
                 recent_indices = list(range(total_rows - 1260, total_rows))
-                # Ältere Historie gleichmäßig auf ca. 350 Stützpunkte verdichten
                 older_total = total_rows - 1260
                 older_step = max(2, older_total // 350)
                 older_indices = list(range(0, older_total, older_step))
@@ -128,7 +151,7 @@ def analyze_stock(req: AnalysisRequest):
         # 2. Intraday-Daten für "Heute" (15-Minuten-Kerzen)
         today_history = []
         try:
-            t_obj = yf.Ticker(req.ticker)
+            t_obj = yf.Ticker(clean_ticker)
             df_today = t_obj.history(period="1d", interval="15m")
             if df_today is None or df_today.empty:
                 df_today = t_obj.history(period="5d", interval="15m")
@@ -149,11 +172,11 @@ def analyze_stock(req: AnalysisRequest):
                         "close": round(float(row["Close"]), 2),
                     })
         except Exception as e:
-            print(f"Hinweis: Intraday-Daten für {req.ticker} konnten nicht geladen werden: {e}")
+            print(f"Hinweis: Intraday-Daten für {clean_ticker} konnten nicht geladen werden: {e}")
 
         res["today_history"] = today_history
 
-        # 3. 1-Stunden-Kerzen für "Woche" (ca. 35-45 Kerzen für stimmige Proportionen)
+        # 3. 1-Stunden-Kerzen für "Woche"
         week_history = []
         try:
             df_week = t_obj.history(period="5d", interval="1h")
@@ -176,7 +199,7 @@ def analyze_stock(req: AnalysisRequest):
                         "close": round(float(row["Close"]), 2),
                     })
         except Exception as e:
-            print(f"Hinweis: Wochen-Stundendaten für {req.ticker} konnten nicht geladen werden: {e}")
+            print(f"Hinweis: Woche-Daten für {clean_ticker} konnten nicht geladen werden: {e}")
 
         res["week_history"] = week_history
 
@@ -186,6 +209,10 @@ def analyze_stock(req: AnalysisRequest):
             res["chart_model"].pop("pattern_series", None)
             res["chart_model"].pop("pattern_type_series", None)
 
+        # 15 Minuten (900s) im Memory-Cache ablegen
+        memory_cache.set(cache_key, res, ttl_seconds=900)
+        analytics_engine.record_ticker_analysis(clean_ticker)
+
         return res
     except HTTPException:
         raise
@@ -194,9 +221,15 @@ def analyze_stock(req: AnalysisRequest):
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Berechnungsfehler für '{req.ticker}': {str(e)}")
 
+
 @app.get("/api/intraday/{ticker}")
 def get_intraday(ticker: str):
     clean = ticker.upper().strip()
+    cache_key = f"intraday_{clean}"
+    cached = memory_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     try:
         t_obj = yf.Ticker(clean)
         df_today = t_obj.history(period="1d", interval="15m")
@@ -219,13 +252,21 @@ def get_intraday(ticker: str):
                     "low": round(float(row.get("Low", row["Close"])), 2),
                     "close": round(float(row["Close"]), 2),
                 })
-        return {"ticker": clean, "today_history": result}
+        payload = {"ticker": clean, "today_history": result}
+        memory_cache.set(cache_key, payload, ttl_seconds=900)
+        return payload
     except Exception as e:
         return {"ticker": clean, "today_history": [], "error": str(e)}
+
 
 @app.get("/api/week/{ticker}")
 def get_week_data(ticker: str):
     clean = ticker.upper().strip()
+    cache_key = f"week_{clean}"
+    cached = memory_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     try:
         t_obj = yf.Ticker(clean)
         df_week = t_obj.history(period="5d", interval="1h")
@@ -248,14 +289,45 @@ def get_week_data(ticker: str):
                     "low": round(float(row.get("Low", row["Close"])), 2),
                     "close": round(float(row["Close"]), 2),
                 })
-        return {"ticker": clean, "week_history": result}
+        payload = {"ticker": clean, "week_history": result}
+        memory_cache.set(cache_key, payload, ttl_seconds=900)
+        return payload
     except Exception as e:
         return {"ticker": clean, "week_history": [], "error": str(e)}
 
 
-from fastapi.responses import FileResponse
+# ---------------- ANALYTICS & CACHE ENDPOINTS ----------------
 
-# Direkte Routen für Apple Touch Icon und Favicons (für iOS Safari & PWA)
+@app.post("/api/analytics/ping")
+def ping_analytics(req: AnalyticsPingRequest, request: Request):
+    """Erfasst anonyme Seitenaufrufe (IP wird täglich gesalzt und gehasht)."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+
+    ua = request.headers.get("user-agent", "")
+    analytics_engine.record_visit(ip=client_ip, user_agent=ua, path=req.path)
+    return {"status": "ok"}
+
+
+@app.get("/api/analytics/stats")
+def get_analytics_stats():
+    """Liefert aggregierte Besucher- und Nutzungsstatistiken."""
+    stats = analytics_engine.get_stats_summary()
+    stats["cache"] = memory_cache.get_stats()
+    return stats
+
+
+@app.get("/api/cache/stats")
+def get_cache_stats():
+    """Gibt aktuelle Cache-Statistiken zurück."""
+    return memory_cache.get_stats()
+
+
+# ---------------- PWA & STATISCHE DATEIEN ----------------
+
 @app.get("/apple-touch-icon.png")
 @app.get("/apple-touch-icon-precomposed.png")
 def get_apple_touch_icon():
@@ -265,6 +337,7 @@ def get_apple_touch_icon():
             return FileResponse(icon_path, media_type="image/png")
     raise HTTPException(status_code=404, detail="Icon not found")
 
+
 @app.get("/favicon.png")
 @app.get("/favicon.ico")
 def get_favicon():
@@ -273,6 +346,16 @@ def get_favicon():
         if os.path.exists(icon_path):
             return FileResponse(icon_path, media_type="image/png")
     raise HTTPException(status_code=404, detail="Favicon not found")
+
+
+@app.get("/og-image.png")
+def get_og_image():
+    for folder in [os.path.join("frontend", "dist"), os.path.join("frontend", "public")]:
+        img_path = os.path.join(os.path.dirname(__file__), folder, "og-image.png")
+        if os.path.exists(img_path):
+            return FileResponse(img_path, media_type="image/png")
+    raise HTTPException(status_code=404, detail="OG Image not found")
+
 
 # Statische Frontend-Dateien einbinden, falls dist gebaut wurde
 frontend_dist_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
