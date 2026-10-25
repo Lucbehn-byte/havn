@@ -1,27 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Share, PlusSquare, Smartphone, X, Sparkles, Check, ArrowDown, ExternalLink } from 'lucide-react';
-
-function getDeviceInfo() {
-  if (typeof window === 'undefined') {
-    return { isIOS: false, isSafari: false, isStandalone: false };
-  }
-
-  const ua = window.navigator.userAgent || '';
-  const isStandalone = 
-    window.matchMedia('(display-mode: standalone)').matches || 
-    window.navigator.standalone === true;
-
-  // iOS-Erkennung: iPhone, iPad, iPod oder iPadOS mit Desktop-UserAgent
-  const isClassicIOS = /iPad|iPhone|iPod/i.test(ua);
-  const isMacTouch = (window.navigator.platform === 'MacIntel' || /Macintosh/i.test(ua)) && 
-                     (window.navigator.maxTouchPoints > 1 || 'ontouchend' in document);
-  const isIOS = (isClassicIOS || isMacTouch) && !window.MSStream;
-
-  // Safari auf iOS
-  const isSafari = isIOS && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
-
-  return { isIOS, isSafari, isStandalone };
-}
+import { getDeviceInfo } from '../utils/device';
 
 export default function InstallPrompt({ forceShow = false, onCloseManual }) {
   // Synchron sofort bei Montage bestimmen (verhindert falschen Render auf iOS)

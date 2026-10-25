@@ -24,6 +24,7 @@ import MobileNav from './components/MobileNav';
 import InfoTooltip from './components/InfoTooltip';
 import { ProSection, ProNav } from './components/ProSection';
 import { getInsights, formatEuro, TONE } from './utils/insights';
+import { checkIsStandalone } from './utils/device';
 import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords } from 'lucide-react';
 
 const API_BASE = '';
@@ -51,6 +52,19 @@ export default function App() {
   const [experienceMode, setExperienceMode] = useState(() => {
     return localStorage.getItem('havn_experience_mode') || 'beginner';
   });
+
+  // Standalone / Home Screen Lesezeichen Erkennung
+  const [isStandalone, setIsStandalone] = useState(() => checkIsStandalone());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia && window.matchMedia('(display-mode: standalone)');
+    const handleChange = () => setIsStandalone(checkIsStandalone());
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', handleChange);
+      return () => mq.removeEventListener('change', handleChange);
+    }
+  }, []);
 
   // Theme-Bereinigung
   useEffect(() => {
@@ -270,7 +284,10 @@ export default function App() {
   const insights = useMemo(() => (displayData ? getInsights(displayData, invType) : null), [displayData, invType]);
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white pb-20 lg:pb-0">
+    <div 
+      className="min-h-screen text-slate-100 flex flex-col antialiased selection:bg-sky-500 selection:text-white lg:pb-0"
+      style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}
+    >
       {/* Liquid-Glass Ambient-Hintergrund (macht die Glas-Transparenz sichtbar) */}
       <div className="havn-ambient" aria-hidden="true"><span /><span /></div>
 
@@ -280,7 +297,8 @@ export default function App() {
         onReset={() => runAnalysis('EUNL.DE')} 
         experienceMode={experienceMode}
         onToggleMode={handleToggleMode}
-        onOpenInstall={() => setShowInstallModal(true)}
+        onOpenInstall={isStandalone ? undefined : () => setShowInstallModal(true)}
+        isStandalone={isStandalone}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -729,11 +747,13 @@ export default function App() {
         timeframe={timeframe}
       />
 
-      {/* PWA App-Installationsbanner & iOS Walkthrough */}
-      <InstallPrompt 
-        forceShow={showInstallModal} 
-        onCloseManual={() => setShowInstallModal(false)} 
-      />
+      {/* PWA App-Installationsbanner & iOS Walkthrough: nur anzeigen, wenn nicht im Standalone/Home-Bildschirm Modus */}
+      {!isStandalone && (
+        <InstallPrompt 
+          forceShow={showInstallModal} 
+          onCloseManual={() => setShowInstallModal(false)} 
+        />
+      )}
 
       {/* Modul: Rechtliches & Datenschutz */}
       <LegalModal

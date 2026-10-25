@@ -8,7 +8,11 @@ import { Lightbulb } from 'lucide-react';
  */
 export function ProSection({ id, number, title, takeaway, children }) {
   return (
-    <section id={id} className="scroll-mt-36 space-y-3">
+    <section 
+      id={id} 
+      className="space-y-3"
+      style={{ scrollMarginTop: 'calc(8.5rem + env(safe-area-inset-top, 0px))' }}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-1">
         <div className="flex items-center gap-2.5 shrink-0">
           <span className="w-7 h-7 rounded-xl glass-chip flex items-center justify-center text-[11px] font-black text-sky-300 font-mono">
@@ -50,7 +54,10 @@ export function ProNav({ sections = [] }) {
   }, [sections]);
 
   return (
-    <div className="sticky top-[72px] z-30 -mx-1">
+    <div 
+      className="sticky z-30 -mx-1"
+      style={{ top: 'calc(4.25rem + env(safe-area-inset-top, 0px))' }}
+    >
       <nav className="glass-strong rounded-2xl p-1 flex gap-1 overflow-x-auto no-scrollbar">
         {sections.map((s) => (
           <a

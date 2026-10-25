@@ -11,7 +11,10 @@ export default function MobileNav({ activeTab, onSelectTab }) {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-4 pt-1 pointer-events-none">
+    <div 
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pt-1 pointer-events-none"
+      style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+    >
       <nav className="max-w-md mx-auto liquid-glass-mobile rounded-3xl p-1.5 shadow-2xl flex items-center justify-between pointer-events-auto">
         {tabs.map((t) => {
           const Icon = t.icon;

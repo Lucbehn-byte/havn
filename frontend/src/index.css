@@ -185,10 +185,12 @@ body {
    Bestehende Liquid-Glass-Klassen (Navbar, Pills, Mobile-Nav) – transparenter
    ========================================================================== */
 .liquid-glass-header {
-  background: linear-gradient(180deg, rgba(10, 14, 26, 0.55) 0%, rgba(10, 14, 26, 0.35) 100%);
+  padding-top: constant(safe-area-inset-top, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+  background: linear-gradient(180deg, rgba(7, 11, 20, 0.85) 0%, rgba(10, 14, 26, 0.70) 100%);
   backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 10px 30px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -209,11 +211,21 @@ body {
 }
 
 .liquid-glass-mobile {
-  background: linear-gradient(160deg, rgba(20, 26, 44, 0.5) 0%, rgba(8, 11, 22, 0.6) 100%);
+  background: linear-gradient(160deg, rgba(20, 26, 44, 0.75) 0%, rgba(8, 11, 22, 0.85) 100%);
   backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55), 0 1px 0 0 rgba(255, 255, 255, 0.18) inset;
+}
+
+/* Safe Area Inset Hilfsklassen für iOS Notch & Dynamic Island */
+.safe-top {
+  padding-top: constant(safe-area-inset-top, 0px);
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ==========================================================================
