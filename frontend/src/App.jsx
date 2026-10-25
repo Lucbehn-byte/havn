@@ -4,6 +4,7 @@ import SearchBar from './components/SearchBar';
 import FavoritesBar, { getStoredFavorites, saveStoredFavorites } from './components/FavoritesBar';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import ShareModal from './components/ShareModal';
+import InstallPrompt from './components/InstallPrompt';
 import SignalBanner from './components/SignalBanner';
 import PriceChart from './components/PriceChart';
 import FinancialMetrics from './components/FinancialMetrics';
@@ -67,6 +68,7 @@ export default function App() {
   // Watchlist & Favoriten
   const [favorites, setFavorites] = useState(() => getStoredFavorites());
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   const handleToggleFavorite = (favTicker, favName) => {
     const sym = favTicker.toUpperCase();
@@ -254,6 +256,7 @@ export default function App() {
         onReset={() => runAnalysis('EUNL.DE')} 
         experienceMode={experienceMode}
         onToggleMode={handleToggleMode}
+        onOpenInstall={() => setShowInstallModal(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -706,6 +709,12 @@ export default function App() {
         invType={invType}
         kapital={kapital}
         timeframe={timeframe}
+      />
+
+      {/* PWA App-Installationsbanner & iOS Walkthrough */}
+      <InstallPrompt 
+        forceShow={showInstallModal} 
+        onCloseManual={() => setShowInstallModal(false)} 
       />
 
       {/* Floating Mobile Navigation Bar */}

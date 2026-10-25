@@ -1,20 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Primäre SEO Meta-Tags -->
+    <title>HAVN — Quant Investment & Risikosteuerung für Aktien & ETFs</title>
+    <meta name="title" content="HAVN — Quant Investment & Risikosteuerung für Aktien & ETFs" />
+    <meta name="description" content="HAVN ist deine High-End Plattform für quantitative Aktien- & ETF-Analysen. Krisen-Stresstests, HAVN-Score, Value at Risk und interaktives Asset-Duell — ohne Fachchinesisch." />
+    <meta name="keywords" content="Aktien Analyse, ETF Vergleich, Risiko Stresstest, Quant Finance, HAVN Score, Value at Risk, Krisensimulator, Finanzapp, MSCI World, S&P 500" />
+    <meta name="author" content="HAVN Systems" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#070B14" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Favicons & Icons -->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Progressive Web App & iOS Optimierung -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="HAVN" />
     <meta name="application-name" content="HAVN" />
-    <meta name="theme-color" content="#020617" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>HAVN — Quant Investment & Risikosteuerung</title>
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HAVN Finance" />
+    <meta property="og:title" content="HAVN — Quant Investment & Risikosteuerung" />
+    <meta property="og:description" content="Dein sicherer Hafen für quantitative Vermögensanalysen. Stresstests, Score-Radar und Asset-Duelle auf institutionellem Niveau." />
+    <meta property="og:image" content="/icon-512.png" />
+    <meta property="og:locale" content="de_DE" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HAVN — Quant Investment & Risikosteuerung" />
+    <meta name="twitter:description" content="Dein sicherer Hafen für quantitative Vermögensanalysen. Stresstests, Score-Radar und Asset-Duelle." />
+    <meta name="twitter:image" content="/icon-512.png" />
+
+    <!-- Google Structured Data (JSON-LD) für beste SEO Rankings -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "HAVN Quant Investment",
+        "url": "https://havn.app",
+        "description": "High-End Finanzanalyse und quantitative Risikobewertung für Privatanleger und Profis.",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        }
+      }
+    </script>
   </head>
   <body style="margin: 0; background-color: #070B14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     <!-- Sofortiger nativer HAVN Ladebildschirm -->
@@ -99,6 +144,19 @@
           }
         }, 300);
       });
+
+      // Registriere den Service Worker für PWA Offline-Support & High-Speed Cache
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => {
+              console.log('[HAVN] Service Worker aktiv mit Scope:', reg.scope);
+            })
+            .catch((err) => {
+              console.warn('[HAVN] Service Worker Registrierung fehlgeschlagen:', err);
+            });
+        });
+      }
     </script>
   </body>
 </html>

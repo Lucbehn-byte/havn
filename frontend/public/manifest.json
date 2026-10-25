@@ -1,20 +1,32 @@
 {
-  "name": "HAVN - Quant Investment & Risk",
+  "id": "/havn-app",
+  "name": "HAVN — Quant Investment & Risikosteuerung",
   "short_name": "HAVN",
-  "description": "Dein sicherer Hafen für quantitative Aktien- & ETF-Analysen.",
+  "description": "Dein sicherer Hafen für quantitative Aktien- & ETF-Analysen, Stresstests und Asset-Duelle.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
+  "orientation": "portrait",
+  "background_color": "#070B14",
+  "theme_color": "#070B14",
+  "lang": "de-DE",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
     }
   ]

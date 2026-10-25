@@ -1,7 +1,7 @@
 import React from 'react';
-import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react';
+import { Anchor, CloudLightning, Compass, Swords, BookOpen, Download } from 'lucide-react';
 
-export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode }) {
+export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode = 'beginner', onToggleMode, onOpenInstall }) {
   const tabs = [
     { id: 'terminal', label: 'Hafen', icon: Anchor },
     { id: 'crisis', label: 'Sturm', icon: CloudLightning },
@@ -86,6 +86,19 @@ export default function Navbar({ activeTab, onSelectTab, onReset, experienceMode
                 Pro
               </button>
             </div>
+          )}
+
+          {/* App-Installationsbutton */}
+          {onOpenInstall && (
+            <button
+              type="button"
+              onClick={onOpenInstall}
+              title="HAVN als App installieren"
+              className="liquid-glass-pill px-3 py-1.5 rounded-2xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 hover:border-sky-400/30"
+            >
+              <Download className="w-3.5 h-3.5 text-sky-400" />
+              <span className="hidden sm:inline">App</span>
+            </button>
           )}
 
         </div>
