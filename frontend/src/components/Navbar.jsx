@@ -1,5 +1,6 @@
 import React from 'react';
-import { Anchor, CloudLightning, Compass, Swords, BookOpen, Download } from 'lucide-react';
+import { Anchor, CloudLightning, Compass, Swords, BookOpen, Download, Settings } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Navbar({ 
   activeTab, 
@@ -8,14 +9,17 @@ export default function Navbar({
   experienceMode = 'beginner', 
   onToggleMode, 
   onOpenInstall,
+  onOpenSettings,
   isStandalone = false 
 }) {
+  const { t, currentLanguage } = useLanguage();
+
   const tabs = [
-    { id: 'terminal', label: 'Hafen', icon: Anchor },
-    { id: 'crisis', label: 'Sturm', icon: CloudLightning },
-    { id: 'goals', label: 'Kompass', icon: Compass },
-    { id: 'battle', label: 'Duell', icon: Swords },
-    { id: 'academy', label: 'Logbuch', icon: BookOpen },
+    { id: 'terminal', label: t('nav.terminal', 'Hafen'), icon: Anchor },
+    { id: 'crisis', label: t('nav.crisis', 'Sturm'), icon: CloudLightning },
+    { id: 'goals', label: t('nav.goals', 'Kompass'), icon: Compass },
+    { id: 'battle', label: t('nav.battle', 'Duell'), icon: Swords },
+    { id: 'academy', label: t('nav.academy', 'Logbuch'), icon: BookOpen },
   ];
 
   return (
@@ -37,10 +41,12 @@ export default function Navbar({
                   ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-400' 
                   : 'bg-sky-500/10 border-sky-400/30 text-sky-400'
               }`}>
-                {experienceMode === 'beginner' ? 'Basic' : 'Pro'}
+                {experienceMode === 'beginner' ? t('nav.basic', 'Basic') : t('nav.pro', 'Pro')}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">Dein sicherer Hafen für Aktien & ETFs</p>
+            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
+              {t('nav.tagline', 'Dein sicherer Hafen für Aktien & ETFs')}
+            </p>
           </div>
         </div>
 
@@ -80,7 +86,7 @@ export default function Navbar({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Basic
+                {t('nav.basic', 'Basic')}
               </button>
               <button
                 type="button"
@@ -91,7 +97,7 @@ export default function Navbar({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Pro
+                {t('nav.pro', 'Pro')}
               </button>
             </div>
           )}
@@ -101,11 +107,24 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenInstall}
-              title="HAVN als App installieren"
+              title={t('nav.install', 'App installieren')}
               className="liquid-glass-pill px-2.5 sm:px-3 py-1.5 rounded-2xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 hover:border-sky-400/30"
             >
               <Download className="w-3.5 h-3.5 text-sky-400" />
               <span className="hidden sm:inline">App</span>
+            </button>
+          )}
+
+          {/* Einstellungs-Icon im Header */}
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              title={t('settings.openSettings', 'Einstellungen & Sprache')}
+              className="liquid-glass-pill p-2 sm:px-2.5 sm:py-1.5 rounded-2xl text-xs font-bold text-slate-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 hover:border-sky-400/40 group shadow-sm"
+            >
+              <Settings className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-90 transition-transform duration-500" />
+              <span className="hidden md:inline font-mono text-[10px] text-sky-300">{currentLanguage.flag}</span>
             </button>
           )}
 

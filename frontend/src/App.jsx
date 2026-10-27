@@ -6,6 +6,7 @@ import ExecutiveSummary from './components/ExecutiveSummary';
 import ShareModal from './components/ShareModal';
 import InstallPrompt from './components/InstallPrompt';
 import LegalModal from './components/LegalModal';
+import SettingsModal from './components/SettingsModal';
 import SignalBanner from './components/SignalBanner';
 import PriceChart from './components/PriceChart';
 import FinancialMetrics from './components/FinancialMetrics';
@@ -25,7 +26,8 @@ import InfoTooltip from './components/InfoTooltip';
 import { ProSection, ProNav } from './components/ProSection';
 import { getInsights, formatEuro, TONE } from './utils/insights';
 import { checkIsStandalone } from './utils/device';
-import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
+import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords, Settings } from 'lucide-react';
 
 const API_BASE = '';
 
@@ -97,6 +99,9 @@ export default function App() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
+  const { language, currentLanguage, t } = useLanguage();
 
   // Anonymer Besucher-Ping für interne Statistik
   useEffect(() => {
@@ -310,6 +315,7 @@ export default function App() {
         experienceMode={experienceMode}
         onToggleMode={handleToggleMode}
         onOpenInstall={isStandalone ? undefined : () => setShowInstallModal(true)}
+        onOpenSettings={() => setSettingsModalOpen(true)}
         isStandalone={isStandalone}
       />
 
@@ -332,10 +338,13 @@ export default function App() {
         <section className="space-y-4">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-              Sicherheit beim <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">Investieren</span>
+              {t('hero.titlePrefix', 'Sicherheit beim')}{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">
+                {t('hero.titleHighlight', 'Investieren')}
+              </span>
             </h1>
             <p className="text-sm md:text-base text-slate-400">
-              Mathematische Wahrscheinlichkeiten, Krisen-Stresstests und Risikoprofile vor deinem ersten Trade.
+              {t('hero.subtitle', 'Mathematische Wahrscheinlichkeiten, Krisen-Stresstests und Risikoprofile vor deinem ersten Trade.')}
             </p>
           </div>
 
@@ -360,28 +369,28 @@ export default function App() {
         <section className="relative rounded-3xl p-6 glass overflow-hidden">
           <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-300 uppercase tracking-wider relative z-10">
             <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-            <span>{isBasic ? 'Deine Anlage' : 'Simulations-Parameter & Anlagestrategie'}</span>
+            <span>{isBasic ? t('params.titleBasic', 'Deine Anlage') : t('params.titlePro', 'Simulations-Parameter & Anlagestrategie')}</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end relative z-10">
             {/* Zeitraum */}
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                {isBasic ? 'Wie lange willst du anlegen?' : 'Geplante Haltedauer'}
+                {isBasic ? t('params.horizonLabelBasic', 'Wie lange willst du anlegen?') : t('params.horizonLabelPro', 'Geplante Haltedauer')}
               </label>
               {isBasic ? (
                 <div className="grid grid-cols-3 gap-1 glass-input p-1 rounded-xl">
-                  {BASIC_TIMEFRAMES.map((t) => (
+                  {BASIC_TIMEFRAMES.map((tItem) => (
                     <button
-                      key={t.key}
+                      key={tItem.key}
                       type="button"
-                      onClick={() => setTimeframe(t.key)}
+                      onClick={() => setTimeframe(tItem.key)}
                       className={`relative text-xs py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
-                        timeframe === t.key ? 'liquid-glass-active text-white' : 'text-slate-400 hover:text-white'
+                        timeframe === tItem.key ? 'liquid-glass-active text-white' : 'text-slate-400 hover:text-white'
                       }`}
                     >
-                      {t.label}
-                      {t.hint && timeframe !== t.key && (
+                      {tItem.key.startsWith('1') ? t('params.tf_1y', '1 Jahr') : tItem.key.startsWith('3') ? t('params.tf_3y', '3 Jahre') : t('params.tf_5y', '5 Jahre')}
+                      {tItem.hint && timeframe !== tItem.key && (
                         <span className="absolute -top-2 -right-1 text-[8px] font-black uppercase px-1 rounded bg-emerald-400/90 text-slate-900">★</span>
                       )}
                     </button>
@@ -403,7 +412,7 @@ export default function App() {
             {/* Strategie */}
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Anlagestrategie
+                {t('params.strategyLabel', 'Anlagestrategie')}
               </label>
               <div className="grid grid-cols-2 gap-1.5 bg-slate-950/80 p-1 border border-white/10 rounded-xl">
                 <button
@@ -415,7 +424,7 @@ export default function App() {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Einmalanlage
+                  {t('params.oneTime', 'Einmalanlage')}
                 </button>
                 <button
                   type="button"
@@ -426,7 +435,7 @@ export default function App() {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Sparplan
+                  {t('params.sparplan', 'Sparplan')}
                 </button>
               </div>
             </div>
@@ -435,7 +444,7 @@ export default function App() {
             {invType === 'Einmalanlage' ? (
               <div className="sm:col-span-2">
                 <RollUpPicker
-                  label="Einmaliger Geldeinsatz"
+                  label={t('params.oneTimeCapital', 'Einmaliger Geldeinsatz')}
                   value={kapital}
                   onChange={setKapital}
                 />
@@ -444,7 +453,7 @@ export default function App() {
               <>
                 <div>
                   <RollUpPicker
-                    label="Startkapital"
+                    label={t('params.startCapital', 'Startkapital')}
                     value={startkapital}
                     onChange={setStartkapital}
                     presets={[0, 100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
@@ -452,7 +461,7 @@ export default function App() {
                 </div>
                 <div>
                   <RollUpPicker
-                    label={`Sparrate • ${sparplanFreq}`}
+                    label={`${t('params.savingsRate', 'Sparrate')} • ${sparplanFreq === 'monatlich' ? t('params.monthly', 'monatlich') : t('params.weekly', 'wöchentlich')}`}
                     value={kapital}
                     onChange={setKapital}
                     presets={[25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000]}
@@ -463,8 +472,8 @@ export default function App() {
                       onChange={(e) => setSparplanFreq(e.target.value)}
                       className="glass-input rounded-lg px-2 py-1 text-[11px] text-slate-300 focus:outline-none cursor-pointer"
                     >
-                      <option value="monatlich">monatlich</option>
-                      <option value="wöchentlich">wöchentlich</option>
+                      <option value="monatlich">{t('params.monthly', 'monatlich')}</option>
+                      <option value="wöchentlich">{t('params.weekly', 'wöchentlich')}</option>
                     </select>
                   </div>
                 </div>
@@ -771,6 +780,14 @@ export default function App() {
         />
       )}
 
+      {/* Modul: Einstellungen & Sprachen (7 Sprachen) */}
+      <SettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+        experienceMode={experienceMode}
+        onToggleMode={handleToggleMode}
+      />
+
       {/* Modul: Rechtliches & Datenschutz */}
       <LegalModal
         isOpen={legalModalOpen}
@@ -784,15 +801,15 @@ export default function App() {
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500 space-y-3 mt-12 mb-16 lg:mb-0">
         <div className="max-w-4xl mx-auto px-4 space-y-3">
           <p>
-            <strong className="text-slate-300">HAVN</strong> — Dein sicherer Hafen für fundierte Investment-Entscheidungen. Entwickelt mit modernem Tailwind CSS & stochastischer Finanzmathematik.
+            <strong className="text-slate-300">HAVN</strong> — {t('footer.tagline', 'Dein sicherer Hafen für fundierte Investment-Entscheidungen.')}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-medium">
             <button
               type="button"
               onClick={() => setLegalModalOpen(true)}
               className="text-slate-400 hover:text-sky-400 transition-colors cursor-pointer underline underline-offset-4"
             >
-              Impressum & Rechtliches
+              {t('footer.imprint', 'Impressum & Rechtliches')}
             </button>
             <span className="text-slate-700">•</span>
             <button
@@ -800,11 +817,31 @@ export default function App() {
               onClick={() => setLegalModalOpen(true)}
               className="text-slate-400 hover:text-sky-400 transition-colors cursor-pointer underline underline-offset-4"
             >
-              Datenschutz (DSGVO)
+              {t('footer.privacy', 'Datenschutz (DSGVO)')}
+            </button>
+            <span className="text-slate-700">•</span>
+
+            {/* Cleveres, einzigartiges Einstellungs-Element: Dezent leuchtende Liquid-Glass Kapsel mit rotierendem Gear und Live-Sprachflagge */}
+            <button
+              type="button"
+              onClick={() => setSettingsModalOpen(true)}
+              className="group relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-slate-900/90 via-sky-950/50 to-slate-900/90 hover:from-sky-900/50 hover:to-indigo-900/50 border border-sky-500/40 hover:border-sky-400 text-slate-200 hover:text-white transition-all duration-300 shadow-[0_0_14px_rgba(56,189,248,0.2)] hover:shadow-[0_0_22px_rgba(56,189,248,0.4)] cursor-pointer"
+              title={t('settings.openSettings', 'Einstellungen & Sprache öffnen')}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+              </span>
+              <Settings className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-90 transition-transform duration-500 ease-out" />
+              <span className="font-semibold text-xs tracking-wide">{t('settings.title', 'Einstellungen')}</span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-[10px] font-mono font-bold text-sky-200">
+                <span>{currentLanguage.flag}</span>
+                <span>{currentLanguage.code.toUpperCase()}</span>
+              </span>
             </button>
           </div>
           <p className="text-[11px] text-slate-600 mt-2">
-            <strong className="text-slate-400">Rechtlicher Hinweis:</strong> HAVN stellt keine Anlageberatung im Sinne des WpHG dar. Alle Berechnungen basieren auf historischen Wahrscheinlichkeitsmodellen und Simulationen. Wertpapiere unterliegen Marktschwankungen bis hin zum Totalverlustrisiko. Investitionen erfolgen eigenverantwortlich über deinen Broker.
+            <strong className="text-slate-400">{t('footer.disclaimerTitle', 'Rechtlicher Hinweis:')}</strong> {t('footer.disclaimerText', 'HAVN stellt keine Anlageberatung im Sinne des WpHG dar. Alle Berechnungen basieren auf historischen Wahrscheinlichkeitsmodellen und Simulationen. Wertpapiere unterliegen Marktschwankungen bis hin zum Totalverlustrisiko. Investitionen erfolgen eigenverantwortlich über deinen Broker.')}
           </p>
         </div>
       </footer>

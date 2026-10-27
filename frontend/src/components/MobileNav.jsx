@@ -1,13 +1,16 @@
 import React from 'react';
 import { Anchor, CloudLightning, Compass, Swords, BookOpen } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function MobileNav({ activeTab, onSelectTab }) {
+  const { t } = useLanguage();
+
   const tabs = [
-    { id: 'terminal', label: 'Hafen', icon: Anchor },
-    { id: 'crisis', label: 'Sturm', icon: CloudLightning },
-    { id: 'goals', label: 'Kompass', icon: Compass },
-    { id: 'battle', label: 'Duell', icon: Swords },
-    { id: 'academy', label: 'Logbuch', icon: BookOpen },
+    { id: 'terminal', label: t('nav.terminal', 'Hafen'), icon: Anchor },
+    { id: 'crisis', label: t('nav.crisis', 'Sturm'), icon: CloudLightning },
+    { id: 'goals', label: t('nav.goals', 'Kompass'), icon: Compass },
+    { id: 'battle', label: t('nav.battle', 'Duell'), icon: Swords },
+    { id: 'academy', label: t('nav.academy', 'Logbuch'), icon: BookOpen },
   ];
 
   return (

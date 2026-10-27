@@ -7,6 +7,7 @@ import {
 import SimpleAreaChart from './SimpleAreaChart';
 import InfoTooltip from './InfoTooltip';
 import { getInsights, formatEuro, scoreTone, TONE } from '../utils/insights';
+import { useLanguage } from '../context/LanguageContext';
 
 /* ------------------------------------------------------------------ */
 /* Bausteine                                                          */
@@ -93,6 +94,7 @@ function Pill({ tone = 'sky', children }) {
 /* ------------------------------------------------------------------ */
 
 export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateToCrisis }) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const ins = getInsights(data, invType);
   if (!data || !ins) return null;
@@ -115,9 +117,9 @@ export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateT
   const pos = (v) => `${((v - scaleMin) / (scaleMax - scaleMin || 1)) * 100}%`;
 
   const scenarioRows = [
-    { key: 'strong', label: 'Gute Jahre', sub: 'Optimistischer Marktverlauf', value: scenarios.strong, icon: SunMedium, color: 'emerald' },
-    { key: 'normal', label: 'Normalfall', sub: 'Statistisch wahrscheinlichstes Ergebnis', value: scenarios.normal, icon: Target, color: 'sky' },
-    { key: 'weak', label: 'Schwache Jahre', sub: 'Längere zähe Börsenphase', value: scenarios.weak, icon: CloudRain, color: 'amber' },
+    { key: 'strong', label: t('beginner.optimistic', 'Optimistisch'), sub: 'Gute Jahre & starker Markt', value: scenarios.strong, icon: SunMedium, color: 'emerald' },
+    { key: 'normal', label: t('beginner.expected', 'Erwartet'), sub: 'Statistisch wahrscheinlichster Median', value: scenarios.normal, icon: Target, color: 'sky' },
+    { key: 'weak', label: t('beginner.pessimistic', 'Pessimistisch'), sub: 'Längere zähe Börsenphase', value: scenarios.weak, icon: CloudRain, color: 'amber' },
   ];
 
   const normalGain = scenarios.normal - scenarios.invested;
@@ -204,7 +206,7 @@ export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateT
         <QuestionCard 
           icon={Coins} 
           step={1} 
-          question="Was kann ich erwarten?" 
+          question={t('beginner.q1Title', 'Was passiert mit meinem Geld?')} 
           accent="bg-sky-400/10 border-sky-400/25 text-sky-300"
           tooltip={{
             title: "Kapital-Projektion",
@@ -275,7 +277,7 @@ export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateT
         <QuestionCard 
           icon={CloudLightning} 
           step={2} 
-          question="Wie stark kann es wackeln?" 
+          question={t('beginner.q2Title', 'Wie sicher ist mein Geld im Crash?')} 
           accent="bg-amber-400/10 border-amber-400/25 text-amber-300"
           tooltip={{
             title: "Maximaler Rückschlag",
@@ -344,7 +346,7 @@ export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateT
         <QuestionCard 
           icon={Compass} 
           step={3} 
-          question="Ist jetzt ein guter Zeitpunkt?" 
+          question={t('beginner.q3Title', 'Ist jetzt ein guter Kaufzeitpunkt?')} 
           accent="bg-emerald-400/10 border-emerald-400/25 text-emerald-300"
           tooltip={{
             title: "Einstiegs-Timing",
