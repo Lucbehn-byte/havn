@@ -77,7 +77,7 @@ export default function SettingsModal({
           </button>
         </div>
 
-        {/* 1. SEKTION: SPRACHAUSWAHL (Die 7 häufigsten Sprachen) */}
+        {/* 1. SEKTION: SPRACHAUSWAHL (10 Sprachen weltweit) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -85,14 +85,14 @@ export default function SettingsModal({
               <span>{t('settings.languageSection', 'Sprache / Language')}</span>
             </label>
             <span className="text-[11px] text-slate-400 font-medium">
-              7 Sprachen verfügbar
+              {languages.length} {t('settings.languagesAvailable', 'Sprachen verfügbar')}
             </span>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
             {t('settings.languageHint', 'Wähle deine bevorzugte Sprache für die gesamte Benutzeroberfläche.')}
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 max-h-[300px] overflow-y-auto pr-1">
             {languages.map((lang) => {
               const isActive = language === lang.code;
               return (
