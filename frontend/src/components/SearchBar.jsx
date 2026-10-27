@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, TrendingUp } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SearchBar({ onSelectAsset, presets = {}, currentTicker = '' }) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +67,7 @@ export default function SearchBar({ onSelectAsset, presets = {}, currentTicker =
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => { if (results.length > 0) setIsOpen(true); }}
-            placeholder={currentTicker ? `Aktuell gewählt: ${currentTicker} – Neue Aktie/ETF suchen...` : "Aktie, ETF oder Ticker suchen (z. B. Tesla, BMW, MSCI World, NVDA, Apple)..."}
+            placeholder={currentTicker ? `${currentTicker} — ${t('hero.searchPlaceholder', 'Aktie, ETF oder Krypto suchen...')}` : t('hero.searchPlaceholder', 'Aktie, ETF oder Krypto suchen...')}
             className="w-full pl-12 pr-12 py-3.5 bg-slate-900/90 border border-slate-700/80 rounded-2xl text-white placeholder-slate-400 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-xl transition-all"
           />
           {loading && (

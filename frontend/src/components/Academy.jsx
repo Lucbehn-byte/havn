@@ -15,9 +15,11 @@ import {
   Percent, 
   Compass 
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const BASIC_LESSONS = [
   {
+    id: 'l1',
     icon: Flame,
     tag: 'Das Problem',
     title: '1. Warum Geld nicht herumliegen darf (Inflation)',
@@ -25,6 +27,7 @@ const BASIC_LESSONS = [
     content: 'Durch die stetige Inflation (ca. 2–3 % pro Jahr) halbiert sich dein Vermögen auf dem Sparbuch alle 25 bis 30 Jahre real. 10.000 € bar auf der Bank sind nach 20 Jahren bei 3 % Inflation im Wert auf nur noch ca. 5.500 € zusammengeschrumpft. Wer sein Geld nicht investiert, verliert garantiert.'
   },
   {
+    id: 'l2',
     icon: TrendingUp,
     tag: 'Die Lösung',
     title: '2. Warum Geld für dich arbeiten muss (Zinseszins)',
@@ -32,6 +35,7 @@ const BASIC_LESSONS = [
     content: 'Wer 25 Jahre lang monatlich 150 € auf dem Sparkonto lässt, hat 45.000 € eingezahlt – und besitzt am Ende nur 45.000 €. Wer dieselben 150 € in einen weltweiten Aktien-ETF mit historisch durchschnittlich 7 % Rendite anlegt, besitzt über 120.000 €! Ganze 75.000 € davon hat dir das Weltwirtschaftswachstum geschenkt.'
   },
   {
+    id: 'l3',
     icon: Smartphone,
     tag: 'Die Praxis',
     title: '3. Was du brauchst: Ein Neobroker-Depot',
@@ -39,6 +43,7 @@ const BASIC_LESSONS = [
     content: 'Früher brauchte man teure Filialbanken mit hohen Depotgebühren. Heute nutzt man moderne, BaFin-regulierte Neobroker (z. B. Trade Republic, Scalable Capital, finanzen.net zero). Dort sind die Depoteröffnung, Depotführung und monatliche ETF-Sparpläne in der Regel komplett kostenlos (0 € Gebühr).'
   },
   {
+    id: 'l4',
     icon: PiggyBank,
     tag: 'Der Einstieg',
     title: '4. Wie man konkret anlegt: Der automatische ETF-Sparplan',
@@ -46,6 +51,7 @@ const BASIC_LESSONS = [
     content: 'Du musst keine Kurse verfolgen oder Aktienexperte sein. Du wählst einen globalen Welt-ETF (z. B. MSCI World oder FTSE All-World), stellst einen monatlichen Dauerauftrag ab 25 € oder 50 € ein und lässt ihn einfach laufen. Fällt der Markt, kaufst du automatisch günstigere Anteile ein (Cost-Average-Effekt).'
   },
   {
+    id: 'l5',
     icon: ShieldAlert,
     tag: 'Sicherheitsnetz',
     title: '5. Der Notgroschen: Niemals alles investieren',
@@ -53,6 +59,7 @@ const BASIC_LESSONS = [
     content: 'Bevor du den Sparplan startest, gehören 2 bis 3 Monatsausgaben auf ein Tagesgeldkonto (Notgroschen für Notfälle, Autoreparaturen etc.). So kommst du nie in die Verlegenheit, deine ETF-Anteile bei einem zwischenzeitlichen Börsentief mit Verlust verkaufen zu müssen.'
   },
   {
+    id: 'l6',
     icon: Sparkles,
     tag: 'Steuergeschenk',
     title: '6. Freistellungsauftrag: 1.000 € steuerfrei jedes Jahr',
@@ -63,6 +70,7 @@ const BASIC_LESSONS = [
 
 const PRO_LESSONS = [
   {
+    id: 'p1',
     icon: Layers,
     tag: 'Strategie',
     title: '1. Core-Satellite-Strategie & Asset Allocation',
@@ -70,6 +78,7 @@ const PRO_LESSONS = [
     content: 'Profis setzen 70–80 % des Portfolios in breit diversifizierte Welt-ETFs (den "Core", z. B. MSCI World / All-World). Die verbleibenden 20–30 % ("Satellites") können gezielt in Wachstumsbranchen (z. B. Halbleiter, KI, Schwellenländer) oder Einzelwerte allokiert werden, ohne das Gesamtrisiko zu sprengen.'
   },
   {
+    id: 'p2',
     icon: Landmark,
     tag: 'Staatliche Förderungen',
     title: '2. Geschenktes Geld: VL & Arbeitnehmersparzulage',
@@ -77,6 +86,7 @@ const PRO_LESSONS = [
     content: 'Viele Arbeitgeber zahlen bis zu 40 € monatlich als VL dazu. Wenn du diese in einen VL-fähigen Aktien-ETF anlegst, schenkt dir der Staat zusätzlich bis zu 80 € pro Jahr Arbeitnehmersparzulage (seit 2024 gilt eine verdoppelte Einkommensgrenze von 40.000 € / 80.000 € zvE). Prüfe auch betriebliche Altersvorsorge (bAV) mit mindestens 15 % gesetzlichem Arbeitgeberzuschuss.'
   },
   {
+    id: 'p3',
     icon: Scale,
     tag: 'Portfoliomanagement',
     title: '3. Rebalancing: Antizyklisch Rendite sichern',
@@ -84,29 +94,17 @@ const PRO_LESSONS = [
     content: 'Wenn Aktien nach einer langen Rallye z. B. 85 % statt der geplanten 70 % deines Vermögens ausmachen, stellst du einmal im Jahr das ursprüngliche Verhältnis wieder her (Rebalancing). Du verkaufst teuer gewordene Anteile und kaufst günstigere nach – das senkt nachweislich das Portfolio-Risiko bei stabiler Rendite.'
   },
   {
+    id: 'p4',
     icon: Percent,
     tag: 'Steueroptimierung',
     title: '4. Teilfreistellung & Vorabpauschale bei ETFs',
     summary: 'Steuervorteile von Aktienfonds gegenüber Direktaktien optimal nutzen.',
     content: 'Aktien-ETFs (mind. 51 % Aktienquote) profitieren in Deutschland von einer 30 %igen Teilfreistellung: Nur 70 % deiner Gewinne und Dividenden unterliegen der Abgeltungssteuer. Bei thesaurierenden ETFs greift die jährliche Vorabpauschale auf Basis des Basiszinses – schöpfe damit jährlich deinen 1.000 € Sparer-Pauschbetrag ideal aus.'
-  },
-  {
-    icon: Compass,
-    tag: 'Faktor-Investing',
-    title: '5. Smart Beta & Faktor-Prämien (Fama-French)',
-    summary: 'Wissenschaftliche Überrenditen durch Faktoren wie Small Cap Value & Quality.',
-    content: 'Die Finanzmarktforschung zeigt, dass bestimmte Risikofaktoren historisch eine Mehrrendite liefern: Small Caps (kleinere Unternehmen), Value (günstig bewertete Firmen), Momentum (starke relative Stärke) und Quality (hohe Eigenkapitalrentabilität & solide Bilanzen). Eine gezielte Faktor-Beimischung kann die risikobereinigte Rendite heben.'
-  },
-  {
-    icon: Coins,
-    tag: 'Entnahmephase',
-    title: '6. Die 4%-Regel & Trinity-Studie im Alter',
-    summary: 'Wie man später sicher vom investierten Vermögen leben kann.',
-    content: 'Nach der berühmten Trinity-Studie kann man bei einem 50/50 bis 75/25 Aktien/Anleihen-Portfolio inflationsbereinigt 3,5 % bis 4 % des Startvermögens pro Jahr entnehmen, ohne dass das Depot über 30 Jahre erschöpft wird. Wer 300.000 € angespart hat, kann so dauerhaft ~1.000 € monatlich vor Steuern entnehmen.'
   }
 ];
 
 export default function Academy({ experienceMode = 'beginner' }) {
+  const { t } = useLanguage();
   const isPro = experienceMode === 'pro';
   const lessons = isPro ? PRO_LESSONS : BASIC_LESSONS;
 
@@ -125,19 +123,19 @@ export default function Academy({ experienceMode = 'beginner' }) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-white tracking-tight">Logbuch</h2>
+              <h2 className="text-xl font-black text-white tracking-tight">{t('nav.academy', 'Logbuch')}</h2>
               <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border ${
                 isPro 
                   ? 'bg-sky-950 border-sky-800 text-sky-400' 
                   : 'bg-emerald-950 border-emerald-800 text-emerald-400'
               }`}>
-                {isPro ? 'Pro-Strategien' : 'Basic-Grundlagen'}
+                {isPro ? t('academy.tabPro', 'Pro-Strategien') : t('academy.tabBasic', 'Basic-Grundlagen')}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {isPro
+              {t('academy.subtitle', isPro
                 ? 'Fortgeschrittenes Portfoliomanagement, Rebalancing, staatliche Förderungen und Steueroptimierung.'
-                : 'Warum anlegen essenziell ist, wie dein Geld arbeitet, Neobroker-Wahl und die ersten sicheren Schritte.'}
+                : 'Warum anlegen essenziell ist, wie dein Geld arbeitet, Neobroker-Wahl und die ersten sicheren Schritte.')}
             </p>
           </div>
         </div>
@@ -161,19 +159,29 @@ export default function Academy({ experienceMode = 'beginner' }) {
                       <Icon className="w-4 h-4" />
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-0.5 bg-slate-800/60 rounded-md">
-                      {l.tag}
+                      {t(`academy.lessons.${l.id}.tag`, l.tag)}
                     </span>
                   </div>
                 </div>
 
-                <h3 className="text-sm font-bold text-white mb-1">{l.title}</h3>
-                <p className="text-xs font-semibold text-slate-300 mb-2 italic">{l.summary}</p>
-                <p className="text-xs text-slate-400 leading-relaxed font-normal">{l.content}</p>
+                <h3 className="text-sm font-bold text-white mb-1">
+                  {t(`academy.lessons.${l.id}.title`, l.title)}
+                </h3>
+                <p className="text-xs font-semibold text-slate-300 mb-2 italic">
+                  {t(`academy.lessons.${l.id}.summary`, l.summary)}
+                </p>
+                <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                  {t(`academy.lessons.${l.id}.content`, l.content)}
+                </p>
               </div>
 
               <div className="pt-3 border-t border-slate-800/60 flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
                 <CheckCircle2 className="w-3.5 h-3.5" /> 
-                <span>{isPro ? 'Empfohlene Best Practice' : 'Wissenschaftlich belegte Grundregel'}</span>
+                <span>
+                  {isPro 
+                    ? t('academy.bestPractice', 'Empfohlene Best Practice') 
+                    : t('academy.provenRule', 'Wissenschaftlich belegte Grundregel')}
+                </span>
               </div>
             </div>
           );

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Smartphone, Copy, Check, Shield, Compass, Search } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', sparplanFreq = 'monatlich', kapital = 1000 }) {
+  const { t } = useLanguage();
   const [copiedKey, setCopiedKey] = useState(null);
 
   const copyToClipboard = (text, key) => {
@@ -23,9 +25,9 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
           <Smartphone className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">Nächster Schritt: In deiner Trading-App umsetzen</h3>
+          <h3 className="text-lg font-bold text-white">{t('beginner.brokerTitle', 'Nächster Schritt: In deiner Trading-App umsetzen')}</h3>
           <p className="text-xs text-slate-400">
-            HAVN ist dein Analysehafen. Der eigentliche Kauf erfolgt sicher in deiner Broker-App (z. B. Trade Republic, Scalable, ING, Neobroker).
+            {t('beginner.brokerDesc', 'HAVN ist dein Orientierungs- und Analysehafen. Den Kauf führst du sicher über dein eigenes Depot durch.')}
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
   Layers, ShieldAlert, Activity, CheckCircle2,
 } from 'lucide-react';
 import InfoTooltip from './InfoTooltip';
+import { useLanguage } from '../context/LanguageContext';
 
 /* ==========================================================================
    ASSET-DATENBANK FÜR DAS DUELL
@@ -566,6 +567,7 @@ function buildVerdict(a, b, scoreA, scoreB) {
    KOMPONENTE: ASSET BATTLE
    ========================================================================== */
 export default function AssetBattle({ experienceMode = 'beginner', initialAssetA = 'EUNL.DE', onAnalyzeAsset }) {
+  const { t } = useLanguage();
   const [assetA, setAssetA] = useState(initialAssetA);
   const [assetB, setAssetB] = useState('NVDA');
 
@@ -597,20 +599,20 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                <span>HAVN Asset-Duell</span>
+                <span>{t('battle.title', 'HAVN Asset-Duell')}</span>
                 <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full border bg-indigo-500/20 text-indigo-300 border-indigo-400/30">
-                  {isPro ? 'Pro-Vergleich' : 'Klartext-Vergleich'}
+                  {isPro ? t('nav.pro', 'Pro') : t('nav.basic', 'Basic')}
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                Vergleiche zwei Investments direkt und unverfälscht auf Rendite, Crash-Sicherheit und Sparplan-Tauglichkeit.
+                {t('battle.subtitle', 'Vergleiche zwei Investments direkt und unverfälscht auf Rendite, Crash-Sicherheit und Sparplan-Tauglichkeit.')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-center">
             <span className="text-xs px-3.5 py-1.5 rounded-xl glass-chip text-slate-300 font-mono font-bold flex items-center gap-2">
-              <span className="text-slate-400">Punktestand:</span>
+              <span className="text-slate-400">{t('battle.score', 'Punktestand')}:</span>
               <span className="text-sky-300 font-black text-sm">{scoreA}</span>
               <span className="text-slate-500">:</span>
               <span className="text-indigo-300 font-black text-sm">{scoreB}</span>
@@ -624,8 +626,8 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           <div className={`p-4 rounded-2xl border transition-all duration-300 ${scoreA > scoreB ? 'bg-sky-950/40 border-sky-400/40 shadow-[0_0_25px_rgba(56,189,248,0.15)]' : 'glass-inset'}`}>
             <div className="flex items-center justify-between text-xs mb-2">
               <span className="font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
-                <span>Wertpapier 1</span>
-                {scoreA > scoreB && <span className="text-amber-400 font-bold flex items-center gap-0.5">👑 Führt</span>}
+                <span>{t('battle.selectA', 'Wertpapier 1')}</span>
+                {scoreA > scoreB && <span className="text-amber-400 font-bold flex items-center gap-0.5">👑 {t('battle.winner', 'Führt')}</span>}
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">
                 {dataA.symbol}
@@ -674,8 +676,8 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           <div className={`p-4 rounded-2xl border transition-all duration-300 ${scoreB > scoreA ? 'bg-indigo-950/40 border-indigo-400/40 shadow-[0_0_25px_rgba(99,102,241,0.15)]' : 'glass-inset'}`}>
             <div className="flex items-center justify-between text-xs mb-2">
               <span className="font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                <span>Wertpapier 2</span>
-                {scoreB > scoreA && <span className="text-amber-400 font-bold flex items-center gap-0.5">👑 Führt</span>}
+                <span>{t('battle.selectB', 'Wertpapier 2')}</span>
+                {scoreB > scoreA && <span className="text-amber-400 font-bold flex items-center gap-0.5">👑 {t('battle.winner', 'Führt')}</span>}
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
                 {dataB.symbol}
@@ -728,11 +730,11 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           <div className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-400" />
             <h3 className="text-base sm:text-lg font-black text-white">
-              Direkter Kriterien-Vergleich
+              {t('battle.categoriesTitle', 'Direkter Kriterien-Vergleich')}
             </h3>
           </div>
           <span className="text-xs px-3 py-1 rounded-full glass-chip text-slate-300 font-mono">
-            {categories.length} Disziplinen
+            {categories.length} {t('battle.disciplines', 'Disziplinen')}
           </span>
         </div>
 
@@ -811,7 +813,7 @@ export default function AssetBattle({ experienceMode = 'beginner', initialAssetA
           <div className="pt-2 border-t border-white/10 flex items-start gap-2 text-xs text-slate-200">
             <Compass className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong className="text-white">Strategischer Portfolio-Tipp: </strong>
+              <strong className="text-white">{t('battle.coreRecommendation', 'Strategischer Portfolio-Tipp')}: </strong>
               {verdict.recommendation}
             </p>
           </div>

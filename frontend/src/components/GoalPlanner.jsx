@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Target, Compass, Sparkles, TrendingUp, ShieldAlert, Award } from 'lucide-react';
 import RollUpPicker from './RollUpPicker';
+import { useLanguage } from '../context/LanguageContext';
 
 const GOALS = [
   {
@@ -46,6 +47,7 @@ const GOALS = [
 ];
 
 export default function GoalPlanner() {
+  const { t } = useLanguage();
   const [selectedGoal, setSelectedGoal] = useState('safety_fund');
   const [targetCapital, setTargetCapital] = useState(15000);
   const [years, setYears] = useState(3);
@@ -80,8 +82,8 @@ export default function GoalPlanner() {
             <Compass className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Kompass • Ziel- & Vermögensplaner</h2>
-            <p className="text-xs text-slate-400">Wähle dein nächstes greifbares Lebensziel und erfahre, welche monatliche Sparrate dich dorthin bringt.</p>
+            <h2 className="text-xl font-black text-white tracking-tight">{t('goals.title', 'Kompass • Ziel- & Vermögensplaner')}</h2>
+            <p className="text-xs text-slate-400">{t('goals.subtitle', 'Wähle dein nächstes greifbares Lebensziel und erfahre, welche monatliche Sparrate dich dorthin bringt.')}</p>
           </div>
         </div>
 
@@ -101,16 +103,18 @@ export default function GoalPlanner() {
               >
                 <div>
                   <span className={`text-xs font-black uppercase tracking-wider block mb-1 ${isSelected ? 'text-sky-400' : 'text-slate-300'}`}>
-                    {g.title}
+                    {t(`goals.goalsList.${g.id}.title`, g.title)}
                   </span>
                   <span className="text-[10px] text-slate-400 font-medium block mb-2">
-                    {g.subtitle}
+                    {t(`goals.goalsList.${g.id}.subtitle`, g.subtitle)}
                   </span>
                   <div className="text-sm font-black text-white font-mono">
-                    {g.targetAmount.toLocaleString('de-DE')} € in {g.years} Jahren
+                    {g.targetAmount.toLocaleString('de-DE')} € in {g.years} {t('goals.years', 'Jahren')}
                   </div>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-2 line-clamp-3 leading-relaxed">{g.desc}</p>
+                <p className="text-[11px] text-slate-400 mt-2 line-clamp-3 leading-relaxed">
+                  {t(`goals.goalsList.${g.id}.desc`, g.desc)}
+                </p>
               </button>
             );
           })}
@@ -121,7 +125,7 @@ export default function GoalPlanner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Wunsch-Zielvermögen"
+            label={t('goals.targetCapital', 'Wunsch-Zielvermögen')}
             value={targetCapital}
             onChange={setTargetCapital}
             unit="€"
@@ -130,10 +134,10 @@ export default function GoalPlanner() {
         </div>
         <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Zeit bis zum Ziel"
+            label={t('goals.timeToGoal', 'Zeit bis zum Ziel')}
             value={years}
             onChange={setYears}
-            unit={years === 1 ? 'Jahr' : 'Jahre'}
+            unit={years === 1 ? t('goals.year', 'Jahr') : t('goals.years', 'Jahre')}
             presets={[1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 35, 40]}
           />
         </div>
@@ -144,40 +148,40 @@ export default function GoalPlanner() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Compass className="w-5 h-5 text-indigo-400" />
-            <span>Dein persönlicher Fahrplan</span>
+            <span>{t('goals.personalRoadmap', 'Dein persönlicher Fahrplan')}</span>
           </h3>
           <span className="text-xs px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-800/80 text-indigo-400 font-mono font-bold">
-            Allokation: {goal.riskAllocation}
+            {t('goals.allocation', 'Allokation')}: {goal.riskAllocation}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Benötigte monatliche Sparrate */}
           <div className="bg-slate-950/80 border border-sky-800/50 rounded-2xl p-4 shadow-lg ring-1 ring-sky-500/20">
-            <span className="text-xs text-sky-400 font-bold uppercase tracking-wider">Benötigte Sparrate</span>
+            <span className="text-xs text-sky-400 font-bold uppercase tracking-wider">{t('goals.neededSavings', 'Benötigte Sparrate')}</span>
             <div className="text-3xl font-black font-mono text-white mt-1">
-              {neededMonthlySavings.toLocaleString('de-DE')} € <span className="text-sm text-slate-400 font-normal">/ Monat</span>
+              {neededMonthlySavings.toLocaleString('de-DE')} € <span className="text-sm text-slate-400 font-normal">{t('goals.perMonth', '/ Monat')}</span>
             </div>
-            <span className="text-[11px] text-slate-400">Automatisiert per Dauerauftrag</span>
+            <span className="text-[11px] text-slate-400">{t('goals.automatedOrder', 'Automatisiert per Dauerauftrag')}</span>
           </div>
 
           {/* Eigene Einzahlungen */}
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Eigene Einzahlungen</span>
+            <span className="text-xs text-slate-400">{t('goals.ownDeposits', 'Eigene Einzahlungen')}</span>
             <div className="text-2xl font-black font-mono text-slate-200 mt-1">
               {totalEigenkapital.toLocaleString('de-DE')} €
             </div>
-            <span className="text-[11px] text-slate-400">Summe aller Monatsraten</span>
+            <span className="text-[11px] text-slate-400">{t('goals.sumRates', 'Summe aller Monatsraten')}</span>
           </div>
 
           {/* Zinseszins Geschenk */}
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-emerald-400 font-bold">Zinseszins-Ertrag</span>
+            <span className="text-xs text-emerald-400 font-bold">{t('goals.compoundReturn', 'Zinseszins-Ertrag')}</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               +{zinsgewinn.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-emerald-400 font-medium">
-              {zinseszinsAnteilPct}% des Endvermögens zahlt die Rendite!
+              {zinseszinsAnteilPct}% {t('goals.compoundShare', 'des Endvermögens zahlt die Rendite!')}
             </span>
           </div>
         </div>
@@ -185,11 +189,10 @@ export default function GoalPlanner() {
         {/* Empfohlene HAVN-Strategie */}
         <div className="p-4 rounded-2xl glass-inset text-xs text-slate-300 leading-relaxed space-y-2">
           <div className="font-bold text-white flex items-center gap-1.5 uppercase tracking-wide">
-            <Award className="w-4 h-4 text-sky-400" /> Die professionelle Umsetzung:
+            <Award className="w-4 h-4 text-sky-400" /> {t('goals.profImplTitle', 'Die professionelle Umsetzung:')}
           </div>
           <p>
-            Richte bei deinem Neobroker (z. B. Trade Republic oder Scalable) einen automatischen ETF-Sparplan über <strong>{neededMonthlySavings} € monatlich</strong> in einen weltweiten All-World-ETF (z. B. <em>MSCI World oder FTSE All-World</em>) ein. 
-            Über {years} Jahre wächst dein Vermögen durch den Zinseszins auf rund <strong>{targetCapital.toLocaleString('de-DE')} €</strong> an – über <strong>{zinsgewinn.toLocaleString('de-DE')} €</strong> davon sind reiner Wertzuwachs ohne zusätzliche Arbeit!
+            {t('goals.profImplP1', 'Richte bei deinem Neobroker einen automatischen ETF-Sparplan über')} <strong>{neededMonthlySavings} € {t('params.monthly', 'monatlich')}</strong> {t('goals.profImplP2', 'in einen weltweiten All-World-ETF ein. Über die Jahre wächst dein Vermögen durch den Zinseszins auf rund')} <strong>{targetCapital.toLocaleString('de-DE')} €</strong> (+<strong>{zinsgewinn.toLocaleString('de-DE')} €</strong>).
           </p>
         </div>
       </div>

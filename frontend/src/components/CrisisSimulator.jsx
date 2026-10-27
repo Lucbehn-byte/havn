@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertTriangle, TrendingDown, Clock, ShieldCheck, Flame, RefreshCw, Zap, CloudLightning, ShieldAlert, Sparkles, Calendar, Layers } from 'lucide-react';
 import RollUpPicker from './RollUpPicker';
 import HISTORICAL_CRISIS_DATA from '../data/historical_crisis_data.json';
+import { useLanguage } from '../context/LanguageContext';
 
 // Wählbare Basis-Assets
 const ASSET_OPTIONS = [
@@ -45,6 +46,7 @@ const CRISIS_EVENTS = [
 ];
 
 export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
+  const { t } = useLanguage();
   const [selectedAssetId, setSelectedAssetId] = useState(() => {
     return ASSET_OPTIONS.some((a) => a.id === initialAsset) ? initialAsset : 'EUNL.DE';
   });
@@ -139,14 +141,14 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
               <CloudLightning className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white tracking-tight">Sturm • Krisen-Stresstest mit realen Kursen</h2>
-              <p className="text-xs text-slate-400">Verfolge den echten, ungeschönten Börsenkurs während historischer Krisen und sieh, wie dein Sparplan reagiert hätte.</p>
+              <h2 className="text-xl font-black text-white tracking-tight">{t('crisis.title', 'Sturm • Krisen-Stresstest mit realen Kursen')}</h2>
+              <p className="text-xs text-slate-400">{t('crisis.subtitle', 'Verfolge den echten, ungeschönten Börsenkurs während historischer Krisen und sieh, wie dein Sparplan reagiert hätte.')}</p>
             </div>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700/80 text-[11px] font-mono text-slate-300 self-start sm:self-auto">
             <Calendar className="w-3.5 h-3.5 text-sky-400" />
-            <span>Zeitraum: {event.period}</span>
+            <span>{t('crisis.timeframe', 'Zeitraum')}: {event.period}</span>
           </div>
         </div>
 
@@ -156,8 +158,8 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
           {/* 1. Wertpapier / Asset Auswahl */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
-              <span>1. Wertpapier / ETF</span>
-              <span className="text-[10px] text-sky-400 font-mono">Real-Daten verfügbar</span>
+              <span>{t('crisis.assetLabel', '1. Wertpapier / ETF')}</span>
+              <span className="text-[10px] text-sky-400 font-mono">{t('crisis.realData', 'Real-Daten verfügbar')}</span>
             </label>
             <select
               value={selectedAssetId}
@@ -171,14 +173,14 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
               ))}
             </select>
             <p className="text-[11px] text-slate-400">
-              {isProxy ? 'Historischer Benchmark-Index herangezogen (da vor Auflage des Wertpapiers).' : 'Exakter historischer Börsenkurs aus diesem Zeitraum.'}
+              {isProxy ? t('crisis.proxyHint', 'Historischer Benchmark-Index herangezogen (da vor Auflage des Wertpapiers).') : t('crisis.realPriceHint', 'Exakter historischer Börsenkurs aus diesem Zeitraum.')}
             </p>
           </div>
 
           {/* 2. Krisen-Ereignis Dropdown */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300">
-              2. Historisches Krisen-Ereignis
+              {t('crisis.crisisEventLabel', '2. Historisches Krisen-Ereignis')}
             </label>
             <select
               value={selectedEventId}
@@ -187,12 +189,12 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
             >
               {CRISIS_EVENTS.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {e.title} • {e.period}
+                  {t(`crisis.events.${e.id}.title`, e.title)} • {e.period}
                 </option>
               ))}
             </select>
             <p className="text-[11px] text-slate-400 line-clamp-1">
-              {event.desc}
+              {t(`crisis.events.${selectedEventId}.desc`, event.desc)}
             </p>
           </div>
         </div>
@@ -202,7 +204,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Startkapital bei Krisenbeginn"
+            label={t('crisis.startCapital', 'Startkapital bei Krisenbeginn')}
             value={kapital}
             onChange={setKapital}
             presets={[100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
@@ -210,7 +212,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
         </div>
         <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label="Monatliche Sparrate während & nach dem Crash"
+            label={t('crisis.monthlySavings', 'Monatliche Sparrate während & nach dem Crash')}
             value={sparrate}
             onChange={setSparrate}
             presets={[25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000]}
@@ -224,34 +226,34 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white">
-              Historischer Echt-Verlauf für {asset.name}
+              {t('crisis.historicCourse', 'Historischer Echt-Verlauf für')} {asset.name}
             </h3>
           </div>
           <span className="text-xs px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 font-mono font-bold">
-            Breakeven nach ca. {breakEvenMonth} {breakEvenMonth === 1 ? 'Monat' : 'Monaten'}
+            {t('crisis.breakeven', 'Breakeven nach ca.')} {breakEvenMonth} {breakEvenMonth === 1 ? t('crisis.month', 'Monat') : t('crisis.months', 'Monaten')}
           </span>
         </div>
 
         {/* 2 Hauptkacheln: Reale Kursveränderung & Sparplan-Endwert */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Reale Kursentwicklung • {event.title}</span>
+            <span className="text-xs text-slate-400">{t('crisis.realPriceDev', 'Reale Kursentwicklung')} • {t(`crisis.events.${event.id}.title`, event.title)}</span>
             <div className="text-2xl font-black font-mono text-white mt-1 flex items-baseline gap-2">
               <span>{priceChange3Y >= 0 ? `+${priceChange3Y}%` : `${priceChange3Y}%`}</span>
               <span className="text-xs font-normal text-slate-400">({startPrice.toFixed(2)} € → {endPrice.toFixed(2)} €)</span>
             </div>
             <span className="text-[11px] text-rose-400 font-medium">
-              Tiefststand: {minPrice.toFixed(2)} € • {priceChangeTrough}% Einbruch in Monat {troughIndex}
+              {t('crisis.trough', 'Tiefststand')}: {minPrice.toFixed(2)} € • {priceChangeTrough}% {t('crisis.crashMonth', 'Einbruch in Monat')} {troughIndex}
             </span>
           </div>
 
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Dein Depotwert nach 3 Jahren mit Sparplan</span>
+            <span className="text-xs text-slate-400">{t('crisis.depotValue3Y', 'Dein Depotwert nach 3 Jahren mit Sparplan')}</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               {endDepotValue.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-emerald-400 font-medium">
-              +{netGain.toLocaleString('de-DE')} € • {gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`} Reingewinn bei {accumulatedCash.toLocaleString('de-DE')} € Einzahlung
+              +{netGain.toLocaleString('de-DE')} € • {gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`} {t('crisis.netGainAt', 'Reingewinn bei')} {accumulatedCash.toLocaleString('de-DE')} € {t('crisis.deposit', 'Einzahlung')}
             </span>
           </div>
         </div>
@@ -265,11 +267,11 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   <TrendingDown className="w-5 h-5" />
                 </span>
                 <h4 className="text-base sm:text-lg font-black text-white">
-                  Realer historischer Kurs & Depot-Erholung
+                  {t('crisis.chartTitle', 'Realer historischer Kurs & Depot-Erholung')}
                 </h4>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Keine vereinfachte Skizze, sondern der <strong>tatsächliche historische Börsenkurs</strong>. Erkennbar sind der Einstiegspunkt, der reale Tiefpunkt und die Kurserholung nach 3 Jahren.
+                {t('crisis.chartDesc', 'Keine vereinfachte Skizze, sondern der tatsächliche historische Börsenkurs.')}
               </p>
             </div>
             
@@ -282,7 +284,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   viewMode === 'both' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Beides
+                {t('crisis.viewBoth', 'Beides')}
               </button>
               <button
                 type="button"
@@ -291,7 +293,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   viewMode === 'depot' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Nur Depot
+                {t('crisis.viewDepot', 'Nur Depot')}
               </button>
               <button
                 type="button"
@@ -300,7 +302,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   viewMode === 'price' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Nur Kurs
+                {t('crisis.viewPrice', 'Nur Kurs')}
               </button>
             </div>
           </div>
@@ -308,13 +310,13 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
           {/* Legende */}
           <div className="flex items-center flex-wrap gap-3 text-xs pt-1">
             <span className="px-3 py-1 rounded-lg bg-sky-950/60 border border-sky-800/60 text-sky-400 font-bold flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span> Reales Depot (mit Sparplan)
+              <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span> {t('crisis.legDepot', 'Reales Depot (mit Sparplan)')}
             </span>
             <span className="px-3 py-1 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-300 font-bold flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> Realer Aktienkurs (€)
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span> {t('crisis.legPrice', 'Realer Aktienkurs (€)')}
             </span>
             <span className="px-3 py-1 rounded-lg glass text-slate-400 font-bold flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 bg-slate-500"></span> Eingezahltes Kapital
+              <span className="w-2.5 h-0.5 bg-slate-500"></span> {t('crisis.legCash', 'Eingezahltes Kapital')}
             </span>
           </div>
 
@@ -501,7 +503,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   <g transform={`translate(${startX}, ${startDepotY - 36})`}>
                     <rect x="0" y="0" width="112" height="26" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.2" />
                     <text x="56" y="17" fill="#ffffff" fontSize="11" fontWeight="800" textAnchor="middle" fontFamily="monospace">
-                      1. Einstieg: {kapital} €
+                      {t('crisis.pointEntry', '1. Einstieg')}: {kapital} €
                     </text>
                   </g>
 
@@ -510,10 +512,10 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   <g transform={`translate(${troughX > 160 ? troughX - 65 : troughX - 10}, ${troughDepotY < svgH - 120 ? troughDepotY + 16 : troughDepotY - 55})`}>
                     <rect x="0" y="0" width="135" height="42" rx="8" fill="#1e1014" stroke="#f43f5e" strokeWidth="1.5" />
                     <text x="67" y="17" fill="#f43f5e" fontSize="11" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                      2. Tiefpunkt ({dates[troughIndex] || `M${troughIndex}`})
+                      {t('crisis.pointTrough', '2. Tiefpunkt')} ({dates[troughIndex] || `M${troughIndex}`})
                     </text>
                     <text x="67" y="32" fill="#f87171" fontSize="10.5" fontWeight="700" textAnchor="middle">
-                      Kurs: {minPrice.toFixed(2)} € ({priceChangeTrough}%)
+                      {t('header.currentPrice', 'Kurs')}: {minPrice.toFixed(2)} € ({priceChangeTrough}%)
                     </text>
                   </g>
 
@@ -522,10 +524,10 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                   <g transform={`translate(${endX - 142}, ${endDepotY - 42})`}>
                     <rect x="0" y="0" width="142" height="38" rx="8" fill="#062d1f" stroke="#10b981" strokeWidth="1.5" />
                     <text x="71" y="16" fill="#ffffff" fontSize="11.5" fontWeight="900" textAnchor="middle" fontFamily="monospace">
-                      3. Ende: {endDepotValue.toLocaleString('de-DE')} €
+                      {t('crisis.pointEnd', '3. Ende')}: {endDepotValue.toLocaleString('de-DE')} €
                     </text>
                     <text x="71" y="30" fill="#34d399" fontSize="10.5" fontWeight="800" textAnchor="middle">
-                      Kurs: {endPrice.toFixed(2)} € (+{priceChange3Y}%)
+                      {t('header.currentPrice', 'Kurs')}: {endPrice.toFixed(2)} € (+{priceChange3Y}%)
                     </text>
                   </g>
 
@@ -535,13 +537,13 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
                       {dates[0] || 'Start'}
                     </text>
                     <text x={getSvgX(troughIndex)} y="0" fill="#f87171" fontSize="11" fontWeight="800" textAnchor="middle">
-                      {dates[troughIndex] || `M${troughIndex}`} (Tief)
+                      {dates[troughIndex] || `M${troughIndex}`} ({t('crisis.trough', 'Tief')})
                     </text>
                     <text x={getSvgX(18)} y="0" fill="#94a3b8" fontSize="11" fontWeight="600" textAnchor="middle">
-                      {dates[18] || '1,5 Jahre'}
+                      {dates[18] || '1.5 Y'}
                     </text>
                     <text x={getSvgX(totalMonths)} y="0" fill="#34d399" fontSize="11" fontWeight="800" textAnchor="middle">
-                      {dates[totalMonths] || '3 Jahre'} (Ziel)
+                      {dates[totalMonths] || '3 Y'}
                     </text>
                   </g>
                 </svg>
@@ -553,12 +555,11 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
         {/* Quant- & Historische Lektion */}
         <div className="p-4 rounded-2xl bg-sky-950/30 border border-sky-800/50 text-xs text-slate-300 leading-relaxed space-y-2">
           <div className="font-bold text-sky-400 flex items-center gap-1.5 uppercase tracking-wide">
-            <Zap className="w-4 h-4" /> Historischer Beweis für {asset.name}:
+            <Zap className="w-4 h-4" /> {t('crisis.historicalProof', 'Historischer Beweis für')} {asset.name}:
           </div>
           <p>
-            Im echten Verlauf der <strong>{event.title}</strong> stürzte der Kurs von <strong>{startPrice.toFixed(2)} €</strong> auf das Tief von <strong>{minPrice.toFixed(2)} € ({priceChangeTrough}%)</strong> im Monat <strong>{dates[troughIndex] || troughIndex}</strong> ab. 
-            Wer jedoch nicht panisch verkaufte, sondern den Sparplan von <strong>{sparrate} € monatlich</strong> stur weiterlaufen ließ, kaufte am Boden extrem günstig ein. 
-            Bereits nach ca. <strong>{breakEvenMonth} Monaten</strong> war der Verlust vollständig ausgeglichen. Nach 3 Jahren schloss das Depot mit <strong>{endDepotValue.toLocaleString('de-DE')} €</strong> ab (Reingewinn: <strong>+{netGain.toLocaleString('de-DE')} €</strong>).
+            {t(`crisis.events.${event.id}.title`, event.title)}: {t('crisis.proofPart1', 'Wer jedoch nicht panisch verkaufte, sondern den Sparplan von')} <strong>{sparrate} € {t('params.monthly', 'monatlich')}</strong> {t('crisis.proofPart2', 'stur weiterlaufen ließ, kaufte am Boden extrem günstig ein.')} 
+            ({t('crisis.breakeven', 'Breakeven nach ca.')} <strong>{breakEvenMonth} {breakEvenMonth === 1 ? t('crisis.month', 'Monat') : t('crisis.months', 'Monaten')}</strong>, {t('crisis.depotValue3Y', 'Depotwert nach 3 Jahren')}: <strong>{endDepotValue.toLocaleString('de-DE')} €</strong>).
           </p>
         </div>
       </div>

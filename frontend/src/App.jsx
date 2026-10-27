@@ -103,6 +103,17 @@ export default function App() {
 
   const { language, currentLanguage, t } = useLanguage();
 
+  const proSections = useMemo(() => [
+    { id: 'pro-signal', label: t('pro.sections.signal', 'Signal') },
+    { id: 'pro-chart', label: t('pro.sections.chart', 'Chart & Muster') },
+    { id: 'pro-projektion', label: t('pro.sections.projection', 'Projektion') },
+    { id: 'pro-risiko', label: t('pro.sections.risk', 'Risiko & Chancen') },
+    { id: 'pro-krisen', label: t('pro.sections.crisis', 'Stresstest') },
+    { id: 'pro-simulation', label: t('pro.sections.simulation', 'Simulation') },
+    { id: 'pro-bewertung', label: t('pro.sections.valuation', 'Bewertung') },
+    { id: 'pro-umsetzung', label: t('pro.sections.implementation', 'Umsetzung') },
+  ], [t]);
+
   // Anonymer Besucher-Ping für interne Statistik
   useEffect(() => {
     try {
@@ -507,17 +518,17 @@ export default function App() {
                     {loading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Berechne Quant-Modelle...</span>
+                        <span>{t('header.calcModels', 'Berechne Quant-Modelle...')}</span>
                       </>
                     ) : isUpToDate ? (
                       <>
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        <span>Simulation synchronisiert</span>
+                        <span>{t('header.syncModels', 'Simulation synchronisiert')}</span>
                       </>
                     ) : (
                       <>
                         <Play className="w-4 h-4 fill-white" />
-                        <span>Simulation jetzt aktualisieren</span>
+                        <span>{t('header.updateSimulation', 'Simulation jetzt aktualisieren')}</span>
                       </>
                     )}
                   </button>
@@ -532,7 +543,7 @@ export default function App() {
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center gap-3">
             <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
             <div>
-              <strong>Fehler: </strong>{error}
+              <strong>{t('header.errorPrefix', 'Fehler:')} </strong>{error}
             </div>
           </div>
         )}
@@ -560,30 +571,30 @@ export default function App() {
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
                         : 'bg-white/[0.04] text-slate-400 hover:text-amber-400 border-white/10 hover:bg-white/[0.08]'
                     }`}
-                    title={isCurrentFavorite ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen"}
+                    title={isCurrentFavorite ? t('modals.watchlist.removeTitle', 'Aus Favoriten entfernen') : t('header.remember', 'Merken')}
                   >
                     <Star className={`w-3.5 h-3.5 ${isCurrentFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
-                    <span className="hidden sm:inline">{isCurrentFavorite ? 'Gemerkt' : 'Merken'}</span>
+                    <span className="hidden sm:inline">{isCurrentFavorite ? t('header.remembered', 'Gemerkt') : t('header.remember', 'Merken')}</span>
                   </button>
                 </div>
 
                 <p className="text-xs text-slate-400 mt-1">
-                  Typ: <span className="text-slate-300 font-medium">{displayData.asset_info?.typ || 'Wertpapier'}</span> • ISIN: <span className="font-mono text-slate-300">{displayData.asset_info?.isin || '–'}</span>
+                  {t('header.type', 'Typ')}: <span className="text-slate-300 font-medium">{displayData.asset_info?.typ || 'Wertpapier'}</span> • {t('header.isin', 'ISIN')}: <span className="font-mono text-slate-300">{displayData.asset_info?.isin || '–'}</span>
                 </p>
               </div>
 
               {/* Kurs & Aktions-Buttons (Teilen & Duell) */}
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 relative z-10">
                 <div>
-                  <div className="text-[10px] text-slate-400 font-medium uppercase">Aktueller Kurs</div>
+                  <div className="text-[10px] text-slate-400 font-medium uppercase">{t('header.currentPrice', 'Aktueller Kurs')}</div>
                   <div className="text-2xl font-black text-white font-mono">{displayData.current_price?.toFixed(2)} €</div>
                 </div>
 
                 {isBasic ? (
                   <div>
                     <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
-                      Schwankung
-                      <InfoTooltip title="Schwankungsintensität" text={`Gibt an, wie stark dieses Wertpapier im Vergleich zum Weltmarkt ausschlägt. ${insights?.marketCompare || ''}.`} />
+                      {t('header.volatility', 'Schwankung')}
+                      <InfoTooltip title={t('header.volatility', 'Schwankung')} text={`Gibt an, wie stark dieses Wertpapier im Vergleich zum Weltmarkt ausschlägt. ${insights?.marketCompare || ''}.`} />
                     </div>
                     <div className="mt-1">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-xs font-bold ${TONE[insights?.swing?.tone || 'sky'].soft}`}>
@@ -595,9 +606,9 @@ export default function App() {
                 ) : (
                   <div>
                     <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
-                      Markt-Beta
+                      {t('header.marketBeta', 'Markt-Beta')}
                       <InfoTooltip 
-                        title="Markt-Beta" 
+                        title={t('header.marketBeta', 'Markt-Beta')} 
                         text="Misst das Kursverhalten im Vergleich zum weltweiten Gesamtmarkt (MSCI World = 1,0). Ein Wert über 1,0 bedeutet dynamischere Kursbewegungen, unter 1,0 schwankt das Papier ruhiger als der Markt." 
                         rule="1,0 = Marktüblich • Unter 0,8 = Defensiv & stabil • Über 1,2 = Wachstumsstark, schwankungsintensiv"
                       />
@@ -612,10 +623,10 @@ export default function App() {
                     type="button"
                     onClick={() => setShareModalOpen(true)}
                     className="p-2.5 rounded-2xl glass-chip hover:bg-white/10 text-sky-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-                    title="Analyse-Report teilen"
+                    title={t('modals.share.title', 'Analyse-Report teilen')}
                   >
                     <Share2 className="w-4 h-4" />
-                    <span className="hidden md:inline">Teilen</span>
+                    <span className="hidden md:inline">{t('header.share', 'Teilen')}</span>
                   </button>
 
                   {/* Modul 3: Duell-Shortcut */}
@@ -623,10 +634,10 @@ export default function App() {
                     type="button"
                     onClick={() => setActiveTab('battle')}
                     className="p-2.5 rounded-2xl bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-md"
-                    title="Im Duell mit anderem Asset vergleichen"
+                    title={t('nav.battle', 'Duell')}
                   >
                     <Swords className="w-4 h-4 text-indigo-400" />
-                    <span className="hidden md:inline">Duell</span>
+                    <span className="hidden md:inline">{t('nav.battle', 'Duell')}</span>
                   </button>
                 </div>
               </div>
@@ -650,13 +661,13 @@ export default function App() {
                 <ExecutiveSummary data={displayData} invType={invType} />
 
                 {/* Sticky Kapitelnavigation für schnelles Springen */}
-                <ProNav sections={PRO_SECTIONS} />
+                <ProNav sections={proSections} />
 
                 {/* 1. Signal & Trend-Banner */}
                 <ProSection
                   id="pro-signal"
                   number={1}
-                  title="Signal & Trend-Modell"
+                  title={t('pro.s1Title', 'Signal & Trend-Modell')}
                   takeaway={insights ? `${insights.trend.text} Gesamtscore: ${displayData.chart_model?.score > 0 ? '+' : ''}${displayData.chart_model?.score ?? 0} %.` : ''}
                 >
                   <SignalBanner chartModel={displayData.chart_model} />
@@ -666,7 +677,7 @@ export default function App() {
                 <ProSection
                   id="pro-chart"
                   number={2}
-                  title="Kursverlauf & Technische Muster"
+                  title={t('pro.s2Title', 'Preishistorie & Candlesticks')}
                   takeaway="Realer Kursverlauf mit Donchian-Kanälen, GD50/200 und harmonisierter Candlestick-Mustererkennung."
                 >
                   <PriceChart 
@@ -682,7 +693,7 @@ export default function App() {
                 <ProSection
                   id="pro-projektion"
                   number={3}
-                  title="Kapital-Projektion"
+                  title={t('pro.s3Title', 'Kapital-Projektion')}
                   takeaway={insights ? `Erwarteter Endwert nach ${insights.horizon}: ${formatEuro(insights.scenarios.normal)} (erwartete Rendite +${(displayData.monte_carlo?.expected_return_pct ?? 0).toFixed(1)} %).` : ''}
                 >
                   <FinancialMetrics 
@@ -696,7 +707,7 @@ export default function App() {
                 <ProSection
                   id="pro-risiko"
                   number={4}
-                  title="Risikoprofil & Gewinnchancen"
+                  title={t('pro.s4Title', 'Risikoprofil & Gewinnchancen')}
                   takeaway={insights ? `Gewinnchance: ${insights.winRate != null ? `${insights.winRate.toFixed(0)} %` : `${insights.probUp.toFixed(0)} %`} • Sortino-Verhältnis: ${insights.sortino.toFixed(2)} Rendite pro Risikoeinheit.` : ''}
                 >
                   <RiskProfile
@@ -710,7 +721,7 @@ export default function App() {
                 <ProSection
                   id="pro-krisen"
                   number={5}
-                  title="Krisen- & Stresstest"
+                  title={t('pro.s5Title', 'Krisen- & Stresstest')}
                   takeaway={insights ? `Maximaler historischer Kurseinbruch: −${insights.maxDd.toFixed(1)} %. ${displayData.crisis_model?.summary || ''}` : ''}
                 >
                   <CrisisStressTest crisisModel={displayData.crisis_model} />
@@ -720,7 +731,7 @@ export default function App() {
                 <ProSection
                   id="pro-simulation"
                   number={6}
-                  title="Simulationsfächer • 5.000 Pfade"
+                  title={t('pro.s6Title', 'Simulationsfächer • 5.000 Pfade')}
                   takeaway="5.000 statistische Zukunftspfade inklusive plötzlicher Marktschocks für eine realistische Bandbreite."
                 >
                   <FanChart 
@@ -734,7 +745,7 @@ export default function App() {
                 <ProSection
                   id="pro-bewertung"
                   number={7}
-                  title="Fundamentale Bewertung"
+                  title={t('pro.s7Title', 'Fundamentale Bewertung')}
                   takeaway={insights ? (insights.isEtf ? 'Breit gestreuter Index-Fonds – keine Einzelunternehmens-Bewertung nötig.' : `${displayData.fundamental?.valuation_status || 'Bewertung'}: ${displayData.fundamental?.summary || ''}`) : ''}
                 >
                   <FundamentalCards fundamental={displayData.fundamental} />
@@ -744,7 +755,7 @@ export default function App() {
                 <ProSection
                   id="pro-umsetzung"
                   number={8}
-                  title="Order-Leitfaden"
+                  title={t('pro.s8Title', 'Order-Leitfaden')}
                   takeaway="Konkrete Kennnummern (WKN/ISIN) und Sparplan-Schritte für deutsche Broker."
                 >
                   <BrokerGuide

@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Scale, FileText, X, Globe, AlertTriangle, ExternalLink } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function LegalModal({ isOpen, onClose }) {
-  const [lang, setLang] = useState('de'); // 'de' oder 'en'
+  const { language } = useLanguage();
+  const [lang, setLang] = useState(language === 'de' ? 'de' : 'en'); // 'de' oder 'en'
   const [activeTab, setActiveTab] = useState('impressum'); // 'impressum', 'disclaimer', 'privacy'
+
+  useEffect(() => {
+    setLang(language === 'de' ? 'de' : 'en');
+  }, [language]);
 
   if (!isOpen) return null;
 

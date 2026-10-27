@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Share2, Copy, Check, MessageSquare, ExternalLink, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ShareModal({ 
   isOpen = false, 
@@ -9,6 +10,7 @@ export default function ShareModal({
   kapital = 100, 
   timeframe = '1 Jahr (Jahres-Trend)' 
 }) {
+  const { t } = useLanguage();
   const [copiedText, setCopiedText] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -26,12 +28,12 @@ export default function ShareModal({
   // Formatierter Text für WhatsApp & Messenger
   const shareText = `📊 HAVN Quant-Analyse für ${assetName} (${ticker}):
   
-💰 Strategie: ${invType} (${Number(kapital).toLocaleString('de-DE')} €)
-🎯 Prognostizierter Endwert: ${Math.round(expectedEndwert).toLocaleString('de-DE')} € (${returnPct > 0 ? '+' : ''}${returnPct.toFixed(1)}%)
-🛡️ Gewinn-Wahrscheinlichkeit: ${probUp}%
-📈 Aktueller Kurs: ${currentPrice.toFixed(2)} €
+💰 ${t('modals.share.strategy', 'Strategie')}: ${invType} (${Number(kapital).toLocaleString('de-DE')} €)
+🎯 ${t('modals.share.projectedEnd', 'Prognostizierter Endwert')}: ${Math.round(expectedEndwert).toLocaleString('de-DE')} € (${returnPct > 0 ? '+' : ''}${returnPct.toFixed(1)}%)
+🛡️ ${t('modals.share.winProb', 'Gewinn-Wahrscheinlichkeit')}: ${probUp}%
+📈 ${t('modals.share.currentPrice', 'Aktueller Kurs')}: ${currentPrice.toFixed(2)} €
 
-Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
+${t('modals.share.footerQuote', 'Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓')}`;
 
   const handleCopyText = async () => {
     try {
@@ -89,8 +91,8 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
               <Share2 className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Analyse-Report teilen</h3>
-              <p className="text-xs text-slate-400">Erstelle eine stylische Vorschau zum Versenden.</p>
+              <h3 className="text-base font-bold text-white">{t('modals.share.title', 'Analyse-Report teilen')}</h3>
+              <p className="text-xs text-slate-400">{t('modals.share.subtitle', 'Erstelle eine stylische Vorschau zum Versenden.')}</p>
             </div>
           </div>
 
@@ -118,28 +120,28 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
           </div>
 
           <div>
-            <div className="text-xs text-slate-400">Analysiertes Wertpapier:</div>
+            <div className="text-xs text-slate-400">{t('modals.share.analyzedAsset', 'Analysiertes Wertpapier:')}</div>
             <div className="text-lg font-black text-white">{assetName}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 pt-1">
             <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-              <span className="text-[11px] text-slate-400">Prognostizierter Wert</span>
+              <span className="text-[11px] text-slate-400">{t('modals.share.projectedEnd', 'Prognostizierter Wert')}</span>
               <div className="text-base font-black font-mono text-emerald-400 mt-0.5">
                 {Math.round(expectedEndwert).toLocaleString('de-DE')} €
               </div>
               <span className="text-[10px] text-emerald-300 font-bold">
-                {returnPct > 0 ? '+' : ''}{returnPct.toFixed(1)}% Ertrag
+                {returnPct > 0 ? '+' : ''}{returnPct.toFixed(1)}% {t('modals.share.gain', 'Ertrag')}
               </span>
             </div>
 
             <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-              <span className="text-[11px] text-slate-400">Gewinn-Chance</span>
+              <span className="text-[11px] text-slate-400">{t('modals.share.winProb', 'Gewinn-Chance')}</span>
               <div className="text-base font-black font-mono text-sky-300 mt-0.5">
                 {probUp}%
               </div>
               <span className="text-[10px] text-slate-400">
-                Stochastisch positiv
+                {t('modals.share.stochPositive', 'Stochastisch positiv')}
               </span>
             </div>
           </div>
@@ -161,12 +163,12 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
             {copiedText ? (
               <>
                 <Check className="w-4 h-4" />
-                <span>Text für WhatsApp kopiert!</span>
+                <span>{t('modals.share.copied', 'In die Zwischenablage kopiert!')}</span>
               </>
             ) : (
               <>
                 <MessageSquare className="w-4 h-4" />
-                <span>Zusammenfassung für WhatsApp kopieren</span>
+                <span>{t('modals.share.copyText', 'Zusammenfassung für WhatsApp kopieren')}</span>
               </>
             )}
           </button>
@@ -180,7 +182,7 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
                 className="py-2 px-3 rounded-xl font-bold text-xs bg-white/[0.08] hover:bg-white/[0.15] text-white border border-white/10 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <Share2 className="w-3.5 h-3.5 text-sky-400" />
-                <span>Per App teilen...</span>
+                <span>{t('modals.share.nativeShare', 'Per App teilen...')}</span>
               </button>
             ) : (
               <button
@@ -189,7 +191,7 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
                 className="py-2 px-3 rounded-xl font-bold text-xs bg-white/[0.08] hover:bg-white/[0.15] text-white border border-white/10 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <Copy className="w-3.5 h-3.5 text-sky-400" />
-                <span>Text kopieren</span>
+                <span>{t('modals.share.copyText', 'Text kopieren')}</span>
               </button>
             )}
 
@@ -202,12 +204,12 @@ Analysiert mit HAVN – Dein sicherer Hafen für Aktien & ETFs ⚓`;
               {copiedLink ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Link kopiert!</span>
+                  <span>{t('modals.share.linkCopied', 'Link kopiert!')}</span>
                 </>
               ) : (
                 <>
                   <ExternalLink className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Link kopieren</span>
+                  <span>{t('modals.share.copyLink', 'Link kopieren')}</span>
                 </>
               )}
             </button>

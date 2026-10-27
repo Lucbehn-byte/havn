@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Share, PlusSquare, Smartphone, X, Sparkles, Check, ArrowDown, ExternalLink } from 'lucide-react';
 import { getDeviceInfo } from '../utils/device';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function InstallPrompt({ forceShow = false, onCloseManual }) {
+  const { t } = useLanguage();
   // Synchron sofort bei Montage bestimmen (verhindert falschen Render auf iOS)
   const [device] = useState(() => getDeviceInfo());
   const { isIOS, isSafari, isStandalone } = device;
@@ -127,13 +129,13 @@ export default function InstallPrompt({ forceShow = false, onCloseManual }) {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h4 className="text-xs font-black text-white tracking-tight truncate">HAVN als App</h4>
+                  <h4 className="text-xs font-black text-white tracking-tight truncate">{t('modals.install.title', 'HAVN als App')}</h4>
                   <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300">
-                    Kostenlos
+                    {t('modals.install.free', 'Kostenlos')}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-300 truncate">
-                  {isIOS ? 'Zum iPhone Home-Bildschirm' : 'Offline-Start & Vollbild-Erlebnis'}
+                  {isIOS ? t('modals.install.iosTitle', 'Zum iPhone Home-Bildschirm') : t('modals.install.subtitle', 'Offline-Start & Vollbild-Erlebnis')}
                 </p>
               </div>
             </div>
@@ -147,17 +149,17 @@ export default function InstallPrompt({ forceShow = false, onCloseManual }) {
                 {isIOS ? (
                   <>
                     <Share className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Holen</span>
+                    <span>{t('modals.install.installBtn', 'Holen')}</span>
                   </>
                 ) : installedSuccess ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Installiert!</span>
+                    <span>{t('modals.install.installed', 'Installiert!')}</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Installieren</span>
+                    <span>{t('modals.install.installBtn', 'Installieren')}</span>
                   </>
                 )}
               </button>
@@ -166,7 +168,7 @@ export default function InstallPrompt({ forceShow = false, onCloseManual }) {
                 type="button"
                 onClick={handleDismissBanner}
                 className="p-1 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                aria-label="Schließen"
+                aria-label={t('modals.install.closeBtn', 'Schließen')}
               >
                 <X className="w-4 h-4" />
               </button>

@@ -31,7 +31,7 @@ function ScoreRing({ score }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-4xl font-black text-white tracking-tight">{score}</span>
-        <span className="text-[10px] font-semibold text-slate-400 -mt-0.5">von 100</span>
+        <span className="text-[10px] font-semibold text-slate-400 -mt-0.5">/ 100</span>
       </div>
     </div>
   );

@@ -1,8 +1,10 @@
 import React from 'react';
 import { ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Sparkles, CheckCircle2, Flame, ArrowUpRight, Award, Compass, HeartHandshake } from 'lucide-react';
 import InfoTooltip from './InfoTooltip';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
+  const { t } = useLanguage();
   if (!data || !data.ticker) return null;
 
   const ticker = data.ticker;
@@ -101,7 +103,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
-              <span>HAVN 3-Sekunden-Fazit</span>
+              <span>HAVN {t('exec.title', '3-Sekunden-Fazit')}</span>
               <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-white/[0.06] text-sky-300 border border-white/10">
                 {assetName}
               </span>
@@ -126,9 +128,9 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sparplan-Eignung</span>
+              <span>{t('exec.sparplanFit', 'Sparplan-Eignung')}</span>
               <InfoTooltip
-                title="Sparplan-Eignung"
+                title={t('exec.sparplanFit', 'Sparplan-Eignung')}
                 text="Bewertet, wie gut sich dieses Wertpapier für den automatischen, monatlichen Vermögensaufbau eignet. Hohe Diversifikation und stetiges Wachstum erzielen Bestwerte."
                 rule="Ab 75/100 Punkten gilt eine Anlage als verlässlicher Sparplan-Motor."
               />
@@ -151,9 +153,9 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Compass className={`w-3.5 h-3.5 ${timingType === 'success' ? 'text-emerald-400' : timingType === 'danger' ? 'text-rose-400' : 'text-amber-400'}`} />
-              <span>Timing-Ampel</span>
+              <span>{t('exec.timingTraffic', 'Timing-Ampel')}</span>
               <InfoTooltip
-                title="Timing-Ampel"
+                title={t('exec.timingTraffic', 'Timing-Ampel')}
                 text="Prüft die aktuelle Marktlage für Einmalkäufe anhand von Trendstärke, Abständen zu Durchschnitten und technischer Überhitzung."
                 rule="Bei Sparplänen ist das Timing zweitrangig. Bei Einmalkäufen schützt die Ampel vor überhitzten Höchstständen."
               />
@@ -182,15 +184,15 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-              <span>Krisen-Resilienz</span>
+              <span>{t('exec.crisisResilience', 'Krisen-Resilienz')}</span>
               <InfoTooltip
-                title="Krisen-Resilienz"
+                title={t('exec.crisisResilience', 'Krisen-Resilienz')}
                 text="Misst den tiefsten historischen Rückschlag vom Allzeithoch und die Erholungsgeschwindigkeit nach schwersten Crashs."
                 rule="Breit gestreute Welt-ETFs erholen sich historisch verlässlich aus Krisen."
               />
             </span>
             <span className="text-xs font-mono font-bold text-sky-300 bg-sky-950/60 px-2 py-0.5 rounded-md border border-sky-500/30">
-              Max. Rückschlag: −{maxDd.toFixed(1)} %
+              {t('exec.maxDrawdown', 'Max. Rückschlag')}: −{maxDd.toFixed(1)} %
             </span>
           </div>
 
