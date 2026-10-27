@@ -2,7 +2,10 @@
 Leitfaden und Praxistipps für die Umsetzung im eigenen Broker.
 Schlägt die Brücke zwischen der Analyse und Neobrokern wie Trade Republic, Scalable Capital etc.
 """
-import streamlit as st
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 
 
 def render_broker_instructions(asset_info: dict, investment_type: str, sparplan_frequenz: str, kapital: float) -> None:
