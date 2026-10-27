@@ -80,7 +80,7 @@ export default function GoalPlanner() {
             <Compass className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight">Kompass (Ziel- & Vermögensplaner)</h2>
+            <h2 className="text-xl font-black text-white tracking-tight">Kompass • Ziel- & Vermögensplaner</h2>
             <p className="text-xs text-slate-400">Wähle dein nächstes greifbares Lebensziel und erfahre, welche monatliche Sparrate dich dorthin bringt.</p>
           </div>
         </div>

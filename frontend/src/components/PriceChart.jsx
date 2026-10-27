@@ -600,7 +600,7 @@ export default function PriceChart({
               </span>
               {hasDc && (
                 <span className="flex items-center gap-1.5 text-sky-400 font-medium">
-                  <span className="w-3 h-0.5 border-t border-dotted border-sky-400 rounded-full inline-block"></span> Donchian (20T)
+                  <span className="w-3 h-0.5 border-t border-dotted border-sky-400 rounded-full inline-block"></span> Donchian 20T
                 </span>
               )}
             </>

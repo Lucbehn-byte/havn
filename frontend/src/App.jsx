@@ -36,11 +36,23 @@ const BASIC_TIMEFRAMES = [
   { key: '5 Jahre (Vermögensaufbau)', label: '5 Jahre', hint: 'empfohlen' },
 ];
 
+function formatTimeframeLabel(key) {
+  if (!key) return '';
+  return key
+    .replace(' (Kurzfrist-Impuls)', ' • Kurzfrist')
+    .replace(' (Kurzfrist-Trend)', ' • Swing')
+    .replace(' (Mittelfrist-Swing)', ' • Mittelfrist')
+    .replace(' (Jahres-Trend)', ' • Jahrestrend')
+    .replace(' (Makro-Zyklus)', ' • Konjunkturzyklus')
+    .replace(' (Vermögensaufbau)', ' • Vermögensaufbau')
+    .replace(/\s*\(([^)]+)\)/g, ' • $1');
+}
+
 const PRO_SECTIONS = [
   { id: 'pro-signal', label: 'Signal' },
   { id: 'pro-chart', label: 'Chart & Muster' },
   { id: 'pro-projektion', label: 'Projektion' },
-  { id: 'pro-risiko', label: 'Risiko' },
+  { id: 'pro-risiko', label: 'Risiko & Chancen' },
   { id: 'pro-krisen', label: 'Stresstest' },
   { id: 'pro-simulation', label: 'Simulation' },
   { id: 'pro-bewertung', label: 'Bewertung' },
@@ -382,7 +394,7 @@ export default function App() {
                   className="w-full glass-input rounded-xl px-3 py-2.5 text-sm text-white cursor-pointer"
                 >
                   {timeframeKeys.map((k) => (
-                    <option key={k} value={k}>{k}</option>
+                    <option key={k} value={k}>{formatTimeframeLabel(k)}</option>
                   ))}
                 </select>
               )}
@@ -423,7 +435,7 @@ export default function App() {
             {invType === 'Einmalanlage' ? (
               <div className="sm:col-span-2">
                 <RollUpPicker
-                  label="Geldeinsatz (Einmalanlage)"
+                  label="Einmaliger Geldeinsatz"
                   value={kapital}
                   onChange={setKapital}
                 />
@@ -440,7 +452,7 @@ export default function App() {
                 </div>
                 <div>
                   <RollUpPicker
-                    label={`Sparrate (${sparplanFreq})`}
+                    label={`Sparrate • ${sparplanFreq}`}
                     value={kapital}
                     onChange={setKapital}
                     presets={[25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000]}
@@ -575,7 +587,11 @@ export default function App() {
                   <div>
                     <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
                       Markt-Beta
-                      <InfoTooltip title="Markt-Beta (Vasicek Shrinkage)" text="Sensitivität gegenüber dem Weltmarkt (MSCI World = 1.0). Ein Beta von 1.2 bedeutet 20 % stärkere Marktschwankungen." />
+                      <InfoTooltip 
+                        title="Markt-Beta" 
+                        text="Misst das Kursverhalten im Vergleich zum weltweiten Gesamtmarkt (MSCI World = 1,0). Ein Wert über 1,0 bedeutet dynamischere Kursbewegungen, unter 1,0 schwankt das Papier ruhiger als der Markt." 
+                        rule="1,0 = Marktüblich • Unter 0,8 = Defensiv & stabil • Über 1,2 = Wachstumsstark, schwankungsintensiv"
+                      />
                     </div>
                     <div className="text-2xl font-black text-sky-400 font-mono">{displayData.beta?.toFixed(2)}</div>
                   </div>
@@ -671,8 +687,8 @@ export default function App() {
                 <ProSection
                   id="pro-risiko"
                   number={4}
-                  title="Stochastisches Risikoprofil"
-                  takeaway={insights ? `Gewinnquote: ${insights.winRate != null ? `${insights.winRate.toFixed(0)} %` : `${insights.probUp.toFixed(0)} %`} · Sortino-Ratio: ${insights.sortino.toFixed(2)} (Rendite relativ zum Abwärtsrisiko).` : ''}
+                  title="Risikoprofil & Gewinnchancen"
+                  takeaway={insights ? `Gewinnchance: ${insights.winRate != null ? `${insights.winRate.toFixed(0)} %` : `${insights.probUp.toFixed(0)} %`} • Sortino-Verhältnis: ${insights.sortino.toFixed(2)} Rendite pro Risikoeinheit.` : ''}
                 >
                   <RiskProfile
                     monteCarlo={displayData.monte_carlo}
@@ -686,17 +702,17 @@ export default function App() {
                   id="pro-krisen"
                   number={5}
                   title="Krisen- & Stresstest"
-                  takeaway={insights ? `Maximaler historischer Drawdown: −${insights.maxDd.toFixed(1)} %. ${displayData.crisis_model?.summary || ''}` : ''}
+                  takeaway={insights ? `Maximaler historischer Kurseinbruch: −${insights.maxDd.toFixed(1)} %. ${displayData.crisis_model?.summary || ''}` : ''}
                 >
                   <CrisisStressTest crisisModel={displayData.crisis_model} />
                 </ProSection>
 
-                {/* 6. Simulationsfächer (Merton Jump-Diffusion) */}
+                {/* 6. Simulationsfächer (5.000 Pfade) */}
                 <ProSection
                   id="pro-simulation"
                   number={6}
-                  title="Merton Jump-Diffusion Fächer"
-                  takeaway="5.000 Pfade mit Poisson-Sprungprozess zur realistischen Modellierung plötzlicher Kurssprünge."
+                  title="Simulationsfächer • 5.000 Pfade"
+                  takeaway="5.000 statistische Zukunftspfade inklusive plötzlicher Marktschocks für eine realistische Bandbreite."
                 >
                   <FanChart 
                     paths={displayData.monte_carlo?.sample_paths} 

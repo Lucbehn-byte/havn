@@ -139,7 +139,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
               <CloudLightning className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white tracking-tight">Sturm (Krisen-Stresstest mit realen Kursen)</h2>
+              <h2 className="text-xl font-black text-white tracking-tight">Sturm • Krisen-Stresstest mit realen Kursen</h2>
               <p className="text-xs text-slate-400">Verfolge den echten, ungeschönten Börsenkurs während historischer Krisen und sieh, wie dein Sparplan reagiert hätte.</p>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
             >
               {ASSET_OPTIONS.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.name} ({a.type})
+                  {a.name} • {a.type}
                 </option>
               ))}
             </select>
@@ -187,7 +187,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
             >
               {CRISIS_EVENTS.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {e.title} ({e.period})
+                  {e.title} • {e.period}
                 </option>
               ))}
             </select>
@@ -202,7 +202,7 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="glass rounded-3xl p-5 shadow-xl">
           <RollUpPicker
-            label={`Geldeinsatz (Startkapital bei Krisenbeginn)`}
+            label="Startkapital bei Krisenbeginn"
             value={kapital}
             onChange={setKapital}
             presets={[100, 250, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000]}
@@ -235,23 +235,23 @@ export default function CrisisSimulator({ initialAsset = 'EUNL.DE' }) {
         {/* 2 Hauptkacheln: Reale Kursveränderung & Sparplan-Endwert */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Reale Kursentwicklung ({event.title})</span>
+            <span className="text-xs text-slate-400">Reale Kursentwicklung • {event.title}</span>
             <div className="text-2xl font-black font-mono text-white mt-1 flex items-baseline gap-2">
               <span>{priceChange3Y >= 0 ? `+${priceChange3Y}%` : `${priceChange3Y}%`}</span>
               <span className="text-xs font-normal text-slate-400">({startPrice.toFixed(2)} € → {endPrice.toFixed(2)} €)</span>
             </div>
             <span className="text-[11px] text-rose-400 font-medium">
-              Tiefststand: {minPrice.toFixed(2)} € ({priceChangeTrough}% Einbruch in Monat {troughIndex})
+              Tiefststand: {minPrice.toFixed(2)} € • {priceChangeTrough}% Einbruch in Monat {troughIndex}
             </span>
           </div>
 
           <div className="glass-inset rounded-2xl p-4">
-            <span className="text-xs text-slate-400">Dein Depotwert nach 3 Jahren (mit Sparplan)</span>
+            <span className="text-xs text-slate-400">Dein Depotwert nach 3 Jahren mit Sparplan</span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               {endDepotValue.toLocaleString('de-DE')} €
             </div>
             <span className="text-[11px] text-emerald-400 font-medium">
-              +{netGain.toLocaleString('de-DE')} € ({gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`}) Reingewinn bei {accumulatedCash.toLocaleString('de-DE')} € Einzahlung
+              +{netGain.toLocaleString('de-DE')} € • {gainPct >= 0 ? `+${gainPct}%` : `${gainPct}%`} Reingewinn bei {accumulatedCash.toLocaleString('de-DE')} € Einzahlung
             </span>
           </div>
         </div>

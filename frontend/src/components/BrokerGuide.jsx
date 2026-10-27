@@ -101,7 +101,7 @@ export default function BrokerGuide({ assetInfo = {}, invType = 'Einmalanlage', 
 
           {invType === 'Sparplan' && (
             <div className="mt-3 p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/50 text-[11px] text-emerald-300 font-medium">
-              <strong className="text-white">Sparplan-Tipp:</strong> Richte in deinem Broker einfach einen automatischen Sparplan über {kapital} € ({sparplanFreq}) ein – das nimmt Emotionen komplett aus der Entscheidung!
+              <strong className="text-white">Sparplan-Tipp:</strong> Richte in deinem Broker einfach einen automatischen Sparplan über {kapital} € • {sparplanFreq} ein – das nimmt Emotionen komplett aus der Entscheidung!
             </div>
           )}
         </div>

@@ -139,7 +139,7 @@ export function getInsights(data, invType = 'Einmalanlage') {
   else marketCompare = `schwankt rund ${Math.round((1 - beta) * 100)} % weniger als der Gesamtmarkt`;
 
   let priceLevel;
-  if (isEtf) priceLevel = { label: 'Fair (Marktpreis)', tone: 'sky', text: 'Ein breiter Index-Fonds kostet immer den Durchschnittspreis des Marktes.' };
+  if (isEtf) priceLevel = { label: 'Fair • Marktpreis', tone: 'sky', text: 'Ein breiter Index-Fonds kostet immer den Durchschnittspreis des Marktes.' };
   else if (valuation >= 70) priceLevel = { label: 'Günstig', tone: 'emerald', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – im Vergleich eher günstig.` : 'Im Vergleich eher günstig bewertet.' };
   else if (valuation >= 52) priceLevel = { label: 'Fair', tone: 'sky', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – ein üblicher Preis.` : 'Ein marktüblicher Preis.' };
   else priceLevel = { label: 'Teuer', tone: 'amber', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns. Die Börse erwartet viel Wachstum – Enttäuschungen werden bestraft.` : 'Die Börse hat hohe Erwartungen eingepreist.' };

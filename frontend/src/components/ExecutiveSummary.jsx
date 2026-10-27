@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Sparkles, CheckCircle2, Flame, ArrowUpRight, Award, Compass, HeartHandshake } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
   if (!data || !data.ticker) return null;
@@ -28,25 +29,25 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
     else sparplanScore = 76;
   }
 
-  let sparplanLabel = "Exzellent (Top-Basiswert)";
+  let sparplanLabel = "Exzellenter Basiswert";
   let sparplanColor = "emerald";
   if (sparplanScore < 70) {
-    sparplanLabel = "Chancenorientiert (Höhere Vola)";
+    sparplanLabel = "Chancenorientiert • Höhere Schwankung";
     sparplanColor = "amber";
   } else if (sparplanScore < 85) {
-    sparplanLabel = "Sehr solide (Qualität)";
+    sparplanLabel = "Sehr solide Qualität";
     sparplanColor = "sky";
   }
 
   // 2. Timing-Risiko für Einmalkauf (Ampel)
-  let timingStatus = "Moderat (Gestaffelt einsteigen)";
+  let timingStatus = "Gestaffelter Einstieg empfohlen";
   let timingType = "warning"; // success | warning | danger
   let timingDesc = "Aktie befindet sich in einer Konsolidierungsphase. Gestaffelter Kauf empfehlenswert.";
 
   if (rsi > 72) {
     timingStatus = "Erhöhtes Korrekturrisiko";
     timingType = "danger";
-    timingDesc = "Technisch überkauft (RSI > 70) – kurzfristige Rücksetzer sind statistisch wahrscheinlich.";
+    timingDesc = "Technisch überkauft • kurzfristige Rücksetzer sind statistisch wahrscheinlich.";
   } else if (chartScore > 20 && rsi < 65) {
     timingStatus = "Günstiger Einstiegs-Trend";
     timingType = "success";
@@ -58,13 +59,13 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
   }
 
   // 3. Krisen-Resilienz
-  let krisenLabel = "Ausgewogen (Marktüblich)";
+  let krisenLabel = "Ausgewogene Stabilität";
   let krisenColor = "sky";
   if (maxDd <= 30) {
-    krisenLabel = "Hohe Stabilität (Defensiv)";
+    krisenLabel = "Hohe Stabilität";
     krisenColor = "emerald";
   } else if (maxDd > 60 || beta > 1.6) {
-    krisenLabel = "Schwankungsintensiv (Offensiv)";
+    krisenLabel = "Höhere Kursschwankung";
     krisenColor = "amber";
   }
 
@@ -126,6 +127,11 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-emerald-400" />
               <span>Sparplan-Eignung</span>
+              <InfoTooltip
+                title="Sparplan-Eignung"
+                text="Bewertet, wie gut sich dieses Wertpapier für den automatischen, monatlichen Vermögensaufbau eignet. Hohe Diversifikation und stetiges Wachstum erzielen Bestwerte."
+                rule="Ab 75/100 Punkten gilt eine Anlage als verlässlicher Sparplan-Motor."
+              />
             </span>
             <span className="text-xs font-black font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
               {sparplanScore}/100
@@ -135,7 +141,7 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
           <div className="space-y-1">
             <div className="font-bold text-sm text-white">{sparplanLabel}</div>
             <p className="text-[11px] text-slate-400 leading-snug">
-              {isEtf ? 'Maximal diversifiziert – idealer Zinseszins-Motor.' : 'Solider Einzeltitel mit stabiler Nachfrage.'}
+              {isEtf ? 'Maximal diversifiziert • idealer Zinseszins-Motor.' : 'Solider Einzeltitel mit stabiler Nachfrage.'}
             </p>
           </div>
         </div>
@@ -146,6 +152,11 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <Compass className={`w-3.5 h-3.5 ${timingType === 'success' ? 'text-emerald-400' : timingType === 'danger' ? 'text-rose-400' : 'text-amber-400'}`} />
               <span>Timing-Ampel</span>
+              <InfoTooltip
+                title="Timing-Ampel"
+                text="Prüft die aktuelle Marktlage für Einmalkäufe anhand von Trendstärke, Abständen zu Durchschnitten und technischer Überhitzung."
+                rule="Bei Sparplänen ist das Timing zweitrangig. Bei Einmalkäufen schützt die Ampel vor überhitzten Höchstständen."
+              />
             </span>
             <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${
               timingType === 'success' 
@@ -172,16 +183,21 @@ export default function ExecutiveSummary({ data = {}, invType = 'Sparplan' }) {
             <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
               <span>Krisen-Resilienz</span>
+              <InfoTooltip
+                title="Krisen-Resilienz"
+                text="Misst den tiefsten historischen Rückschlag vom Allzeithoch und die Erholungsgeschwindigkeit nach schwersten Crashs."
+                rule="Breit gestreute Welt-ETFs erholen sich historisch verlässlich aus Krisen."
+              />
             </span>
             <span className="text-xs font-mono font-bold text-sky-300 bg-sky-950/60 px-2 py-0.5 rounded-md border border-sky-500/30">
-              Max DD: -{maxDd.toFixed(1)}%
+              Max. Rückschlag: −{maxDd.toFixed(1)} %
             </span>
           </div>
 
           <div className="space-y-1">
             <div className="font-bold text-sm text-white">{krisenLabel}</div>
             <p className="text-[11px] text-slate-400 leading-snug">
-              Markt-Beta: {beta.toFixed(2)} &bull; Erholungsquote: {probUp}%
+              Markt-Beta: {beta.toFixed(2)} &bull; Erholungsquote: {probUp} %
             </p>
           </div>
         </div>

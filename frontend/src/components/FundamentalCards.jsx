@@ -1,5 +1,6 @@
 import React from 'react';
 import { Landmark, Target, Users, TrendingUp, Sparkles, Compass } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 export default function FundamentalCards({ fundamental = {} }) {
   const isEtf = fundamental.is_etf;
@@ -18,9 +19,13 @@ export default function FundamentalCards({ fundamental = {} }) {
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Landmark className="w-5 h-5 text-indigo-400" />
             <span>Fundamentale Bewertung & Analysten-Konsens</span>
+            <InfoTooltip
+              title="Fundamentale Bewertung"
+              text="Prüft das Kurs-Gewinn-Verhältnis (KGV), Dividendenrenditen und den breiten Konsens der führenden Wall-Street-Analystenhäuser."
+            />
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            {isEtf ? 'Kostenstruktur & Fondsvolumen (Welt-ETF)' : 'KGV, Forward-KGV, Wall-Street-Kursziele & Konsens'}
+            {isEtf ? 'Kostenstruktur & Fondsvolumen • Welt-ETF' : 'KGV, Forward-KGV, Wall-Street-Kursziele & Konsens'}
           </p>
         </div>
         <div className="text-xs px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-800 text-indigo-300 font-bold self-start sm:self-auto">
@@ -83,13 +88,17 @@ export default function FundamentalCards({ fundamental = {} }) {
               <div className="glass-inset rounded-lg p-2.5">
                 <div className="text-[10px] text-slate-400 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-emerald-400" />
-                  <span>Gewinnwachstum (EPS)</span>
+                  <span>Gewinnwachstum je Aktie</span>
+                  <InfoTooltip
+                    title="Gewinnwachstum (EPS)"
+                    text="Erwartetes jährliches Wachstum des Gewinns je Aktie (Earnings per Share) laut Analystenprognosen."
+                  />
                 </div>
                 <div className={`text-sm font-black font-mono mt-1 ${consensus.forward_eps_growth_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {consensus.forward_eps_growth_pct >= 0 ? `+${consensus.forward_eps_growth_pct}%` : `${consensus.forward_eps_growth_pct}%`}
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5 truncate">
-                  {consensus.forward_eps ? `Ziel: ${consensus.forward_eps} €/Aktie` : 'Erwartetes Forward-EPS'}
+                  {consensus.forward_eps ? `Ziel: ${consensus.forward_eps} € je Aktie` : 'Erwartetes Wachstum'}
                 </div>
               </div>
             )}
@@ -98,13 +107,17 @@ export default function FundamentalCards({ fundamental = {} }) {
             <div className="glass-inset rounded-lg p-2.5">
               <div className="text-[10px] text-slate-400 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>KGV-Mean-Reversion</span>
+                <span>Bewertungseffekt</span>
+                <InfoTooltip
+                  title="KGV-Bewertungseffekt"
+                  text="Berücksichtigt die Tendenz der Börse, extreme Übertreibungen über 3 bis 5 Jahre wieder zum fairen Mittelwert (Mean Reversion) zurückzuführen."
+                />
               </div>
               <div className={`text-sm font-black font-mono mt-1 ${driftAdj >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
                 {driftAdj > 0 ? `+${(driftAdj * 100).toFixed(1)}%` : `${(driftAdj * 100).toFixed(1)}%`} p.a.
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5 truncate">
-                Drift-Korrektur
+                KGV-Anpassung
               </div>
             </div>
           </div>
@@ -127,12 +140,11 @@ export default function FundamentalCards({ fundamental = {} }) {
         <div className="text-xs text-slate-400 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
           <span>
-            Mathematischer Multiple-Einfluss auf die 3–5 Jahres-Simulation: 
-            <strong className={driftAdj > 0 ? "text-emerald-400" : "text-amber-400"}> {driftAdj > 0 ? `+${(driftAdj * 100).toFixed(2)}` : (driftAdj * 100).toFixed(2)}% p.a.</strong>
+            Bewertungseffekt auf die 3–5 Jahres-Simulation: 
+            <strong className={driftAdj > 0 ? "text-emerald-400" : "text-amber-400"}> {driftAdj > 0 ? `+${(driftAdj * 100).toFixed(2)}` : (driftAdj * 100).toFixed(2)} % p.a.</strong>
           </span>
         </div>
       )}
     </div>
   );
 }
-

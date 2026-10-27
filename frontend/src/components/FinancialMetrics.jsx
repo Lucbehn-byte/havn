@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, TrendingUp, PiggyBank, ShieldAlert, SunMedium, CloudRain, Coins, Target } from 'lucide-react';
+import { Wallet, TrendingUp, PiggyBank, SunMedium, CloudRain, Coins, Target } from 'lucide-react';
 import InfoTooltip from './InfoTooltip';
 
 export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparplanFreq = '' }) {
@@ -21,7 +21,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
             <span>Hochrechnung für dein Kapital</span>
           </h3>
           <p className="text-xs text-slate-400">
-            Median-Erwartung und Wertkorridore aus 5.000 Pfaden ({invType} {invType === 'Sparplan' ? `• ${sparplanFreq}` : ''}).
+            Median-Erwartung und Zukunftskorridor aus 5.000 Pfaden • {invType} {invType === 'Sparplan' ? `• ${sparplanFreq}` : ''}
           </p>
         </div>
       </div>
@@ -32,10 +32,10 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
-              Eingezahltes Kapital
+              <span>Eingezahltes Kapital</span>
               <InfoTooltip 
                 title="Eingezahltes Kapital" 
-                text="Die Summe deines tatsächlich aus eigener Tasche investierten Geldes über den gewählten Anlagezeitraum." 
+                text="Die Summe deines tatsächlich aus eigener Tasche investierten Geldes über den gewählten Zeitraum." 
               />
             </span>
             <Wallet className="w-4 h-4 text-slate-400" />
@@ -52,10 +52,11 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
-              Erwarteter Reingewinn
+              <span>Erwarteter Reingewinn</span>
               <InfoTooltip 
-                title="Erwarteter Reingewinn (Median)" 
-                text="Der statistische Mittelwert (50. Perzentil) deiner Gewinne nach 5.000 Monte-Carlo-Simulationen. 50 % aller Szenarien schnitten historisch besser, 50 % schlechter ab." 
+                title="Erwarteter Reingewinn" 
+                text="Der statistische Mittelwert aller 5.000 Monte-Carlo-Simulationen nach Abzug deines Einsatzes." 
+                rule="50 % der historischen Szenarien schnitten besser ab, 50 % schwächer."
               />
             </span>
             <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -66,7 +67,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
             </span>
           </div>
           <div className="text-[11px] font-semibold text-emerald-400 mt-1">
-            {expectedReturn >= 0 ? `+${expectedReturn.toFixed(1)}%` : `${expectedReturn.toFixed(1)}%`} Rendite
+            {expectedReturn >= 0 ? `+${expectedReturn.toFixed(1)} %` : `${expectedReturn.toFixed(1)} %`} Rendite
           </div>
         </div>
 
@@ -74,10 +75,10 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
         <div className="glass rounded-2xl p-4 shadow-lg flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span className="font-medium flex items-center">
-              Voraussichtlicher Endwert
+              <span>Voraussichtlicher Endwert</span>
               <InfoTooltip 
                 title="Voraussichtlicher Endwert" 
-                text="Der Gesamtbetrag deines Depots (dein eingezahltes Eigenkapital plus alle erwirtschafteten Renditen) zum Ende der Haltedauer." 
+                text="Der Gesamtbetrag deines Depots (eingezahltes Geld plus erwirtschafteter Gewinn) zum Ende der Haltedauer." 
               />
             </span>
             <PiggyBank className="w-4 h-4 text-sky-400" />
@@ -86,7 +87,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
             {formatEuro(expectedEndwert)}
           </div>
           <div className="text-[11px] text-slate-400 mt-1">
-            Kapital + Ertrag nach der Haltedauer
+            Kapital plus Ertrag nach der Haltedauer
           </div>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
       <div className="glass-inset rounded-2xl p-4">
         <div className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-sky-400" />
-          <span>Realistischer Korridor (Worst-Case bis Best-Case):</span>
+          <span>Mögliche Entwicklungen nach Haltedauer</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="glass-inset rounded-xl p-3 flex items-center gap-3">
@@ -103,7 +104,14 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
               <CloudRain className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[10px] text-slate-400 font-medium uppercase">Schwacher Markt (10%)</div>
+              <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
+                <span>Pessimistisch</span>
+                <InfoTooltip 
+                  title="Pessimistischer Verlauf" 
+                  text="Das 10. Perzentil: Nur in 10 % aller durchgerechneten Börsenphasen schnitt dieses Wertpapier noch schwächer ab." 
+                  rule="Dient als konservativer Puffer für deine Finanzplanung."
+                />
+              </div>
               <div className="text-sm font-bold text-slate-200 font-mono">{formatEuro(worstCase)}</div>
             </div>
           </div>
@@ -113,7 +121,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
               <TrendingUp className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[10px] text-sky-400 font-medium uppercase">Realistischer Median</div>
+              <div className="text-[10px] text-sky-400 font-medium uppercase flex items-center">
+                <span>Erwartet • Median</span>
+                <InfoTooltip 
+                  title="Erwartetes Median-Szenario" 
+                  text="Das 50. Perzentil: Die statistisch ausgewogenste Mitte aus 5.000 Simulationspfaden." 
+                />
+              </div>
               <div className="text-sm font-bold text-white font-mono">{formatEuro(expectedEndwert)}</div>
             </div>
           </div>
@@ -123,7 +137,13 @@ export default function FinancialMetrics({ monteCarlo = {}, invType = '', sparpl
               <SunMedium className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-[10px] text-slate-400 font-medium uppercase">Starker Markt (90%)</div>
+              <div className="text-[10px] text-slate-400 font-medium uppercase flex items-center">
+                <span>Optimistisch</span>
+                <InfoTooltip 
+                  title="Optimistischer Verlauf" 
+                  text="Das 90. Perzentil: In 10 % aller Fälle liefen die Märkte besonders stark und erzielten diesen Wert oder mehr." 
+                />
+              </div>
               <div className="text-sm font-bold text-emerald-300 font-mono">{formatEuro(bestCase)}</div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { GitBranch, TrendingUp, Download } from 'lucide-react';
+import InfoTooltip from './InfoTooltip';
 
 export default function FanChart({ paths = [], medianPath = [], ticker = 'Asset' }) {
   if (!paths || paths.length === 0) {
@@ -60,11 +61,18 @@ export default function FanChart({ paths = [], medianPath = [], ticker = 'Asset'
         <div>
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <GitBranch className="w-5 h-5 text-indigo-400" />
-            <span>Stochastischer Simulationsfächer</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-mono">5.000 Pfade (Merton Jump-Diffusion)</span>
+            <span>Simulationsfächer</span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300 font-mono font-semibold">
+              5.000 Pfade
+            </span>
+            <InfoTooltip
+              title="Merton Jump-Diffusion Simulation"
+              text="Generiert 5.000 Zukunfts-Szenarien anhand von Kursschwankungen und Poisson-Sprungprozessen, um plötzliche Crashs und Kurssprünge realistisch abzubilden."
+              rule="Die gelbe Linie markiert den Median: 50 % aller Szenarien lagen darüber, 50 % darunter."
+            />
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Graublaue Fächerpfade = stochastische Pfade inkl. Schock-Szenarien. Gelbe Linie = Median-Erwartung.
+            Blaue Fächerlinien = Stichproben möglicher Kursverläufe • Gelbe Linie = statistischer Erwartungswert
           </p>
         </div>
         <div className="flex items-center gap-3">
