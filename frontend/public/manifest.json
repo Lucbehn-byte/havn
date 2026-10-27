@@ -1,8 +1,8 @@
 {
-  "id": "/havn-app",
-  "name": "HAVN — Dein sicherer Hafen für Aktien & ETFs",
-  "short_name": "HAVN",
-  "description": "Dein sicherer Hafen für quantitative Aktien- & ETF-Analysen, Stresstests und Asset-Duelle.",
+  "id": "/havn-finance",
+  "name": "HAVN Finance — Dein sicherer Hafen für Aktien & ETFs",
+  "short_name": "HAVN Finance",
+  "description": "HAVN Finance: Dein sicherer Hafen für quantitative Aktien- & ETF-Analysen, Stresstests und Asset-Duelle.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

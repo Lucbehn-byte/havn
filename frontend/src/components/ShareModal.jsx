@@ -148,7 +148,7 @@ ${t('modals.share.footerQuote', 'Analysiert mit HAVN – Dein sicherer Hafen fü
 
           <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-white/[0.08]">
             <span>{invType}: {Number(kapital).toLocaleString('de-DE')} €</span>
-            <span className="text-slate-300 font-mono">havn.app ⚓</span>
+            <span className="text-slate-300 font-mono">havn-finance.com ⚓</span>
           </div>
         </div>
 
