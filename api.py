@@ -374,6 +374,24 @@ def get_og_image():
     raise HTTPException(status_code=404, detail="OG Image not found")
 
 
+@app.get("/robots.txt")
+def get_robots_txt():
+    for folder in [os.path.join("frontend", "dist"), os.path.join("frontend", "public")]:
+        robots_path = os.path.join(os.path.dirname(__file__), folder, "robots.txt")
+        if os.path.exists(robots_path):
+            return FileResponse(robots_path, media_type="text/plain; charset=utf-8")
+    raise HTTPException(status_code=404, detail="robots.txt not found")
+
+
+@app.get("/sitemap.xml")
+def get_sitemap_xml():
+    for folder in [os.path.join("frontend", "dist"), os.path.join("frontend", "public")]:
+        sitemap_path = os.path.join(os.path.dirname(__file__), folder, "sitemap.xml")
+        if os.path.exists(sitemap_path):
+            return FileResponse(sitemap_path, media_type="application/xml; charset=utf-8")
+    raise HTTPException(status_code=404, detail="sitemap.xml not found")
+
+
 # Statische Frontend-Dateien einbinden, falls dist gebaut wurde
 frontend_dist_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 if os.path.exists(frontend_dist_path):

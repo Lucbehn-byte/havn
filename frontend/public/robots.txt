@@ -1,0 +1,6 @@
+# robots.txt für HAVN Finance (https://havn-finance.com)
+User-agent: *
+Allow: /
+
+# Sitemap-Verzeichnis für Suchmaschinen
+Sitemap: https://havn-finance.com/sitemap.xml
