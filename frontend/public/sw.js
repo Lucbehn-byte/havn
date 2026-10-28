@@ -1,5 +1,5 @@
 // HAVN Progressive Web App Service Worker
-const CACHE_NAME = 'havn-cache-v2';
+const CACHE_NAME = 'havn-cache-v3';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
