@@ -125,7 +125,7 @@ export default function App() {
     } catch (e) {}
   }, []);
 
-  // Menüreiter-Nutzung anonym erfassen (wird direkt in README.md protokolliert)
+  // Menüreiter-Nutzung anonym erfassen & GoatCounter SPA-Tracking
   useEffect(() => {
     try {
       fetch(`${API_BASE}/api/analytics/tab`, {
@@ -133,6 +133,17 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tab: activeTab })
       }).catch(() => {});
+    } catch (e) {}
+
+    // GoatCounter SPA Pageview Tracking
+    try {
+      if (typeof window !== 'undefined' && window.goatcounter && typeof window.goatcounter.count === 'function') {
+        window.goatcounter.count({
+          path: `/#${activeTab}`,
+          title: `HAVN Finance — ${activeTab}`,
+          event: false,
+        });
+      }
     } catch (e) {}
   }, [activeTab]);
 
