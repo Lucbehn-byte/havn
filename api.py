@@ -392,6 +392,30 @@ def get_sitemap_xml():
     raise HTTPException(status_code=404, detail="sitemap.xml not found")
 
 
+def serve_html_file(filename: str):
+    for folder in [os.path.join("frontend", "dist"), "frontend"]:
+        file_path = os.path.join(os.path.dirname(__file__), folder, filename)
+        if os.path.exists(file_path):
+            return FileResponse(file_path, media_type="text/html; charset=utf-8")
+    raise HTTPException(status_code=404, detail=f"{filename} not found")
+
+
+@app.get("/etf-sparplan")
+@app.get("/etf")
+def get_etf_page():
+    return serve_html_file("etf-sparplan.html")
+
+
+@app.get("/investieren")
+def get_investieren_page():
+    return serve_html_file("investieren.html")
+
+
+@app.get("/anlegen")
+def get_anlegen_page():
+    return serve_html_file("anlegen.html")
+
+
 # Statische Frontend-Dateien einbinden, falls dist gebaut wurde
 frontend_dist_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 if os.path.exists(frontend_dist_path):
