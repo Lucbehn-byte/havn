@@ -78,13 +78,13 @@ Die Web-App öffnet sich automatisch in deinem Browser unter `http://localhost:8
 <!-- HAVN_STATS_START -->
 ## 📊 HAVN Live-Analytics (Internes Admin-Dashboard)
 
-> *Automatisch aktualisiert am: **2026-10-25 16:09 UTC** • Nur im Code / Repository sichtbar (nicht öffentlich im Web).*
+> *Automatisch aktualisiert am: **2026-10-28 22:36 UTC** • Nur im Code / Repository sichtbar (nicht öffentlich im Web).*
 
 ### 👥 1. Besucher & Aufrufe
 | Metrik | Heute | Gesamt (All-Time) |
 | :--- | :--- | :--- |
-| **Eindeutige Besucher (Uniques)** | **1** | **1** |
-| **Seiten- & Interaktions-Aufrufe** | **1** | **1** |
+| **Eindeutige Besucher (Uniques)** | **0** | **1** |
+| **Seiten- & Interaktions-Aufrufe** | **0** | **1** |
 
 ---
 
@@ -110,9 +110,6 @@ Die Web-App öffnet sich automatisch in deinem Browser unter `http://localhost:8
 ```text
 Datum     Besucher   Aufrufe    Verlauf
 ------------------------------------------------------------
-12.10.    0          0          · (0)
-13.10.    0          0          · (0)
-14.10.    0          0          · (0)
 15.10.    0          0          · (0)
 16.10.    0          0          · (0)
 17.10.    0          0          · (0)
@@ -124,18 +121,21 @@ Datum     Besucher   Aufrufe    Verlauf
 23.10.    0          0          · (0)
 24.10.    0          0          · (0)
 25.10.    1          1          ████████████████████ (1)
+26.10.    0          0          · (0)
+27.10.    0          0          · (0)
+28.10.    0          0          · (0)
 ```
 
 ---
 
 ### 🏆 5. Beliebteste Wertpapiere & Suchbegriffe
-* **Meistgesuchte Ticker:** `EUNL.DE` (1x), `AAPL` (1x)
+* **Meistgesuchte Ticker:** `AAPL` (4x), `EUNL.DE` (3x)
 * **Häufigste Suchbegriffe:** „msci world“ (1x)
 
 ---
 
 ### ⚡ 6. 15-Minuten In-Memory Cache Performance
 * **Cache Hits (eingesparte Anfragen):** `0`
-* **Aktive Einträge im RAM:** `0`
+* **Aktive Einträge im RAM:** `2`
 * **Erfolgsquote (Hit-Ratio):** `0.0 %` der Anfragen blitzschnell aus dem RAM bedient
 <!-- HAVN_STATS_END -->

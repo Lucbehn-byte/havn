@@ -86,10 +86,12 @@ def run_monte_carlo_simulation(
     num_simulations: int = 5000,
     sample_size_viz: int = 40,
     valuation_drift_adj: float = 0.0,
-    beta: float = 1.0
+    beta: float = 1.0,
+    qis_alpha_adj: float = 0.0
 ) -> dict:
     """
     Führt die mathematisch geschärfte Monte-Carlo-Simulation durch.
+    Inklusive Goldman Sachs QIS Multi-Faktor Alpha-Drift.
     """
     dt = 1 / 252.0
     recent_3y = log_returns.iloc[-min(len(log_returns), 756):]
@@ -121,9 +123,13 @@ def run_monte_carlo_simulation(
     timeframe_dampening = np.exp(-holding_days / 252.0)
     chart_drift_adj = (chart_score / 100.0) * 0.03 * timeframe_dampening
 
+    # Goldman Sachs QIS Multi-Factor Alpha Drift:
+    qis_dampening = 0.75 + 0.25 * np.exp(-holding_days / 504.0)
+    effective_qis_adj = qis_alpha_adj * qis_dampening
+
     # Gesamter kontinuierlicher Drift
-    mu = shrunk_mu + chart_drift_adj + valuation_drift_adj
-    mu = float(np.clip(mu, -0.15, 0.28))
+    mu = shrunk_mu + chart_drift_adj + valuation_drift_adj + effective_qis_adj
+    mu = float(np.clip(mu, -0.15, 0.30))
 
     # 3. Asymmetrisch kalibrierte Merton Jump-Diffusion (Reine Abwärtsschocks)
     lam, mu_j, sigma_j = calibrate_merton_jumps(log_returns)

@@ -14,6 +14,7 @@ import RiskProfile from './components/RiskProfile';
 import CrisisStressTest from './components/CrisisStressTest';
 import FanChart from './components/FanChart';
 import FundamentalCards from './components/FundamentalCards';
+import QISRadar from './components/QISRadar';
 import BrokerGuide from './components/BrokerGuide';
 import RollUpPicker from './components/RollUpPicker';
 import CrisisSimulator from './components/CrisisSimulator';
@@ -111,6 +112,7 @@ export default function App() {
     { id: 'pro-krisen', label: t('pro.sections.crisis', 'Stresstest') },
     { id: 'pro-simulation', label: t('pro.sections.simulation', 'Simulation') },
     { id: 'pro-bewertung', label: t('pro.sections.valuation', 'Bewertung') },
+    { id: 'pro-qis', label: t('pro.sections.qis', 'QIS Radar (GSAM)') },
     { id: 'pro-umsetzung', label: t('pro.sections.implementation', 'Umsetzung') },
   ], [t]);
 
@@ -762,10 +764,22 @@ export default function App() {
                   <FundamentalCards fundamental={displayData.fundamental} />
                 </ProSection>
 
-                {/* 8. Broker-Leitfaden */}
+                {/* 8. Goldman Sachs QIS Alpha-Radar */}
+                {displayData.qis && (
+                  <ProSection
+                    id="pro-qis"
+                    number={8}
+                    title={t('pro.sQisTitle', 'QIS Alpha-Radar • Goldman Sachs Standard')}
+                    takeaway="5-Faktoren-Zerlegung (Value, Qualität, Momentum, Sentiment, Low-Vol) mit dynamischer Markt-Regime-Anpassung und Volatility Targeting."
+                  >
+                    <QISRadar qis={displayData.qis} ticker={displayData.ticker} />
+                  </ProSection>
+                )}
+
+                {/* 9. Broker-Leitfaden */}
                 <ProSection
                   id="pro-umsetzung"
-                  number={8}
+                  number={9}
                   title={t('pro.s8Title', 'Order-Leitfaden')}
                   takeaway="Konkrete Kennnummern (WKN/ISIN) und Sparplan-Schritte für deutsche Broker."
                 >

@@ -14,6 +14,7 @@ from models.monte_carlo import run_monte_carlo_simulation
 from models.rolling_returns import calculate_rolling_returns
 from models.backtesting import run_model_backtest
 from models.fundamental_valuation import analyze_fundamental_valuation
+from core.qis_engine import analyze_qis_system
 
 
 def run_full_analysis(
@@ -99,14 +100,24 @@ def run_full_analysis(
     )
     val_drift_adj = fund_res.get("drift_adjustment", 0.0)
 
-    # 5. Modell 1: Technische Chartanalyse
+    # 5. Goldman Sachs QIS (Quantitative Investment Strategies) Multi-Faktor & Regime-Engine
+    qis_res = analyze_qis_system(
+        ticker_symbol=clean_ticker,
+        df=df,
+        asset_info=asset_info,
+        beta=beta,
+        holding_days=tf_config["days"]
+    )
+    qis_alpha_adj = (qis_res.get("alpha_drift_annualized", 0.0)) / 100.0
+
+    # 6. Modell 1: Technische Chartanalyse
     chart_res = analyze_chart_technicals(df, category=tf_config["category"])
     chart_score = chart_res["score"]
 
-    # 6. Modell 2: Historischer & synthetischer Krisen-Stresstest
+    # 7. Modell 2: Historischer & synthetischer Krisen-Stresstest
     crisis_res = run_crisis_stress_test(df, beta=beta)
 
-    # 7. Modell 3: Stochastische Monte-Carlo-Simulation (EWMA, Jump-Diffusion, CAPM, Sortino, CVaR)
+    # 8. Modell 3: Stochastische Monte-Carlo-Simulation (EWMA, Jump-Diffusion, CAPM, QIS Alpha-Drift, Sortino, CVaR)
     mc_res = run_monte_carlo_simulation(
         current_price=current_price,
         log_returns=log_returns,
@@ -120,10 +131,11 @@ def run_full_analysis(
         num_simulations=SIMULATION_PATHS,
         sample_size_viz=VIZ_SAMPLE_PATHS,
         valuation_drift_adj=val_drift_adj,
-        beta=beta
+        beta=beta,
+        qis_alpha_adj=qis_alpha_adj
     )
 
-    # 8. Modell 4: Empirische rollierende Renditen (Parallele Sparplan- / Einmalanlage-Prüfung)
+    # 9. Modell 4: Empirische rollierende Renditen (Parallele Sparplan- / Einmalanlage-Prüfung)
     rolling_res = calculate_rolling_returns(
         close_series=close_series,
         holding_days=tf_config["days"],
@@ -133,7 +145,7 @@ def run_full_analysis(
         startkapital=startkapital
     )
 
-    # 9. Modell 5: Kausaler Backtest (Regime-basiertes Quantil-Backtesting)
+    # 10. Modell 5: Kausaler Backtest (Regime-basiertes Quantil-Backtesting)
     backtest_res = run_model_backtest(
         hist_score_series=chart_res["hist_score_series"],
         close_series=close_series,
@@ -160,5 +172,6 @@ def run_full_analysis(
         "rolling_returns": rolling_res,
         "backtest": backtest_res,
         "fundamental": fund_res,
+        "qis": qis_res,
         "history_df": df
     }
