@@ -761,7 +761,7 @@ export default function App() {
                   title={t('pro.s7Title', 'Fundamentale Bewertung')}
                   takeaway={insights ? (insights.isEtf ? 'Breit gestreuter Index-Fonds – keine Einzelunternehmens-Bewertung nötig.' : `${displayData.fundamental?.valuation_status || 'Bewertung'}: ${displayData.fundamental?.summary || ''}`) : ''}
                 >
-                  <FundamentalCards fundamental={displayData.fundamental} />
+                  <FundamentalCards fundamental={displayData.fundamental} currentPrice={displayData.current_price} />
                 </ProSection>
 
                 {/* 8. Goldman Sachs QIS Alpha-Radar */}

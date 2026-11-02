@@ -138,11 +138,61 @@ export function getInsights(data, invType = 'Einmalanlage') {
   else if (beta > 1.15) marketCompare = `schwankt rund ${Math.round((beta - 1) * 100)} % stärker als der Gesamtmarkt`;
   else marketCompare = `schwankt rund ${Math.round((1 - beta) * 100)} % weniger als der Gesamtmarkt`;
 
+  const dcf = fund.dcf_valuation || {};
+  const health = fund.financial_health || {};
+
   let priceLevel;
-  if (isEtf) priceLevel = { label: 'Fair • Marktpreis', tone: 'sky', text: 'Ein breiter Index-Fonds kostet immer den Durchschnittspreis des Marktes.' };
-  else if (valuation >= 70) priceLevel = { label: 'Günstig', tone: 'emerald', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – im Vergleich eher günstig.` : 'Im Vergleich eher günstig bewertet.' };
-  else if (valuation >= 52) priceLevel = { label: 'Fair', tone: 'sky', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – ein üblicher Preis.` : 'Ein marktüblicher Preis.' };
-  else priceLevel = { label: 'Teuer', tone: 'amber', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns. Die Börse erwartet viel Wachstum – Enttäuschungen werden bestraft.` : 'Die Börse hat hohe Erwartungen eingepreist.' };
+  if (isEtf) {
+    priceLevel = { label: 'Fair • Marktpreis', tone: 'sky', text: 'Ein breiter Index-Fonds kostet immer den fairen Durchschnittspreis des Marktes.' };
+  } else if (dcf.base_fair_value) {
+    const margin = dcf.margin_of_safety_pct ?? 0;
+    if (margin >= 5) {
+      priceLevel = {
+        label: 'Günstig (Sicherheitsmarge)',
+        tone: 'emerald',
+        text: `Fairer Wert ca. ${dcf.base_fair_value} € • Aktuell mit ${margin > 0 ? '+' : ''}${margin} % Sicherheitsmarge günstig bewertet.`
+      };
+    } else if (margin >= -5) {
+      priceLevel = {
+        label: 'Fair bewertet',
+        tone: 'sky',
+        text: `Fairer Wert ca. ${dcf.base_fair_value} € • Der aktuelle Kurs entspricht dem fairen inneren Wert.`
+      };
+    } else if (margin >= -15) {
+      priceLevel = {
+        label: 'Ambitioniert',
+        tone: 'amber',
+        text: `Fairer Wert ca. ${dcf.base_fair_value} € • Die Börse preist bereits hohes Wachstum ein (${Math.abs(margin)} % Aufschlag).`
+      };
+    } else {
+      priceLevel = {
+        label: 'Teuer',
+        tone: 'rose',
+        text: `Fairer Wert ca. ${dcf.base_fair_value} € • Aktie notiert mit deutlichem Bewertungsaufschlag.`
+      };
+    }
+  } else if (valuation >= 70) {
+    priceLevel = { label: 'Günstig', tone: 'emerald', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – im Vergleich eher günstig.` : 'Im Vergleich eher günstig bewertet.' };
+  } else if (valuation >= 52) {
+    priceLevel = { label: 'Fair', tone: 'sky', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns – ein üblicher Preis.` : 'Ein marktüblicher Preis.' };
+  } else {
+    priceLevel = { label: 'Teuer', tone: 'amber', text: kgv ? `Du zahlst etwa das ${kgv.toFixed(0)}-Fache des Jahresgewinns. Die Börse erwartet viel Wachstum – Enttäuschungen werden bestraft.` : 'Die Börse hat hohe Erwartungen eingepreist.' };
+  }
+
+  let financialHealth;
+  if (isEtf) {
+    financialHealth = { label: 'Pleiterisiko 0 %', tone: 'emerald', text: 'Als Sondervermögen über hunderte Firmen gestreut – vor einer Firmen-Pleite geschützt.' };
+  } else if (health.score != null) {
+    if (health.score >= 8) {
+      financialHealth = { label: 'Kerngesund', tone: 'emerald', text: `Hervorragende Bilanz & echter Cash-Zufluss (Piotroski ${health.score}/9 Punkte).` };
+    } else if (health.score >= 5) {
+      financialHealth = { label: 'Solide Finanzen', tone: 'sky', text: `Stabile Finanzlage ohne akute Bilanzrisiken (Piotroski ${health.score}/9 Punkte).` };
+    } else {
+      financialHealth = { label: 'Erhöhtes Risiko', tone: 'amber', text: `Vorsicht: Schwächere Cashflows oder erhöhte Schulden (Piotroski ${health.score}/9).` };
+    }
+  } else {
+    financialHealth = { label: 'Solide', tone: 'sky', text: 'Stabile Marktstellung ohne akute Bilanzwarnsignale.' };
+  }
 
   // Timing-Ampel
   let timing;
@@ -196,8 +246,9 @@ export function getInsights(data, invType = 'Einmalanlage') {
   return {
     isEtf, beta, rsi, trendScore, maxDd, vol, histVol, probUp, sortino, winRate, kgv, horizon,
     scores: { total, totalLabel, momentum, stability, valuation, history },
-    trend, heat, swing, marketCompare, priceLevel, timing, action,
+    trend, heat, swing, marketCompare, priceLevel, financialHealth, timing, action,
     crises, boom, scenarios, outOfTen,
     ma50, ma200, price,
+    dcf, health,
   };
 }

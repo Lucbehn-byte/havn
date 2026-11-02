@@ -360,6 +360,7 @@ export default function BeginnerView({ data, invType, onSwitchToPro, onNavigateT
                 { icon: TrendingUp, title: 'Richtung', item: ins.trend },
                 { icon: Activity, title: 'Stimmung', item: ins.heat },
                 { icon: Tag, title: 'Preisniveau', item: ins.priceLevel },
+                { icon: ShieldCheck, title: 'Bilanz-Schutz', item: ins.financialHealth },
               ].map(({ icon: Icon, title, item }) => (
                 <div key={title} className="glass-inset rounded-2xl p-2.5 sm:p-3">
                   <div className="flex items-center justify-between">
