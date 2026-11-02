@@ -116,20 +116,21 @@ export default function LegalModal({ isOpen, onClose }) {
                     <strong>Diensteanbieter & Betreiber:</strong><br />
                     Luc Behn<br />
                     HAVN Systems & Quant Technologies<br />
-                    Zustellfähige Anschrift:<br />
-                    <span className="text-amber-300 font-mono">[Straße und Hausnummer hier eintragen]</span><br />
-                    <span className="text-amber-300 font-mono">[PLZ und Ort, Deutschland]</span>
+                    Standort: Deutschland
                   </p>
-                  <p className="mt-2 text-[11px] text-slate-400 leading-snug">
-                    <em>Hinweis: Nach § 5 Abs. 1 Nr. 1 DDG ist eine ladungsfähige Anschrift (kein reines Postfach) gesetzlich vorgeschrieben. Hier kann auch ein professioneller Impressum-Schutzdienst mit Postweiterleitung hinterlegt werden.</em>
-                  </p>
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                    <p className="font-bold text-sky-300">Privates, nicht-kommerzielles Bildungsprojekt:</p>
+                    <p>
+                      HAVN Finance ist ein <strong>rein privates, nicht-kommerzielles Bildungs- und Forschungsprojekt</strong> zur Visualisierung quantitativer Finanzmodelle. Die Plattform verfolgt keinerlei Gewinnerzielungsabsicht. Es werden weder kostenpflichtige Abonnements angeboten noch Werbung oder bezahlte Kooperationen betrieben.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="border-t border-white/10 pt-3">
-                  <h4 className="text-sm font-black text-white mb-1">Kontaktmöglichkeiten</h4>
+                  <h4 className="text-sm font-black text-white mb-1">Elektronische Kontaktaufnahme</h4>
                   <p className="leading-relaxed">
+                    Für allgemeine Anfragen, Feedback oder rechtliche Auskunftsersuchen gemäß DSGVO:<br />
                     E-Mail: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
-                    Telefon: <span className="text-amber-300 font-mono">+49 (0) [Telefonnummer eintragen]</span><br />
                     Internet: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
@@ -160,25 +161,26 @@ export default function LegalModal({ isOpen, onClose }) {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">Legal Notice / Provider Identification (§ 5 DDG)</h4>
+                  <h4 className="text-sm font-black text-white mb-1">Legal Notice & Provider Information</h4>
                   <p className="leading-relaxed">
                     <strong>Provider & Operator:</strong><br />
                     Luc Behn<br />
                     HAVN Systems & Quant Technologies<br />
-                    Postal Address:<br />
-                    <span className="text-amber-300 font-mono">[Street & House Number]</span><br />
-                    <span className="text-amber-300 font-mono">[Postal Code & City, Germany]</span>
+                    Location: Germany
                   </p>
-                  <p className="mt-2 text-[11px] text-slate-400 leading-snug">
-                    <em>Statutory requirement pursuant to Section 5 DDG: A valid physical postal address is legally mandatory.</em>
-                  </p>
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+                    <p className="font-bold text-sky-300">Non-Commercial Educational Project:</p>
+                    <p>
+                      HAVN Finance is a <strong>strictly non-commercial, private educational and research project</strong> designed for quantitative financial modeling. The platform generates no revenue, displays no ads, and does not sell subscriptions or investment products.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="border-t border-white/10 pt-3">
                   <h4 className="text-sm font-black text-white mb-1">Contact</h4>
                   <p className="leading-relaxed">
+                    For inquiries, feedback, or privacy-related requests under GDPR:<br />
                     Email: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
-                    Phone: <span className="text-amber-300 font-mono">+49 (0) [Phone Number]</span><br />
                     Website: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
