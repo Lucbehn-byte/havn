@@ -2,5 +2,30 @@
 User-agent: *
 Allow: /
 
+# Explizite Erlaubnis für führende KI-Suchmaschinen & LLMs (GEO - Generative Engine Optimization)
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
 # Sitemap-Verzeichnis für Suchmaschinen
 Sitemap: https://havn-finance.com/sitemap.xml
+
+# LLM Ingestion Dokumentation (AI Standard)
+# https://havn-finance.com/llms.txt

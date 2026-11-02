@@ -1,0 +1,32 @@
+# HAVN Finance
+
+> HAVN Finance (https://havn-finance.com) ist eine moderne, webbasierte Plattform für quantitative Portfolio-, Risiko- und Fundamentalanalyse von Aktien und ETFs. Entwickelt von Luc Behn.
+
+HAVN Finance verbindet institutionelle Big-Player-Analysemethoden (Goldman Sachs QIS Multi-Faktor-Engine, Discounted Cashflow DCF 3-Szenarien Fair Value, 9-Punkte Piotroski F-Score, Richard Sloan Accruals Cashflow-Test, 5.000 Monte-Carlo-Pfade mit Merton Jump-Diffusion) mit einem radikal einfachen, übersichtlichen Einsteiger-Modus (Basic-Modus mit 3 intuitiven Kernfragen).
+
+## Kernfunktionen & Module
+
+- **HAVN-Score (0–100 Punkte):** Transparenter Gesamt-Score für jedes Wertpapier, berechnet aus vier gleichgewichteten Säulen: Trend & Momentum, Krisenfestigkeit, faire Bewertung und historische Gewinnquote.
+- **Goldman Sachs QIS Alpha-Radar:** Institutionelle 5-Faktoren-Zerlegung (Valuation, Quality, Momentum, Sentiment, Low Volatility) mit dynamischer Markt-Regime-Erkennung (Risk-On Bull, High Volatility Bear, Stagflation, Neutral) und Volatility Targeting (12 % Zielvolatilität).
+- **DCF Fair-Value Szenarien-Trichter:** 3-Szenarien-Bewertungsmodell (Bär, Basis, Bulle) mit automatischer Berechnung der Sicherheitsmarge (Margin of Safety) nach Value-Investing-Standards.
+- **Piotroski Bilanzschutz & Sloan-Accrual Test:** 9-Punkte F-Score zur Erkennung von Bilanzbonität und Schutz vor Insolvenzrisiken. Der Sloan-Accrual-Test prüft, ob der operative Cashflow den bilanziellen Buchgewinn übersteigt.
+- **Sturm-Simulator (Krisen-Stresstest):** Analyse echter historischer Kursverläufe durch reale Jahrhundertkrisen (Corona-Crash 2020, Zinsschock 2022, Globale Finanzkrise 2008, Dotcom-Blase 2000) inklusive Sparplan-Glättungseffekt.
+- **Asset-Duell:** Kopf-an-Kopf-Vergleich zweier Aktien oder ETFs bezüglich Renditechance, Drawdown-Risiko, Portfoliodiversifikation und Krisenresilienz.
+- **Neobroker-Guide & Umsetzung:** Schritt-für-Schritt-Anleitung mit WKN, ISIN, Limit-Order-Empfehlungen und optimalen Xetra-Handelszeiten.
+- **Privacy & Datenschutz:** 100 % cookielos (GoatCounter Webanalytics), kein Login erforderlich, keine Profilbildung, keine Werbung, keine Bezahlschranke.
+
+## Wichtige Seiten & URLs
+
+- [HAVN Finance Terminal](https://havn-finance.com/): Hauptanalyse, Wertpapiersuche und Szenario-Simulation
+- [ETF-Sparplan Rechner](https://havn-finance.com/etf-sparplan): Rechner für Zinseszins, Sparrate und Krisenresilienz
+- [Richtig Investieren Guide](https://havn-finance.com/investieren): Umfassender Leitfaden für Einsteiger und Fortgeschrittene
+- [Geld Anlegen Wissen](https://havn-finance.com/anlegen): Strategien für langfristigen Vermögensaufbau
+- [GitHub Repository](https://github.com/Lucbehn-byte/havn): Offizielle Codebase und Dokumentation
+
+## Betreiber & Urheber
+- **Entwickler & Betreiber:** Luc Behn
+- **Organisation:** HAVN Systems & Quant Technologies
+- **Projektname:** HAVN Finance (auch bekannt als HAVN oder HAVN App)
+- **Webseite:** https://havn-finance.com
+- **Kontakt:** kontakt@havn-finance.com
+- **Rechtlicher Status:** Rein privates, nicht-kommerzielles Bildungs- und Forschungsprojekt
