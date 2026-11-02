@@ -28,7 +28,7 @@ import { ProSection, ProNav } from './components/ProSection';
 import { getInsights, formatEuro, TONE } from './utils/insights';
 import { checkIsStandalone } from './utils/device';
 import { useLanguage } from './context/LanguageContext';
-import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords, Settings } from 'lucide-react';
+import { Play, Loader2, Sparkles, SlidersHorizontal, AlertCircle, Target, ArrowRight, ShieldCheck, CheckCircle2, Star, Share2, Swords, Settings, Scale } from 'lucide-react';
 
 const API_BASE = '';
 
@@ -876,9 +876,20 @@ export default function App() {
               </span>
             </button>
           </div>
-          <p className="text-[11px] text-slate-600 mt-2">
-            <strong className="text-slate-400">{t('footer.disclaimerTitle', 'Rechtlicher Hinweis:')}</strong> {t('footer.disclaimerText', 'HAVN stellt keine Anlageberatung im Sinne des WpHG dar. Alle Berechnungen basieren auf historischen Wahrscheinlichkeitsmodellen und Simulationen. Wertpapiere unterliegen Marktschwankungen bis hin zum Totalverlustrisiko. Investitionen erfolgen eigenverantwortlich über deinen Broker.')}
-          </p>
+
+          {/* Fester, unübersehbarer BaFin & WpHG Risikohinweis */}
+          <div className="glass-inset rounded-2xl p-4 sm:p-5 border border-amber-500/20 text-left text-xs text-slate-400 leading-relaxed space-y-2 mt-5 max-w-3xl mx-auto shadow-lg">
+            <div className="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wider">
+              <Scale className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>{t('footer.disclaimerTitle', 'Wichtiger Risikohinweis gemäß § 2 Abs. 2 WpHG')}</span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              {t('footer.disclaimerText', 'Alle auf HAVN Finance bereitgestellten Kennzahlen, Bewertungen, Algorithmen und Simulationsdaten dienen ausschließlich der Information und privaten Bildung. Sie stellen zu keinem Zeitpunkt eine Anlageberatung, Vermögensverwaltung, Finanzdienstleistung oder eine Empfehlung bzw. Aufforderung zum Kauf oder Verkauf von Wertpapieren dar.')}
+            </p>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              {t('footer.disclaimerRisk', 'Kapitalanlagen am Aktien- und ETF-Markt sind mit unvermeidbaren Kursschwankungen und Risiken bis hin zum Totalverlust des eingesetzten Kapitals verbunden. Historische Kursverläufe und mathematische Modellrechnungen sind kein verlässlicher Indikator für künftige Ergebnisse. Anlageentscheidungen triffst du stets in eigener Verantwortung.')}
+            </p>
+          </div>
         </div>
       </footer>
     </div>

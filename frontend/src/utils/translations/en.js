@@ -340,8 +340,9 @@ export default {
     tagline: 'HAVN — Your safe haven for data-driven investment decisions.',
     imprint: 'Legal Notice & Imprint',
     privacy: 'Privacy Policy (GDPR)',
-    disclaimerTitle: 'Legal Disclaimer:',
-    disclaimerText: 'HAVN does not provide financial or investment advice. All calculations are mathematical probability models and historical simulations. Securities carry market volatility up to total capital loss.',
+    disclaimerTitle: 'Important Regulatory Notice (§ 2 (2) WpHG)',
+    disclaimerText: 'All metrics, simulations, algorithms, and analytical data on HAVN Finance are provided solely for general informational and personal educational purposes. They do not constitute investment advice, asset management, financial services, or a solicitation or recommendation to buy or sell securities.',
+    disclaimerRisk: 'Capital market investments carry inherent market volatility and risk of capital loss up to total principal loss. Past performance and mathematical models are no guarantee of future returns. You make investment decisions independently at your own risk.',
   },
   settings: {
     title: 'Settings',

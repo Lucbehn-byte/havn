@@ -340,8 +340,9 @@ export default {
     tagline: 'HAVN — Dein sicherer Hafen für fundierte Investment-Entscheidungen.',
     imprint: 'Impressum & Rechtliches',
     privacy: 'Datenschutz (DSGVO)',
-    disclaimerTitle: 'Rechtlicher Hinweis:',
-    disclaimerText: 'HAVN stellt keine Anlageberatung im Sinne des WpHG dar. Alle Berechnungen basieren auf historischen Wahrscheinlichkeitsmodellen und Simulationen. Wertpapiere unterliegen Marktschwankungen bis hin zum Totalverlustrisiko. Investitionen erfolgen eigenverantwortlich über deinen Broker.',
+    disclaimerTitle: 'Wichtiger Risikohinweis gemäß § 2 Abs. 2 WpHG',
+    disclaimerText: 'Alle auf HAVN Finance bereitgestellten Kennzahlen, Bewertungen, Algorithmen und Simulationsdaten dienen ausschließlich der Information und privaten Bildung. Sie stellen zu keinem Zeitpunkt eine Anlageberatung, Vermögensverwaltung, Finanzdienstleistung oder eine Empfehlung bzw. Aufforderung zum Kauf oder Verkauf von Wertpapieren dar.',
+    disclaimerRisk: 'Kapitalanlagen am Aktien- und ETF-Markt sind mit unvermeidbaren Kursschwankungen und Risiken bis hin zum Totalverlust des eingesetzten Kapitals verbunden. Historische Kursverläufe und mathematische Modellrechnungen sind kein verlässlicher Indikator für künftige Ergebnisse. Anlageentscheidungen triffst du stets in eigener Verantwortung.',
   },
   settings: {
     title: 'Einstellungen',

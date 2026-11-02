@@ -112,11 +112,24 @@ export default function LegalModal({ isOpen, onClose }) {
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h4>
-                  <p>
-                    <strong>Diensteanbieter:</strong><br />
+                  <p className="leading-relaxed">
+                    <strong>Diensteanbieter & Betreiber:</strong><br />
+                    Luc Behn<br />
                     HAVN Systems & Quant Technologies<br />
-                    Betreiber: Luc Behn<br />
+                    Zustellfähige Anschrift:<br />
+                    <span className="text-amber-300 font-mono">[Straße und Hausnummer hier eintragen]</span><br />
+                    <span className="text-amber-300 font-mono">[PLZ und Ort, Deutschland]</span>
+                  </p>
+                  <p className="mt-2 text-[11px] text-slate-400 leading-snug">
+                    <em>Hinweis: Nach § 5 Abs. 1 Nr. 1 DDG ist eine ladungsfähige Anschrift (kein reines Postfach) gesetzlich vorgeschrieben. Hier kann auch ein professioneller Impressum-Schutzdienst mit Postweiterleitung hinterlegt werden.</em>
+                  </p>
+                </div>
+
+                <div className="border-t border-white/10 pt-3">
+                  <h4 className="text-sm font-black text-white mb-1">Kontaktmöglichkeiten</h4>
+                  <p className="leading-relaxed">
                     E-Mail: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
+                    Telefon: <span className="text-amber-300 font-mono">+49 (0) [Telefonnummer eintragen]</span><br />
                     Internet: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
@@ -147,12 +160,25 @@ export default function LegalModal({ isOpen, onClose }) {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">Legal Notice / Provider Identification</h4>
-                  <p>
+                  <h4 className="text-sm font-black text-white mb-1">Legal Notice / Provider Identification (§ 5 DDG)</h4>
+                  <p className="leading-relaxed">
                     <strong>Provider & Operator:</strong><br />
+                    Luc Behn<br />
                     HAVN Systems & Quant Technologies<br />
-                    Representative: Luc Behn<br />
-                    Contact: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
+                    Postal Address:<br />
+                    <span className="text-amber-300 font-mono">[Street & House Number]</span><br />
+                    <span className="text-amber-300 font-mono">[Postal Code & City, Germany]</span>
+                  </p>
+                  <p className="mt-2 text-[11px] text-slate-400 leading-snug">
+                    <em>Statutory requirement pursuant to Section 5 DDG: A valid physical postal address is legally mandatory.</em>
+                  </p>
+                </div>
+
+                <div className="border-t border-white/10 pt-3">
+                  <h4 className="text-sm font-black text-white mb-1">Contact</h4>
+                  <p className="leading-relaxed">
+                    Email: <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span><br />
+                    Phone: <span className="text-amber-300 font-mono">+49 (0) [Phone Number]</span><br />
                     Website: <span className="text-sky-400 font-mono">https://havn-finance.com</span>
                   </p>
                 </div>
@@ -244,21 +270,30 @@ export default function LegalModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">1. Erfassung von Zugriffsdaten & Logfiles</h4>
+                  <h4 className="text-sm font-black text-white mb-1">1. Cookielose Webanalyse mit GoatCounter</h4>
                   <p>
-                    Beim Aufruf unserer Web-App werden technisch notwendige Verbindungsdaten an den Server übertragen. Zum Schutz vor Missbrauch (z. B. Denial-of-Service-Angriffen) und zur Zählung der täglichen Besucher wird die IP-Adresse des Nutzers <strong>unmittelbar mit einem täglich wechselnden kryptografischen Schlüssel gehasht</strong> (SHA-256). Eine Rückführung auf deine Person ist ausgeschlossen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Ausfallsicherheit).
+                    Zur bedarfsgerechten Gestaltung und statistischen Auswertung der Besucherströme nutzen wir den datenschutzfreundlichen Open-Source-Webanalysedienst <strong>GoatCounter</strong> (betrieben von Martin Tournoij, goatcounter.com).
+                  </p>
+                  <p className="mt-1">
+                    GoatCounter arbeitet <strong>vollständig ohne Cookies</strong>. Es werden keine Daten im Browser des Nutzers zu Tracking-Zwecken abgelegt und keine geräteübergreifenden Nutzungsprofile erstellt.
+                  </p>
+                  <p className="mt-1">
+                    Zur Zählung aggregierter Seitenaufrufe und zur Unterscheidung von Bots wird aus der IP-Adresse, dem User-Agent und einem <strong>täglich wechselnden Salt</strong> ein einmaliger, nicht umkehrbarer Hashwert (SHA-256) generiert. Die ungehashte IP-Adresse wird zu keinem Zeitpunkt dauerhaft gespeichert.
+                  </p>
+                  <p className="mt-1 text-slate-400">
+                    Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an anonymer Reichweitenmessung und Systemstabilität) sowie § 25 Abs. 2 Nr. 2 TDDDG (keine Cookie-Einwilligung erforderlich, da kein Zugriff auf Endeinrichtungen stattfindet).
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">2. Lokale Speicherung im Browser (LocalStorage)</h4>
                   <p>
-                    Um deine Einstellungen (z. B. gewählte Favoriten-Aktien oder der Einsteiger-/Pro-Modus) zwischen Sitzungen zu erhalten, nutzt HAVN den lokalen Speicher deines Browsers (LocalStorage). Diese Daten verbleiben ausschließlich auf deinem Gerät und werden niemals an unsere Server übertragen.
+                    Um deine Einstellungen (z. B. gewählte Favoriten-Aktien oder der Einsteiger-/Pro-Modus) zwischen Sitzungen zu erhalten, nutzt HAVN den lokalen Speicher deines Browsers (LocalStorage). Diese Daten verbleiben ausschließlich auf deinem Endgerät und werden niemals an unsere Server übertragen.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">3. Externe Marktdaten</h4>
+                  <h4 className="text-sm font-black text-white mb-1">3. Externe Marktdaten & APIs</h4>
                   <p>
                     Börsenkurse und historische Zeitreihen werden serverseitig über Finanzschnittstellen bezogen. Deine persönliche IP-Adresse wird bei diesen Abfragen nicht an Drittanbieter weitergegeben.
                   </p>
@@ -267,7 +302,7 @@ export default function LegalModal({ isOpen, onClose }) {
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">4. Deine Rechte</h4>
                   <p>
-                    Dir stehen nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung zu. Da wir keine Klardaten speichern, kontaktiere uns bei Fragen gern jederzeit unter <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
+                    Dir stehen nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung zu. Da wir keine Klardaten oder personenbezogenen Profile speichern, kontaktiere uns bei Fragen gern jederzeit unter <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
                   </p>
                 </div>
               </div>
@@ -281,23 +316,29 @@ export default function LegalModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">1. Data Minimization & Server Logs</h4>
+                  <h4 className="text-sm font-black text-white mb-1">1. Cookieless Web Analytics via GoatCounter</h4>
                   <p>
-                    To ensure service uptime and count daily visits, incoming IP addresses are immediately hashed using SHA-256 with a daily rotating salt. Raw IP addresses are not stored.
+                    We use <strong>GoatCounter</strong> (goatcounter.com) for privacy-friendly, aggregated traffic statistics. GoatCounter does <strong>not use cookies</strong>, does not access local device identifiers, and does not build cross-site user profiles.
+                  </p>
+                  <p className="mt-1">
+                    To count daily unique visitors and filter web scrapers, an irreversible SHA-256 hash is generated from the IP address, user agent, and a daily rotating salt. Raw IP addresses are never persisted.
+                  </p>
+                  <p className="mt-1 text-slate-400">
+                    Legal basis: Art. 6(1)(f) GDPR (legitimate interest in traffic analysis and service stability) and Section 25(2)(2) TDDDG.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">2. Local Storage</h4>
                   <p>
-                    Preferences such as saved watchlists or experience modes are stored strictly client-side on your device via HTML5 LocalStorage.
+                    Preferences such as saved watchlists or experience modes are stored strictly client-side on your device via HTML5 LocalStorage and are never transmitted to our servers.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-sm font-black text-white mb-1">3. Contact</h4>
                   <p>
-                    For any privacy inquiries under GDPR or CCPA, reach out directly to <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
+                    For any privacy inquiries under GDPR, reach out directly to <span className="text-sky-400 font-mono">kontakt@havn-finance.com</span>.
                   </p>
                 </div>
               </div>
