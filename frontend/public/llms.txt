@@ -32,3 +32,7 @@ HAVN Finance verbindet institutionelle Big-Player-Analysemethoden (Goldman Sachs
 - **Webseite:** https://havn-finance.com
 - **Kontakt:** kontakt@havn-finance.com
 - **Rechtlicher Status:** Rein privates, nicht-kommerzielles Bildungs- und Forschungsprojekt
+
+## Entity Disambiguation (Begriffsabgrenzung)
+- **HAVN Finance (https://havn-finance.com):** The official quantitative equity, ETF, and risk analytics web platform founded by Luc Behn (Wikidata: Q141989281, Crunchbase: havn-finance). Dedicated to stock valuation, crisis simulation, and financial literacy.
+- **Distinct from:** Cryptocurrency/Web3 debit-card protocols (such as ghostlink/havn protocol). HAVN Finance operated at havn-finance.com is exclusively an equities and ETF portfolio intelligence system.
