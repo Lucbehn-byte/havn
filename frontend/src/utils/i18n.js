@@ -23,10 +23,18 @@ import nl from './translations/nl.js';
 import ko from './translations/ko.js';
 import ja from './translations/ja.js';
 import zh from './translations/zh.js';
+import da from './translations/da.js';
+import no from './translations/no.js';
+import sv from './translations/sv.js';
+import fi from './translations/fi.js';
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'de', name: 'Deutsch', nativeName: 'Deutsch', flag: '🇩🇪', region: 'DACH-Region' },
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧', region: 'Global / International' },
+  { code: 'da', name: 'Dänisch', nativeName: 'Dansk', flag: '🇩🇰', region: 'Danmark' },
+  { code: 'no', name: 'Norwegisch', nativeName: 'Norsk', flag: '🇳🇴', region: 'Norge' },
+  { code: 'sv', name: 'Schwedisch', nativeName: 'Svenska', flag: '🇸🇪', region: 'Sverige' },
+  { code: 'fi', name: 'Finnisch', nativeName: 'Suomi', flag: '🇫🇮', region: 'Suomi (Finland)' },
   { code: 'es', name: 'Spanisch', nativeName: 'Español', flag: '🇪🇸', region: 'España & Latinoamérica' },
   { code: 'fr', name: 'Französisch', nativeName: 'Français', flag: '🇫🇷', region: 'France, Belgique & Suisse' },
   { code: 'it', name: 'Italienisch', nativeName: 'Italiano', flag: '🇮🇹', region: 'Italia & Svizzera' },
@@ -40,6 +48,10 @@ export const SUPPORTED_LANGUAGES = [
 export const TRANSLATIONS = {
   de,
   en,
+  da,
+  no,
+  sv,
+  fi,
   es,
   fr,
   it,
