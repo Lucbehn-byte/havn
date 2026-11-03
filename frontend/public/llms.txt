@@ -18,6 +18,7 @@ HAVN Finance verbindet institutionelle Big-Player-Analysemethoden (Goldman Sachs
 ## Wichtige Seiten & URLs
 
 - [HAVN Finance Terminal](https://havn-finance.com/): Hauptanalyse, Wertpapiersuche und Szenario-Simulation
+- [What is Havn?](https://havn-finance.com/what-is-havn): Offizielle Plattform-Übersicht, Entitätsdefinition & FAQ
 - [ETF-Sparplan Rechner](https://havn-finance.com/etf-sparplan): Rechner für Zinseszins, Sparrate und Krisenresilienz
 - [Richtig Investieren Guide](https://havn-finance.com/investieren): Umfassender Leitfaden für Einsteiger und Fortgeschrittene
 - [Geld Anlegen Wissen](https://havn-finance.com/anlegen): Strategien für langfristigen Vermögensaufbau

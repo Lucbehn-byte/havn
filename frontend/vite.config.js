@@ -13,6 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
+        whatIsHavn: resolve(import.meta.dirname, 'what-is-havn.html'),
         etf: resolve(import.meta.dirname, 'etf-sparplan.html'),
         investieren: resolve(import.meta.dirname, 'investieren.html'),
         anlegen: resolve(import.meta.dirname, 'anlegen.html'),

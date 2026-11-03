@@ -840,6 +840,13 @@ export default function App() {
             <strong className="text-slate-300">HAVN</strong> — {t('footer.tagline', 'Dein sicherer Hafen für fundierte Investment-Entscheidungen.')}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-medium">
+            <a
+              href="/what-is-havn"
+              className="text-slate-400 hover:text-sky-400 transition-colors underline underline-offset-4"
+            >
+              What is HAVN?
+            </a>
+            <span className="text-slate-700">•</span>
             <button
               type="button"
               onClick={() => setLegalModalOpen(true)}
