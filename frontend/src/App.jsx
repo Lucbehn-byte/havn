@@ -116,9 +116,16 @@ export default function App() {
     { id: 'pro-umsetzung', label: t('pro.sections.implementation', 'Umsetzung') },
   ], [t]);
 
-  // Anonymer Besucher-Ping für interne Statistik
+  // Anonymer Besucher-Ping für interne Statistik (übersprungen wenn skipgc aktiv)
   useEffect(() => {
     try {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get('ignore') === '1' || sp.get('admin') === '1') {
+        localStorage.setItem('skipgc', 't');
+      }
+      if (localStorage.getItem('skipgc') === 't') {
+        return;
+      }
       fetch(`${API_BASE}/api/analytics/ping`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,6 +137,9 @@ export default function App() {
   // Menüreiter-Nutzung anonym erfassen & GoatCounter SPA-Tracking
   useEffect(() => {
     try {
+      if (localStorage.getItem('skipgc') === 't') {
+        return;
+      }
       fetch(`${API_BASE}/api/analytics/tab`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,6 +149,9 @@ export default function App() {
 
     // GoatCounter SPA Pageview Tracking
     try {
+      if (localStorage.getItem('skipgc') === 't') {
+        return;
+      }
       if (typeof window !== 'undefined' && window.goatcounter && typeof window.goatcounter.count === 'function') {
         window.goatcounter.count({
           path: `/#${activeTab}`,

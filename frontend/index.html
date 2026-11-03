@@ -220,6 +220,17 @@
     </script>
 
     <!-- GoatCounter Web Analytics (100% DSGVO-konform, ohne Cookies) -->
+    <script>
+      try {
+        var sp = new URLSearchParams(window.location.search);
+        if (sp.get('ignore') === '1' || sp.get('admin') === '1') {
+          localStorage.setItem('skipgc', 't');
+        }
+        if (localStorage.getItem('skipgc') === 't') {
+          window.goatcounter = { no_onload: true };
+        }
+      } catch (e) {}
+    </script>
     <script data-goatcounter="https://havn-finance.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
   </head>
