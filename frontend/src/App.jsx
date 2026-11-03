@@ -134,10 +134,10 @@ export default function App() {
     } catch (e) {}
   }, []);
 
-  // Menüreiter-Nutzung anonym erfassen & GoatCounter SPA-Tracking
+  // Menüreiter-Nutzung anonym erfassen & Umami SPA-Tracking
   useEffect(() => {
     try {
-      if (localStorage.getItem('skipgc') === 't') {
+      if (localStorage.getItem('umami.disabled') === '1' || localStorage.getItem('skipgc') === 't') {
         return;
       }
       fetch(`${API_BASE}/api/analytics/tab`, {
@@ -147,17 +147,17 @@ export default function App() {
       }).catch(() => {});
     } catch (e) {}
 
-    // GoatCounter SPA Pageview Tracking
+    // Umami SPA Pageview & Tab Tracking
     try {
-      if (localStorage.getItem('skipgc') === 't') {
+      if (localStorage.getItem('umami.disabled') === '1' || localStorage.getItem('skipgc') === 't') {
         return;
       }
-      if (typeof window !== 'undefined' && window.goatcounter && typeof window.goatcounter.count === 'function') {
-        window.goatcounter.count({
-          path: `/#${activeTab}`,
+      if (typeof window !== 'undefined' && window.umami && typeof window.umami.track === 'function') {
+        window.umami.track((props) => ({
+          ...props,
+          url: `/#${activeTab}`,
           title: `HAVN Finance — ${activeTab}`,
-          event: false,
-        });
+        }));
       }
     } catch (e) {}
   }, [activeTab]);

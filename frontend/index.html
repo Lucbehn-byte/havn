@@ -219,20 +219,17 @@
       }
     </script>
 
-    <!-- GoatCounter Web Analytics (100% DSGVO-konform, ohne Cookies) -->
+    <!-- Umami Cloud Web Analytics (100% DSGVO-konform, cookielos & datenschutzfreundlich) -->
     <script>
       try {
         var sp = new URLSearchParams(window.location.search);
         if (sp.get('ignore') === '1' || sp.get('admin') === '1') {
+          localStorage.setItem('umami.disabled', '1');
           localStorage.setItem('skipgc', 't');
-        }
-        if (localStorage.getItem('skipgc') === 't') {
-          window.goatcounter = { no_onload: true };
         }
       } catch (e) {}
     </script>
-    <script data-goatcounter="https://havn-finance.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="979acc00-cd88-426f-bbdc-c6fdb0ce7b80"></script>
   </head>
   <body style="margin: 0; background-color: #070B14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     <!-- Sofortiger nativer HAVN Ladebildschirm -->

@@ -13,7 +13,7 @@ HAVN Finance verbindet institutionelle Big-Player-Analysemethoden (Goldman Sachs
 - **Sturm-Simulator (Krisen-Stresstest):** Analyse echter historischer Kursverläufe durch reale Jahrhundertkrisen (Corona-Crash 2020, Zinsschock 2022, Globale Finanzkrise 2008, Dotcom-Blase 2000) inklusive Sparplan-Glättungseffekt.
 - **Asset-Duell:** Kopf-an-Kopf-Vergleich zweier Aktien oder ETFs bezüglich Renditechance, Drawdown-Risiko, Portfoliodiversifikation und Krisenresilienz.
 - **Neobroker-Guide & Umsetzung:** Schritt-für-Schritt-Anleitung mit WKN, ISIN, Limit-Order-Empfehlungen und optimalen Xetra-Handelszeiten.
-- **Privacy & Datenschutz:** 100 % cookielos (GoatCounter Webanalytics), kein Login erforderlich, keine Profilbildung, keine Werbung, keine Bezahlschranke.
+- **Privacy & Datenschutz:** 100 % cookielos (Umami Web Analytics), kein Login erforderlich, keine Profilbildung, keine Werbung, keine Bezahlschranke.
 
 ## Wichtige Seiten & URLs
 

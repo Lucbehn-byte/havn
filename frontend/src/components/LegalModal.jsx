@@ -272,15 +272,15 @@ export default function LegalModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">1. Cookielose Webanalyse mit GoatCounter</h4>
+                  <h4 className="text-sm font-black text-white mb-1">1. Cookielose Webanalyse mit Umami</h4>
                   <p>
-                    Zur bedarfsgerechten Gestaltung und statistischen Auswertung der Besucherströme nutzen wir den datenschutzfreundlichen Open-Source-Webanalysedienst <strong>GoatCounter</strong> (betrieben von Martin Tournoij, goatcounter.com).
+                    Zur bedarfsgerechten Gestaltung und statistischen Auswertung der Besucherströme nutzen wir den datenschutzfreundlichen Webanalysedienst <strong>Umami</strong> (umami.is).
                   </p>
                   <p className="mt-1">
-                    GoatCounter arbeitet <strong>vollständig ohne Cookies</strong>. Es werden keine Daten im Browser des Nutzers zu Tracking-Zwecken abgelegt und keine geräteübergreifenden Nutzungsprofile erstellt.
+                    Umami arbeitet <strong>vollständig ohne Cookies</strong>. Es werden keine Daten im Browser des Nutzers zu Tracking-Zwecken abgelegt und keine geräteübergreifenden Nutzungsprofile erstellt.
                   </p>
                   <p className="mt-1">
-                    Zur Zählung aggregierter Seitenaufrufe und zur Unterscheidung von Bots wird aus der IP-Adresse, dem User-Agent und einem <strong>täglich wechselnden Salt</strong> ein einmaliger, nicht umkehrbarer Hashwert (SHA-256) generiert. Die ungehashte IP-Adresse wird zu keinem Zeitpunkt dauerhaft gespeichert.
+                    Zur Zählung aggregierter Seitenaufrufe und zur Unterscheidung von Bots werden Daten pseudonymisiert verarbeitet. Die ungehashte IP-Adresse wird zu keinem Zeitpunkt dauerhaft gespeichert.
                   </p>
                   <p className="mt-1 text-slate-400">
                     Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an anonymer Reichweitenmessung und Systemstabilität) sowie § 25 Abs. 2 Nr. 2 TDDDG (keine Cookie-Einwilligung erforderlich, da kein Zugriff auf Endeinrichtungen stattfindet).
@@ -318,12 +318,12 @@ export default function LegalModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-black text-white mb-1">1. Cookieless Web Analytics via GoatCounter</h4>
+                  <h4 className="text-sm font-black text-white mb-1">1. Cookieless Web Analytics via Umami</h4>
                   <p>
-                    We use <strong>GoatCounter</strong> (goatcounter.com) for privacy-friendly, aggregated traffic statistics. GoatCounter does <strong>not use cookies</strong>, does not access local device identifiers, and does not build cross-site user profiles.
+                    We use <strong>Umami</strong> (umami.is) for privacy-friendly, aggregated traffic statistics. Umami does <strong>not use cookies</strong>, does not access local device identifiers, and does not build cross-site user profiles.
                   </p>
                   <p className="mt-1">
-                    To count daily unique visitors and filter web scrapers, an irreversible SHA-256 hash is generated from the IP address, user agent, and a daily rotating salt. Raw IP addresses are never persisted.
+                    Traffic metrics are processed pseudonymously without storing raw IP addresses.
                   </p>
                   <p className="mt-1 text-slate-400">
                     Legal basis: Art. 6(1)(f) GDPR (legitimate interest in traffic analysis and service stability) and Section 25(2)(2) TDDDG.

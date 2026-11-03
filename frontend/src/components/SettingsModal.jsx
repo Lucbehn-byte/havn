@@ -11,7 +11,7 @@ export default function SettingsModal({
   const { language, setLanguage, languages, t } = useLanguage();
   const [isIgnored, setIsIgnored] = useState(() => {
     try {
-      return localStorage.getItem('skipgc') === 't';
+      return localStorage.getItem('umami.disabled') === '1' || localStorage.getItem('skipgc') === 't';
     } catch {
       return false;
     }
@@ -20,9 +20,11 @@ export default function SettingsModal({
   const handleToggleIgnore = () => {
     try {
       if (isIgnored) {
+        localStorage.removeItem('umami.disabled');
         localStorage.removeItem('skipgc');
         setIsIgnored(false);
       } else {
+        localStorage.setItem('umami.disabled', '1');
         localStorage.setItem('skipgc', 't');
         setIsIgnored(true);
       }
@@ -253,10 +255,10 @@ export default function SettingsModal({
             <p className="text-[11px] text-slate-400 leading-relaxed">
               {isIgnored ? (
                 <span className="text-emerald-300 font-medium">
-                  ✓ Aktiv: Aufrufe auf diesem Mac/iPhone werden in GoatCounter nicht mehr gezählt.
+                  ✓ Aktiv: Aufrufe auf diesem Mac/iPhone werden in Umami Analytics nicht gezählt.
                 </span>
               ) : (
-                'Wenn aktiviert, werden deine eigenen Tests und Klicks auf diesem Gerät aus der Statistik ausgeschlossen.'
+                'Wenn aktiviert, werden deine eigenen Tests und Klicks auf diesem Gerät aus der Umami-Statistik ausgeschlossen.'
               )}
             </p>
           </div>
