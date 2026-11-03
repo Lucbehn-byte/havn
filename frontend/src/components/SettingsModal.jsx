@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { X, Settings, Globe, Check, Sliders, Shield, RefreshCw, Sparkles, EyeOff } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Settings, Globe, Check, Sliders, Shield, RefreshCw, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function SettingsModal({ 
@@ -9,29 +9,6 @@ export default function SettingsModal({
   onToggleMode 
 }) {
   const { language, setLanguage, languages, t } = useLanguage();
-  const [isIgnored, setIsIgnored] = useState(() => {
-    try {
-      return localStorage.getItem('umami.disabled') === '1' || localStorage.getItem('skipgc') === 't';
-    } catch {
-      return false;
-    }
-  });
-
-  const handleToggleIgnore = () => {
-    try {
-      if (isIgnored) {
-        localStorage.removeItem('umami.disabled');
-        localStorage.removeItem('skipgc');
-        setIsIgnored(false);
-      } else {
-        localStorage.setItem('umami.disabled', '1');
-        localStorage.setItem('skipgc', 't');
-        setIsIgnored(true);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   // Schließen bei Escape-Taste
   useEffect(() => {
@@ -229,39 +206,6 @@ export default function SettingsModal({
           <p className="text-[11px] text-slate-400 leading-relaxed">
             {t('settings.storageDesc', 'Alle Favoriten und Einstellungen bleiben privat auf deinem Gerät gespeichert.')}
           </p>
-
-          {/* Eigene Besuche ignorieren (Admin / Entwickler Schutz) */}
-          <div className="p-3.5 rounded-2xl glass-inset border border-white/10 space-y-2 mt-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <EyeOff className={`w-4 h-4 ${isIgnored ? 'text-emerald-400' : 'text-slate-400'}`} />
-                <span className="font-bold text-xs text-white">Eigene Aufrufe ignorieren (Admin)</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleToggleIgnore}
-                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer ${
-                  isIgnored ? 'bg-emerald-500' : 'bg-slate-700'
-                }`}
-                title="Eigene Aufrufe in GoatCounter ignorieren"
-              >
-                <span
-                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                    isIgnored ? 'translate-x-5' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              {isIgnored ? (
-                <span className="text-emerald-300 font-medium">
-                  ✓ Aktiv: Aufrufe auf diesem Mac/iPhone werden in Umami Analytics nicht gezählt.
-                </span>
-              ) : (
-                'Wenn aktiviert, werden deine eigenen Tests und Klicks auf diesem Gerät aus der Umami-Statistik ausgeschlossen.'
-              )}
-            </p>
-          </div>
 
           <div className="pt-1 flex items-center justify-between gap-3">
             <button

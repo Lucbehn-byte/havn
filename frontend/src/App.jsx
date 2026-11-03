@@ -116,14 +116,20 @@ export default function App() {
     { id: 'pro-umsetzung', label: t('pro.sections.implementation', 'Umsetzung') },
   ], [t]);
 
-  // Anonymer Besucher-Ping für interne Statistik (übersprungen wenn skipgc aktiv)
+  // Anonymer Besucher-Ping für interne Statistik (übersprungen wenn Admin/skipgc aktiv)
   useEffect(() => {
     try {
       const sp = new URLSearchParams(window.location.search);
       if (sp.get('ignore') === '1' || sp.get('admin') === '1') {
+        localStorage.setItem('umami.disabled', '1');
         localStorage.setItem('skipgc', 't');
+        // URL im Browser sofort bereinigen, damit der Parameter unsichtbar bleibt
+        sp.delete('ignore');
+        sp.delete('admin');
+        const newSearch = sp.toString() ? `?${sp.toString()}` : '';
+        window.history.replaceState({}, document.title, window.location.pathname + newSearch + window.location.hash);
       }
-      if (localStorage.getItem('skipgc') === 't') {
+      if (localStorage.getItem('umami.disabled') === '1' || localStorage.getItem('skipgc') === 't') {
         return;
       }
       fetch(`${API_BASE}/api/analytics/ping`, {
