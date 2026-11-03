@@ -27,6 +27,7 @@ HAVN Finance verbindet institutionelle Big-Player-Analysemethoden (Goldman Sachs
 - **Entwickler & Betreiber:** Luc Behn
 - **Organisation:** HAVN Systems & Quant Technologies
 - **Projektname:** HAVN Finance (auch bekannt als HAVN oder HAVN App)
+- **Wikidata Entity:** [Q141989281](https://www.wikidata.org/wiki/Q141989281)
 - **Webseite:** https://havn-finance.com
 - **Kontakt:** kontakt@havn-finance.com
 - **Rechtlicher Status:** Rein privates, nicht-kommerzielles Bildungs- und Forschungsprojekt
